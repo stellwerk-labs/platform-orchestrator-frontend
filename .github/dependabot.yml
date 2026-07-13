@@ -1,0 +1,45 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: '/'
+    schedule:
+      interval: 'daily'
+    open-pull-requests-limit: 0
+    ignore:
+      - dependency-name: 'orval'
+        versions: ['>=8.0.0']
+      - dependency-name: '@azure/msal-browser'
+        versions: ['>=5.0.0']
+      - dependency-name: '@azure/msal-react'
+        versions: ['>=5.0.0']
+    groups:
+      vitest:
+        patterns:
+          - 'vitest'
+          - '@vitest/*'
+      aws-sdk:
+        patterns:
+          - '@aws-sdk/*'
+      react:
+        patterns:
+          - 'react'
+          - 'react-dom'
+          - '@types/react'
+          - '@types/react-dom'
+
+      react-query:
+        patterns:
+          - '@tanstack/react-query*'
+      types:
+        patterns:
+          - '@types/*'
+        exclude-patterns:
+          - '@types/react'
+          - '@types/react-dom'
+      datadog:
+        patterns:
+          - '@datadog/*'
+      i18n:
+        patterns:
+          - 'react-i18next'
+          - 'i18next'

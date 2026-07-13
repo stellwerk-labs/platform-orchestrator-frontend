@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" height="100" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="404-a" x1="50%" x2="50%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#22A1E1"/>
+      <stop offset="100%" stop-color="#0F68C0"/>
+    </linearGradient>
+    <rect id="404-b" width="31.844" height="33" x="17.999" y="16.209" rx="12"/>
+    <filter id="404-c" width="115.7%" height="115.2%" x="-7.9%" y="-7.6%" filterUnits="objectBoundingBox">
+      <feGaussianBlur in="SourceAlpha" result="shadowBlurInner1" stdDeviation="2"/>
+      <feOffset dy="1" in="shadowBlurInner1" result="shadowOffsetInner1"/>
+      <feComposite in="shadowOffsetInner1" in2="SourceAlpha" k2="-1" k3="1" operator="arithmetic" result="shadowInnerInner1"/>
+      <feColorMatrix in="shadowInnerInner1" values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0"/>
+    </filter>
+    <linearGradient id="404-d" x1="50%" x2="50%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#BFC6D3"/>
+      <stop offset="100%" stop-color="#8B94A8"/>
+    </linearGradient>
+    <linearGradient id="404-e" x1="50%" x2="50%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#8997B4"/>
+      <stop offset="100%" stop-color="#515E7D"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" fill-rule="evenodd">
+    <rect width="100" height="99.502" fill="#27292B" fill-rule="nonzero" rx="49.751"/>
+    <g fill="#101214" fill-rule="nonzero" transform="translate(0 20)">
+      <rect width="42.5" height="31.5"/>
+      <polygon points="30.264 31.5 30.264 38.747 24.083 31.5"/>
+    </g>
+    <g transform="matrix(-1 0 0 1 92 9.337)">
+      <g transform="matrix(-1 0 0 1 67.14 0)">
+        <path stroke="#02A483" stroke-width="1.92" d="M55.3468629 45.0725539L56.7364518 49.0294202M56.7364518 49.0294202L60.32375 46.582676"/>
+        <path stroke="#F38C8C" stroke-width="1.92" d="M3.34343625,72.8347506 L4.7263907,76.7928713" transform="rotate(-150 4.035 74.814)"/>
+        <path stroke="#F38C8C" stroke-width="1.92" d="M0.464689086,74.1465331 L4.05252044,71.6928311" transform="rotate(-150 2.259 72.92)"/>
+        <path stroke="#F38C8C" stroke-width="1.92" d="M3.52449555,72.9664179 C21.8938109,68.6737376 34.4846994,60.6582594 41.297161,48.9199834"/>
+        <path fill="url(#404-a)" d="M38.7453778,81.6231343 C66.7864163,81.6231343 66.7864163,66.319808 66.7864163,47.4421983 C66.7864163,28.5645885 62.6212678,3.83693077e-13 39.2644767,3.83693077e-13 C15.9076857,3.86808136e-13 10.7043394,28.5645885 10.7043394,47.4421983 C10.7043394,66.319808 10.7043394,81.6231343 38.7453778,81.6231343 Z"/>
+        <use fill="#073460" xlink:href="#404-b"/>
+        <use fill="#000" filter="url(#404-c)" xlink:href="#404-b"/>
+        <g fill="#FFF" transform="translate(23.555 30.5)">
+          <g transform="rotate(-90 9.672 -5.387)">
+            <polygon points="0 2.372 1.223 2.372 1.223 1.186 0 1.186"/>
+            <polygon points="1.223 1.186 2.446 1.186 2.446 0 1.223 0"/>
+            <polygon points="2.446 2.372 3.669 2.372 3.669 1.186 2.446 1.186"/>
+          </g>
+          <g transform="rotate(-90 2.145 2.14)">
+            <polygon points="0 2.372 1.223 2.372 1.223 1.186 0 1.186"/>
+            <polygon points="1.223 1.186 2.446 1.186 2.446 0 1.223 0"/>
+            <polygon points="2.446 2.372 3.669 2.372 3.669 1.186 2.446 1.186"/>
+          </g>
+          <g transform="rotate(-180 6.296 4.951)">
+            <polygon points="0 1.186 1.223 1.186 1.223 0 0 0"/>
+            <polygon points="1.223 2.372 2.446 2.372 2.446 1.186 1.223 1.186"/>
+            <polygon points="2.446 2.372 3.669 2.372 3.669 1.186 2.446 1.186"/>
+            <polygon points="3.669 2.372 4.892 2.372 4.892 1.186 3.669 1.186"/>
+            <polygon points="4.892 1.186 6.115 1.186 6.115 0 4.892 0"/>
+          </g>
+        </g>
+        <path stroke="#22A1E1" stroke-linecap="round" stroke-width="1.92" d="M21.8586535,81.6231343 C40.2279688,77.330454 52.8188573,69.3149759 59.6313189,57.5766998"/>
+        <path stroke="#F38C8C" stroke-width="1.92" d="M21.2506643,81.5679044 L22.6336187,85.5260251" transform="rotate(-150 21.942 83.547)"/>
+        <path stroke="#F38C8C" stroke-width="1.92" d="M18.3719171,82.8796869 L21.9597485,80.4259849" transform="rotate(-150 20.166 81.653)"/>
+      </g>
+      <g transform="translate(22.879 57.577)">
+        <rect width="48.248" height="32.703" fill="url(#404-d)" rx="2.88"/>
+        <path fill="url(#404-e)" d="M24.6063698,22.1227197 C22.2081834,22.1227197 20.2640693,20.1848478 20.2640693,17.7943615 C20.2640693,15.4038753 22.2081834,13.4660033 24.6063698,13.4660033 C27.0045562,13.4660033 28.9486704,15.4038753 28.9486704,17.7943615 C28.9486704,20.1848478 27.0045562,22.1227197 24.6063698,22.1227197 Z M25.1292609,12.4638624 C25.1027204,12.3210112 25.0888477,12.1737291 25.0888477,12.0232172 C25.0888477,10.6951693 26.1689111,9.6185738 27.5012369,9.6185738 C27.6522335,9.6185738 27.7999901,9.63240203 27.9433014,9.65885733 C27.9698419,9.80170852 27.9837147,9.94899062 27.9837147,10.0995025 C27.9837147,11.4275504 26.9036513,12.5041459 25.5713255,12.5041459 C25.4203288,12.5041459 25.2725723,12.4903177 25.1292609,12.4638624 Z"/>
+      </g>
+    </g>
+    <g fill="#FFF" transform="translate(16 35)">
+      <polygon points="0 1.753 1.776 1.753 1.776 0 0 0"/>
+      <polygon points="4 1.753 5.776 1.753 5.776 0 4 0"/>
+      <polygon points="8 1.753 9.776 1.753 9.776 0 8 0"/>
+    </g>
+  </g>
+</svg>

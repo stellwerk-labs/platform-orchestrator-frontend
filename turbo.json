@@ -1,0 +1,78 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "start": {
+      "cache": false,
+      "persistent": true
+    },
+    "build": {
+      "inputs": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "!src/**/*.test.ts",
+        "!src/**/*.test.tsx",
+        ".eslintrc.cjs",
+        "tsconfig.json",
+        "*.config.ts",
+        "src/**/*.json",
+        "pnpm-lock.yaml"
+      ],
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "persistent": true,
+      "cache": false
+    },
+    "test:ci": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "src/**/*.test.ts",
+        "src/**/*.test.tsx",
+        "src/**/*.json"
+      ]
+    },
+    "test:report": {},
+    "coverage": {
+      "outputs": ["coverage/**"]
+    },
+    "lint": {
+      "dependsOn": ["^build"]
+    },
+    "check-typescript": {
+      "dependsOn": ["^build"]
+    },
+    "e2e": {
+      "cache": false,
+      "persistent": true
+    },
+    "e2e:ci": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "tests/mock-tests/**/*.test.ts",
+        "tests/mock-tests/**/*.test.tsx",
+        "tests/utils/testFixtures.ts",
+        "tests/pages/**/*.ts",
+        "playwright.config.ci.ts"
+      ],
+      "outputs": ["test-reports/mock/*"]
+    },
+    "storybook": {
+      "cache": false,
+      "persistent": true
+    },
+    "storybook:build": {
+      "inputs": ["src/**/*.stories.mdx", "src/**/*.stories.tsx", "src/**/*.tsx"],
+      "outputs": ["storybook-static/*"]
+    },
+    "plop": {
+      "cache": false
+    }
+  },
+  "globalDependencies": ["tsconfig.base.json"]
+}

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json.schemastore.org/jscpd.json",
+  "threshold": 9,
+  "reporters": ["console", "consoleFull", "html"],
+  "output": "reports/jscpd",
+  "ignore": [
+    "**/*.stories.tsx",
+    "**/*.stories.ts",
+    "**/test-reports/**",
+    "**/test-results/**",
+    "**/__mocks__/**",
+    "**/__snapshots__/**",
+    "**/playwright/**",
+    "**/plop-templates/**",
+    "**/coverage/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/.turbo/**",
+    "**/public/**",
+    "**/schemas/**",
+    "**/i18n/locales/**",
+    "**/models/v2/**",
+    "**/hooks/react-query/v2/**",
+    "**/*.json",
+    "**/*.css",
+    "**/*.svg",
+    "**/*.md"
+  ],
+  "format": ["typescript", "tsx"],
+  "minLines": 10,
+  "minTokens": 50,
+  "path": ["apps/main/src"]
+}

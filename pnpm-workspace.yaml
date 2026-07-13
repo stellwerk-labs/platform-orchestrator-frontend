@@ -1,0 +1,19 @@
+packages:
+  # all apps in direct subdirs of apps/
+  - 'apps/*'
+  # all packages in direct subdirs of packages/
+  - 'packages/*'
+
+overrides:
+  '@testing-library/dom': '<10.0.0'
+  'brace-expansion@1': '1.1.13'
+  'brace-expansion@2': '2.0.3'
+  'flatted': '^3.4.2'
+  'follow-redirects@1': '>1.15.11'
+  'minimatch@3': '3.1.5'
+  'picomatch@2': '2.3.2'
+  'picomatch@4': '4.0.4'
+  'svgo@3': '^3.3.3'
+  'vitest-preview>vite': '<6.0.0'
+  'yaml@1': '1.10.3'
+  'yaml@2': '2.8.3'

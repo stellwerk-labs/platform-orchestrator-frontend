@@ -1,0 +1,9 @@
+.customControl :global(.react-flow__controls-button) {
+  background: var(--ant-color-bg-layer);
+  border-bottom: 1px solid var(--ant-color-border);
+  fill: var(--ant-color-text);
+}
+
+.customControl :global(.react-flow__controls-button:hover) {
+  background: var(--ant-color-bg-base);
+}

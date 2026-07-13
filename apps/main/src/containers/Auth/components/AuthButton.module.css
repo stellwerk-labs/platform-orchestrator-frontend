@@ -1,0 +1,46 @@
+.authButton {
+  width: 300px;
+  height: 40px;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  background-color: #ffffff;
+  color: #3c4043;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: 'Google Sans', Roboto, Arial, sans-serif;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 12px;
+  line-height: 1;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.ssoButtonGroup {
+  width: 300px;
+  height: 40px;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.authButton:disabled {
+  cursor: not-allowed;
+  background-color: #f8f9fa;
+  color: #9ca3af;
+  position: relative;
+}
+
+.authIcon {
+  display: block;
+}

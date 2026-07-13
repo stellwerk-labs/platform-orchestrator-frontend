@@ -1,0 +1,68 @@
+{
+  "name": "orchestrator",
+  "version": "0.1.0",
+  "type": "module",
+  "packageManager": "pnpm@10.17.0",
+  "minimumReleaseAge": 2880,
+  "scripts": {
+    "prepare": "husky",
+    "build": "turbo build --cache-dir=.turbo",
+    "start": "turbo start",
+    "test": "turbo test",
+    "test:ci": "turbo test:ci --cache-dir=.turbo",
+    "test:report": "turbo test-report",
+    "coverage": "turbo coverage",
+    "lint": "eslint --max-warnings=0 .",
+    "lint-fix": "eslint --fix .",
+    "commitlint": "commitlint --from main --to HEAD",
+    "vite-lint": "tsc",
+    "check-typescript": "turbo check-typescript",
+    "e2e": "turbo e2e ",
+    "e2e:ci": "turbo e2e:ci --cache-dir=.turbo",
+    "storybook": "turbo run storybook",
+    "storybook:build": "turbo run storybook:build",
+    "detect-duplicates": "jscpd",
+    "format-orval": "node apps/main/src/scripts/format-orval-output.mjs",
+    "orval": "orval --config ./apps/main/orval.config.ts"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.5.0",
+    "@commitlint/config-conventional": "^20.4.4",
+    "@eslint/compat": "^2.0.3",
+    "@eslint/js": "^9.39.4",
+    "@typescript-eslint/eslint-plugin": "^8.58.0",
+    "@typescript-eslint/parser": "^8.58.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsdoc": "^62.8.1",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-no-only-tests": "^3.3.0",
+    "eslint-plugin-playwright": "^2.10.1",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "eslint-plugin-testing-library": "^7.16.2",
+    "eslint-plugin-unicorn": "^64.0.0",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "globals": "^17.4.0",
+    "husky": "^9.1.7",
+    "jscpd": "^4.0.8",
+    "lint-staged": "^16.4.0",
+    "orval": "^7.20.0",
+    "prettier": "^3.8.1",
+    "turbo": "^2.9.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.57.2"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix --max-warnings=0 --no-warn-ignored"
+    ],
+    "*.{js,ts,tsx,css,json,md}": [
+      "prettier --write"
+    ]
+  }
+}

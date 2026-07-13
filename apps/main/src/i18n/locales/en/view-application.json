@@ -1,0 +1,73 @@
+{
+  "PROJECT_NOT_FOUND": "Project not found",
+  "TABS": {
+    "ACCESS": "Access",
+    "ENVIRONMENTS": "Environments",
+    "CLI_COMMANDS": "CLI Commands",
+    "PIPELINES": "Pipelines",
+    "VALUES_AND_SECRETS": "Values & Secrets",
+    "WEBHOOKS": "Webhooks",
+    "PEOPLE": "People",
+    "DELETE": "Delete",
+    "VERSIONS": "Versions",
+    "PREVIEW": "Preview"
+  },
+  "ENVIRONMENTS": {
+    "CREATE": "Create new environment",
+    "NO_PERMISSION": "You don't have permission to create a new environment",
+    "NOT_DEPLOYED": "You must deploy at least one environment to create a new one"
+  },
+  "PIPELINES": {
+    "MATCHING_CRITERIA_TITLE": "Matching criteria",
+    "MATCHING_CRITERIA_HOVER_TEXT": "Matching Criteria can only be configured for Deployment Pipelines with a deployment request trigger",
+    "PIPELINES": "Pipelines",
+    "PIPELINE_RUNS": "Pipeline runs",
+    "PIPELINE_VERSIONS": "Pipeline versions",
+    "REVERT": "Revert",
+    "REVERT_MODAL_TITLE": "Revert pipeline to previous version",
+    "CANNOT_EDIT_DEFAULT": "Default schema cannot be updated",
+    "CURRENT": "Current",
+    "EDIT_DATE": "Edit date",
+    "EDIT_BY": "Edited by",
+    "ADD_NEW": "Add new pipeline",
+    "NO_PERMISSION": "You don't have permission to create a new pipeline",
+    "DIFF_VERSION_TEXT": "Diff against current version",
+    "LAST_RUN": "Last run",
+    "ID": "ID",
+    "VERSION_ID": "Version ID",
+    "DEFINITION": "Definition",
+    "VIEW": "View",
+    "RUNS": "Runs",
+    "SAVE": "Save",
+    "CANCEL": "Cancel",
+    "YAML": "YAML",
+    "YAML_CONFiG": "YAML config",
+    "PIPELINE_NAME": "Name",
+    "CREATE_NEW_PIPELINE": "Create new pipeline",
+    "DELETE_PIPELINE_WARNING": "Deleting this pipeline is permanent and can't be undone",
+    "DELETE_PIPELINE_WARNING2": "You won't be able to recover all previous versions and any historical run logs of this pipeline.",
+    "DELETE_INPUT_PLACEHOLDER": "Enter pipeline name",
+    "DELETE_INPUT_LABEL": "Enter the name of this pipeline to continue",
+    "DELETE_PIPELINE": "Delete Pipeline",
+    "DELETE": "Delete",
+    "ENTER_PIPELINE_NAME_PLACEHOLDER": "Enter pipeline name",
+    "DELETE_PIPELINE_CONFIRM_TEXT": "Deleting this pipeline will prevent it from being used for future app deployments. <br/ ><br/> Environments currently using this pipeline will use the next closest matching pipeline.",
+    "INVALID_SCHEMA": "Invalid schema. Accepts only valid YAML list data structures",
+    "RUN_PIPELINE": "Run pipeline",
+    "RUN": "Run",
+    "NO_PIPELINES_DEFINED": "No pipelines have been defined yet",
+    "RESTORE": "Restore",
+    "CANNOT_TRIGGER_PIPELINE": "This pipeline cannot be triggered, please add a <0>pipeline_call</0> trigger event to your pipeline definition schema",
+    "FILTERS": {
+      "STATUS": "Status",
+      "APPLICATION": "Application",
+      "PIPELINE": "Pipeline"
+    }
+  },
+  "DELETE_APPLICATION": {
+    "DELETE_APP_TITLE": "Delete application",
+    "CANT_BE_UNDONE": "Deleting an application is permanent and can't be undone",
+    "CANT_RECOVER": "You won't be able to recover the envrionments, deployments, drafts, automations or overrides used in this application."
+  },
+  "RENAME_MODAL_TITLE": "Rename application"
+}

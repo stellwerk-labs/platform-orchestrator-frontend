@@ -1,0 +1,49 @@
+.resourceNode {
+  padding: var(--ant-padding-sm);
+  border-radius: var(--ant-border-radius);
+  border: 1px solid var(--ant-color-border);
+  &:hover {
+    border: 1px solid var(--ant-color-primary);
+  }
+}
+
+.resourceNode :global(.react-flow__handle) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.clickCallout {
+  position: absolute;
+  top: 50%;
+  right: -12px;
+  transform: translateY(-50%) translateX(100%);
+  z-index: 10;
+  animation: pulse 1.5s ease-in-out 10;
+}
+
+.clickCalloutText {
+  background: linear-gradient(
+    135deg,
+    var(--ant-color-warning) 0%,
+    var(--ant-color-warning-border) 100%
+  );
+  color: white;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(250, 140, 22, 0.4);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: translateY(-50%) translateX(100%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-50%) translateX(100%) scale(1.05);
+    opacity: 0.9;
+  }
+}

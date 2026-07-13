@@ -1,0 +1,31 @@
+// templates/query-template.hbs
+// This is the content of each query file
+
+/**
+ * Hints: Replace `$` preffixed names with actual names/values.
+ * Modify other parts of the file as needed.e.g remove orgId if your URL doesn't include it.
+ * DELETE THIS HINT AFTERWARDS
+ */
+
+import { useQuery } from '@tanstack/react-query';
+import { useParams } from 'react-router';
+
+// ModelName import goes here. e.g import { ModelName } from '@src/models/{{kebabCase folderName}}';
+import { MatchParams } from '@src/models/routing';
+import { makeRequest } from '@src/utilities/make-request';
+
+import { {{camelCase folderName}}QueryKeys } from '../{{camelCase folderName}}QueryKeys';
+
+const use{{pascalCase folderName}}Query = () => {
+  const { orgId } = useParams<keyof MatchParams>() as MatchParams;
+
+  const { data, ...queryResult } = useQuery({
+    queryKey: {{camelCase folderName}}QueryKeys.list{{pascalCase folderName}}(orgId),
+    queryFn: () => makeRequest<ModelName[]>('GET', `$URL`),
+    enabled: Boolean(orgId),
+  });
+
+  return { ...queryResult, data: data?.data };
+};
+
+export default use{{ pascalCase folderName }}Query;

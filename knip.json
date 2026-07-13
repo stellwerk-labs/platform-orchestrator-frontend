@@ -1,0 +1,8 @@
+{
+  "ignore": [
+    "**/v2/{controlplane,iam,dataplane}/**/*",
+    "apps/main/orval.config.ts",
+    "eslint-plugin-no-only-tests.d.ts",
+    "apps/main/plopfile.mjs"
+  ]
+}

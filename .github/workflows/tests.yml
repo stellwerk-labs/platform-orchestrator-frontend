@@ -1,0 +1,70 @@
+name: Tests
+
+on: pull_request
+
+permissions:
+  contents: read
+  pull-requests: read
+
+env:
+  NODE_VERSION: 22
+
+jobs:
+  code-quality:
+    name: 🚨 Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Setup turbo cache
+        uses: actions/cache@v5
+        with:
+          path: .turbo
+          key: code-quality-turbo-${{ github.sha }}
+          restore-keys: |
+            code-quality-turbo-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check typescript
+        run: pnpm run check-typescript
+
+      - name: Run eslint
+        run: pnpm run lint
+
+      - name: Detect code duplicates
+        run: pnpm run detect-duplicates
+
+      - name: Commit lint
+        if: github.actor != 'dependabot[bot]' && github.ref != 'refs/heads/main'
+        uses: wagoid/commitlint-github-action@v6.2.1
+
+  tests:
+    name: 🧪 Test
+    needs: code-quality
+    uses: ./.github/workflows/callable_automated-tests.yml
+    secrets: inherit
+
+  check-all-jobs-success:
+    if: always()
+    name: ☔️ Result
+    runs-on: ubuntu-latest
+    needs:
+      - code-quality
+      - tests
+    steps:
+      - run: |
+          if ${{ needs.tests.result != 'success' }} || ${{ needs.code-quality.result != 'success' }}; then
+            echo "Some checks failed"
+            exit 1
+          fi

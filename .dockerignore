@@ -1,0 +1,11 @@
+.git
+.turbo
+**/.env*
+**/*.key
+**/*.pem
+**/coverage
+**/dist
+**/node_modules
+**/vitest-report
+CODEX_HANDOFF.md
+reports

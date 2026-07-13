@@ -1,0 +1,16 @@
+
+// query-keys-template.hbs
+
+/**
+ * Hints: Query keys are typically constructed based on the order of parameters in the URL for that query/mutation. 
+ * Some query key factories may have nested URLS which may require some more explicit naming. Check some of the other existing query key factories if you are stuck.
+ * See react-query.md for more info on how to construct factiories.
+ * DELETE THIS HINT AFTERWARDS
+ */
+
+export const {{camelCase folderName}}QueryKeys = {
+  // e.g. ['orgs', 'my-org', '{{dashCase folderName}}']
+  all: (orgId: string | undefined) => ['orgs', orgId, '{{dashCase folderName}}'],
+  // e.g. ['orgs', 'my-org', '{{dashCase folderName}}', 'list']
+  list{{pascalCase folderName}}: (orgId: string | undefined) => [...{{camelCase folderName}}QueryKeys.all(orgId), 'list'],
+};

@@ -1,0 +1,87 @@
+{
+  "ADMINISTRATOR_WARNING": {
+    "APP_OWNER_PERMISSION": "As an organization Administrator, this person has owner permissions in all applications by default.",
+    "ENV_TYPE_DEPLOYER_PERMISSION": "As an organization Administrator, this person has deployer permissions in all environment types by default.",
+    "READ_MORE_RBAC": "Read more about RBAC",
+    "IN_OUR_DOCUMENTATION": "in our documentation"
+  },
+  "ENVIRONMENT_TYPES_TAB": {
+    "TABLE_CAPTION": "Environment types",
+    "ROLE": "Role",
+    "ENVIRONMENT_TYPE": "Environment type",
+    "FIND_ENV_TYPE": "Find environment type",
+    "CHNAGE_ROLE": "Change role",
+    "CHANGE_ENV_TYPE_ROLE": "Change enviroment type role",
+    "ENV_TYPE_ROLES": "Users with Deployer role can create, deploy, pause, and delete Environments of this Environment Type.",
+    "NONE": "None",
+    "DEPLOYER": "Deployer"
+  },
+  "REMOVE_USER_TAB": {
+    "ARE_YOU_SURE_USER": "Are you sure you want to remove this user?",
+    "ARE_YOU_SURE_GROUP": "Are you sure you want to remove this group?",
+    "YOU_WILL_LOSE_ACCESS": "They will lose access and roles across all applications, environments and environment types in this Organization.",
+    "REMOVE_USER": "Remove user",
+    "REMOVE_GROUP": "Remove group"
+  },
+  "APPLICATIONS_TAB": {
+    "APP_PERMISSIONS": "App permissions",
+    "FIND_APPLICATION": "Find application",
+    "CHANGE_ROLE": "Change role",
+    "CHANGE_APPLICATION_ROLE": "Change application role",
+    "VIEWER": "Viewer",
+    "VIEWER_DESC": "Has read-only access to the app.",
+    "DEVELOPER": "Developer",
+    "DEVELOPER_DESC": "Can update configuration, shared values and secrets, and create environments.",
+    "OWNER": "Owner",
+    "OWNER_DESC": "Same as the Developer Role, but can additionally configure webhooks, invite and remove users from the application, and delete the app.",
+    "ROLE": "Role"
+  },
+  "APPLICATIONS_TITLE": "Applications",
+  "USERS_TITLE": "Users",
+  "ENVIRONMENT_TYPES_TITLE": "Environment Types",
+  "GROUPS_TITLE": "Groups",
+  "REMOVE_USER_TITLE": "Remove user",
+  "REMOVE_GROUP_TITLE": "Remove group",
+  "APPLICATION_ROLES": "Application roles",
+  "USER": "User",
+  "GROUP": "Group",
+  "EMAIL_ADDRESS": "Email address",
+  "STATUS": "Status",
+  "JOINED": "Joined",
+  "CREATED": "Created",
+  "ORGANIZATION_ROLE": "Organization role",
+  "ACTIVE": "Active",
+  "INVITATION_PENDING": "Invitation pending",
+  "DIFFERENT_ROLES": "Different roles have different permissions across your Organization.",
+  "NOT_PART_OF_GROUP": "This user is not part of any group.",
+  "YOU_CAN": "You can ",
+  "READ_MORE": "read more in our documentation",
+  "ORG_MEMBERS_LIST": {
+    "ORG_ROLE_MODAL": {
+      "CHANGE_ROLE": "Change role",
+      "CHANGE_ORG_ROLE": "Change organization role",
+      "CHANGE_TITLE": "Change organization role",
+      "INVITE_USERS": "Invite users",
+      "SEND_INVITE": "Send invite",
+      "SEND_INVITES": "Send invites",
+      "ROLE": "Role",
+      "ADMINISTRATOR": "Administrator",
+      "MANAGER": "Manager",
+      "ORG_VIEWER": "Org Viewer",
+      "MEMBER": "Member",
+      "MEMBER_DESC": "Can access applications they have a role for.",
+      "ARE_YOU_SURE": "Are you sure you want to downgrade your role?",
+      "YOU_WILL_LOSE": "You will lose editor rights on certain objects and won't be able to restore them yourself."
+    }
+  },
+  "TABS": {
+    "USERS": "Users",
+    "GROUPS": "Groups"
+  },
+  "GROUPS": {
+    "ADD_GROUP": "Add group",
+    "GROUP_ID": "Group ID",
+    "IDP_ID": "IDP ID",
+    "ROLE": "Role"
+  }
+}

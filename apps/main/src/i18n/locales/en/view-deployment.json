@@ -1,0 +1,27 @@
+{
+  "REVIEW_AND_DEPLOY": "Review & Deploy",
+  "RENAME_DRAFT": "Rename draft",
+  "TABS": {
+    "WORKLOADS": "Workloads",
+    "SHARED_RESOURCES": "Shared resources",
+    "DEPLOYED_VALUES": "Deployed values",
+    "RESOURCE_DEPENDENCY_GRAPH": "Resource dependency graph"
+  },
+  "WORKLOADS": {
+    "ADD": "Add workload",
+    "DELETE_WORKLOAD": "Delete workload",
+    "DUPLICATE_WORKLOAD": "Duplicate workload",
+    "WORKLOAD_ID": "Workload ID",
+    "HEALTHY": "Healthy",
+    "UNHEALTHY": "Unhealthy",
+    "FAILED": "Failed",
+    "WARNING": "Warning",
+    "STOPPED": "Stopped",
+    "UNKNOWN": "Unknown"
+  },
+  "OLD_DEPLOYMENT_BANNER": {
+    "OLD_DEPLOYMENT": "This is an old deployment.",
+    "VIEW_LATEST": "View the latest deployment: "
+  },
+  "DURATION": "Duration"
+}

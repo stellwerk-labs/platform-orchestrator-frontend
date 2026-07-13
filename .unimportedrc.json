@@ -1,0 +1,17 @@
+{
+  "aliases": {
+    "@src/*": ["./src/*"]
+  },
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/*.tests.{js,jsx,ts,tsx}",
+    "**/*.test.{js,jsx,ts,tsx}",
+    "**/*.spec.{js,jsx,ts,tsx}",
+    "**/*.stories.{js,jsx,ts,tsx}",
+    "**/tests/**",
+    "**/__mocks__/**",
+    "**/src/testing-utils/**",
+    "**/src/setupTests.js",
+    "**/*.d.ts"
+  ]
+}

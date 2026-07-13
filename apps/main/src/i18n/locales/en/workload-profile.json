@@ -1,0 +1,45 @@
+{
+  "FEATURES": {
+    "CONTAINERS": {
+      "ADD_CONTAINER": "Add container",
+      "NO_CONTAINERS_DEFINED": "No containers defined."
+    },
+    "LABELS": {
+      "LABELS": "Labels",
+      "LABEL": "Label",
+      "INFO_TEXT": "Attach metadata to the pods generated for your workload. Be aware that this may only make up a subset of the labels on the pod.",
+      "ADD": "Add label",
+      "NO_LABELS_DEFINED": "No labels defined.",
+      "VALUE_INVALID": "A valid label value must begin and end with an alphanumeric character ([a-z0-9A-Z]), could contain dashes (-), underscores (_), dots (.), and alphanumerics between."
+    },
+    "ANNOTATIONS": {
+      "ANNOTATIONS": "Annotations",
+      "ANNOTATION": "Annotation",
+      "INFO_TEXT": "Attach metadata to the pods generated for your workload. Be aware that this may only make up a subset of the annotations on the pod.",
+      "ADD": "Add annotation",
+      "NO_ANNOTATIONS_DEFINED": "No annotations defined.",
+      "KEY_EXISTS": "Duplicate key",
+      "KEY": "Key",
+      "VALUE": "Value"
+    },
+    "PROBE": {
+      "PROBE": "Probe",
+      "INFO_TEXT": "Define probes to check the health of your container.",
+      "INFO_TEXT_RUNNING_OR_PAST_DEPLOYMENT": "The probes defined for this container.",
+      "HTTP": "HTTP",
+      "COMMAND": "Command",
+      "TCP_PORT": "TCP port",
+      "GRPC": "gRPC",
+      "NONE": "None",
+      "ARGUMENTS_ARRAY": "Arguments array",
+      "URL": "Path",
+      "PORT": "Port"
+    },
+    "OVERRIDES": {
+      "OVERRIDES": "Overrides",
+      "NO_OVERRIDES_TEXT": "You haven't added any overrides. Environment defaults are used.",
+      "INFO_TEXT": "Provide alternative commands and arguments to run when this container starts up.",
+      "INFO_TEXT_RUNNING_OR_PAST_DEPLOYMENT": "The command and argument overrides specified for this container."
+    }
+  }
+}

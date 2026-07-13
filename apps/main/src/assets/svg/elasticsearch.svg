@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="48px" height="48px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <filter x="-9.6%" y="-8.7%" width="122.3%" height="119.6%" filterUnits="objectBoundingBox" id="elastic-search-filter">
+            <feOffset dx="0" dy="0" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.1 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+        <polygon id="path-2" points="0.9254625 0 39.5010625 0 39.5010625 12.9367812 0.9254625 12.9367812"></polygon>
+        <polygon id="path-4" points="0.92531875 -0.00014375 39.5010625 -0.00014375 39.5010625 12.9373563 0.92531875 12.9373563"></polygon>
+    </defs>
+    <g id="symbols/logo/elasticsearch" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="logo-elasticsearch-32-white" filter="url(#elastic-search-filter)" transform="translate(3.000000, 1.000000)">
+            <path d="M0,22.9998563 C0,24.9893563 0.278875,26.9084188 0.75325,28.7498563 L28.75,28.7498563 C31.9254375,28.7498563 34.5,26.1752938 34.5,22.9998563 C34.5,19.8244187 31.9254375,17.2498563 28.75,17.2498563 L0.75325,17.2498563 C0.278875,19.0912938 0,21.0103563 0,22.9998563" id="Fill-1" fill="#FFFFFF" fill-rule="nonzero"></path>
+            <g id="Group-5" transform="translate(1.437500, 0.000000)">
+                <g id="Fill-3-Clipped">
+                    <mask id="mask-3" fill="currentColor">
+                        <use xlink:href="#path-2"></use>
+                    </mask>
+                    <g id="path-1"></g>
+                    <path d="M37.2654625,11.0134062 C38.069025,10.2730937 38.816525,9.47815625 39.5022125,8.62428125 C35.286025,3.37165625 28.8215875,-0.00071875 21.5622125,-0.00071875 C12.475775,-0.00071875 4.655775,5.28640625 0.9254625,12.9367812 L32.359275,12.9367812 C34.17915,12.9367812 35.9285875,12.2467812 37.2654625,11.0134062" id="Fill-3" fill="#FFFFFF" fill-rule="nonzero" mask="url(#mask-3)"></path>
+                </g>
+            </g>
+            <g id="Group-8" transform="translate(1.437500, 33.062500)">
+                <g id="Fill-6-Clipped">
+                    <mask id="mask-5" fill="currentColor">
+                        <use xlink:href="#path-4"></use>
+                    </mask>
+                    <g id="path-3"></g>
+                    <path d="M32.3591312,-0.00014375 L0.92531875,-0.00014375 C4.65706875,7.65166875 12.4756312,12.9373563 21.5620687,12.9373563 C28.8214437,12.9373563 35.2858812,9.56641875 39.5020687,4.31235625 C38.8163812,3.45991875 38.0688812,2.66354375 37.2653187,1.92323125 C35.9284437,0.68985625 34.1790062,-0.00014375 32.3591312,-0.00014375" id="Fill-6" fill="#FFFFFF" fill-rule="nonzero" mask="url(#mask-5)"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

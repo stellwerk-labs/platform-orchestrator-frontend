@@ -1,0 +1,34 @@
+{
+  "CREATE_NEW_APPLICATION": "Create new application",
+  "CREATE_FROM_TEMPLATE": "Create from template",
+  "NO_APPLICATIONS_ADDED": "No projects added",
+  "NO_PROJECTS_FOUND": "No projects found",
+  "SORT_BY": "Sort by",
+  "NAME": "Name",
+  "CREATE_DATE": "Creation date",
+  "SHOW_ENVIRONMENTS": "Show environments",
+  "APPLICATION_CARD": {
+    "NO_DEPLOYS_IN_APPLICATION": "No deployments have been made within this application"
+  },
+  "ENVIRONMENT_CARD": {
+    "RUNNING": "Running",
+    "DEPLOYMENT_ERROR": "deployment error",
+    "DEPLOYMENT_ERRORS": "deployment errors",
+    "RUNTIME_ERROR": "runtime error",
+    "RUNTIME_ERRORS": "runtime errors",
+    "VALUES_OUTDATED": "The values & secrets deployed in this environment are outdated"
+  },
+  "APPLICATION_CARD.LAST_CHANGE_DEPLOYED": "Last change deployed {{time}}",
+  "WELCOME_BOX": {
+    "NEXT_STEPS": "The next step is to hook the Platform Orchestrator up to your infrastructure and source control. To make this easy, you can use our pre-packaged reference architectures.",
+    "TAKES_45_MINS": "This should take around 45 minutes.",
+    "GET_STARTED": "Get started"
+  },
+  "GET_STARTED": {
+    "TITLE": "Get started",
+    "DISMISS": "Dismiss and don't show again",
+    "DESCRIPTION": "Depending on how much time you have, whether you have an existing Kubernetes cluster to work with, and how hands-on you want to be at this point, you choose a path that fits you best. "
+  },
+  "APPLICATIONS_TITLE": "Projects",
+  "FILTER_PROJECTS": "Filter projects by name"
+}

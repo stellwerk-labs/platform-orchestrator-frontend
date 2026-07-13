@@ -1,0 +1,19 @@
+.loadingAnimation {
+  animation-name: myAnim;
+  animation-duration: 4600ms;
+  animation-timing-function: cubic-bezier(0.45, 0.19, 0.67, 0.89);
+  animation-iteration-count: infinite;
+}
+@keyframes myAnim {
+  0% {
+    width: 0;
+  }
+  25% {
+    width: 100vw;
+    transform: translate(0vw);
+  }
+  100% {
+    width: 0vw;
+    transform: translate(100vw);
+  }
+}
