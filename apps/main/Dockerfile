@@ -12,6 +12,8 @@ RUN pnpm run build
 
 FROM nginx:stable-alpine
 
+LABEL org.opencontainers.image.source="https://github.com/stellwerk-labs/platform-orchestrator-frontend"
+
 RUN apk add --no-cache bash jq
 
 RUN sed -i '/^pid/d' /etc/nginx/nginx.conf && \
