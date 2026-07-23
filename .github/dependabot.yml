@@ -43,3 +43,10 @@ updates:
         patterns:
           - 'react-i18next'
           - 'i18next'
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "build"
+      include: "scope"
