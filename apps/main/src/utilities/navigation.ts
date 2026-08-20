@@ -24,6 +24,7 @@ export const generateMembershipDetailsUrl = (orgId: string, userId: string) =>
 export const generateServiceUsersUrl = (orgId: string) => {
   return `/orgs/${orgId}/service-users`;
 };
+export const generateRolesUrl = (orgId: string) => `/orgs/${orgId}/roles`;
 
 export const generateServiceUserDetailsUrl = (orgId: string, serviceUserId: string) =>
   `/orgs/${orgId}/service-users/${serviceUserId}`;

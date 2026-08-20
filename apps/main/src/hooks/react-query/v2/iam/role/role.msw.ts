@@ -9,6 +9,7 @@ import { http, HttpResponse } from 'msw';
 import type {
   N400BadRequestResponse,
   N404NotFoundResponse,
+  N409ConflictResponse,
   Role,
   RolePage,
 } from '../../../../../models/v2/iam';
@@ -22,6 +23,7 @@ export const getListRolesResponseMock = (overrideResponse: Partial<RolePage> = {
     permissions: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
       () => faker.string.alpha({ length: { min: 10, max: 20 } }),
     ),
+    is_system: faker.datatype.boolean(),
   })),
   next_page_token: undefined,
   ...overrideResponse,
@@ -38,8 +40,51 @@ export const getListRolesResponseMock200 = (
     permissions: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
       () => faker.string.alpha({ length: { min: 10, max: 20 } }),
     ),
+    is_system: faker.datatype.boolean(),
   })),
   next_page_token: undefined,
+  ...overrideResponse,
+});
+
+export const getCreateRoleResponseMock = (overrideResponse: Partial<Role> = {}): Role => ({
+  id: faker.string.uuid(),
+  display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  created_by: faker.string.uuid(),
+  permissions: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+    () => faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ),
+  is_system: faker.datatype.boolean(),
+  ...overrideResponse,
+});
+
+export const getCreateRoleResponseMock201 = (overrideResponse: Partial<Role> = {}): Role => ({
+  id: faker.string.uuid(),
+  display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  created_by: faker.string.uuid(),
+  permissions: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+    () => faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ),
+  is_system: faker.datatype.boolean(),
+  ...overrideResponse,
+});
+
+export const getCreateRoleResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getCreateRoleResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
   ...overrideResponse,
 });
 
@@ -51,6 +96,7 @@ export const getGetRoleResponseMock = (overrideResponse: Partial<Role> = {}): Ro
   permissions: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
     () => faker.string.alpha({ length: { min: 10, max: 20 } }),
   ),
+  is_system: faker.datatype.boolean(),
   ...overrideResponse,
 });
 
@@ -62,6 +108,7 @@ export const getGetRoleResponseMock200 = (overrideResponse: Partial<Role> = {}):
   permissions: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
     () => faker.string.alpha({ length: { min: 10, max: 20 } }),
   ),
+  is_system: faker.datatype.boolean(),
   ...overrideResponse,
 });
 
@@ -77,6 +124,75 @@ export const getGetRoleResponseMock400 = (
 export const getGetRoleResponseMock404 = (
   overrideResponse: Partial<N404NotFoundResponse> = {},
 ): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getUpdateRoleResponseMock = (overrideResponse: Partial<Role> = {}): Role => ({
+  id: faker.string.uuid(),
+  display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  created_by: faker.string.uuid(),
+  permissions: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+    () => faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ),
+  is_system: faker.datatype.boolean(),
+  ...overrideResponse,
+});
+
+export const getUpdateRoleResponseMock200 = (overrideResponse: Partial<Role> = {}): Role => ({
+  id: faker.string.uuid(),
+  display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  created_by: faker.string.uuid(),
+  permissions: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+    () => faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ),
+  is_system: faker.datatype.boolean(),
+  ...overrideResponse,
+});
+
+export const getUpdateRoleResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getUpdateRoleResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getUpdateRoleResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getDeleteRoleResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getDeleteRoleResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
   error: faker.string.alpha({ length: { min: 10, max: 20 } }),
   message: faker.string.alpha({ length: { min: 10, max: 20 } }),
   details: faker.helpers.arrayElement([{}, undefined]),
@@ -125,6 +241,106 @@ export const getListRolesMockHandler200 = (
             : getListRolesResponseMock200(),
         ),
         { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateRoleMockHandler = (
+  overrideResponse?:
+    | Role
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<Role> | Role),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/roles',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCreateRoleResponseMock(),
+        ),
+        { status: 201, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateRoleMockHandler201 = (
+  overrideResponse?:
+    | Role
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<Role> | Role),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/roles',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCreateRoleResponseMock201(),
+        ),
+        { status: 201, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateRoleMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/roles',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCreateRoleResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateRoleMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/roles',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCreateRoleResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
       );
     },
     options,
@@ -230,4 +446,224 @@ export const getGetRoleMockHandler404 = (
     options,
   );
 };
-export const getRoleMock = () => [getListRolesMockHandler(), getGetRoleMockHandler()];
+
+export const getUpdateRoleMockHandler = (
+  overrideResponse?:
+    | Role
+    | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<Role> | Role),
+  options?: RequestHandlerOptions,
+) => {
+  return http.put(
+    'http://example.com/orgs/:orgId/roles/:roleId',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getUpdateRoleResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpdateRoleMockHandler200 = (
+  overrideResponse?:
+    | Role
+    | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<Role> | Role),
+  options?: RequestHandlerOptions,
+) => {
+  return http.put(
+    'http://example.com/orgs/:orgId/roles/:roleId',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getUpdateRoleResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpdateRoleMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.put>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.put(
+    'http://example.com/orgs/:orgId/roles/:roleId',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getUpdateRoleResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpdateRoleMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.put>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.put(
+    'http://example.com/orgs/:orgId/roles/:roleId',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getUpdateRoleResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpdateRoleMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.put>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.put(
+    'http://example.com/orgs/:orgId/roles/:roleId',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getUpdateRoleResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getDeleteRoleMockHandler = (
+  overrideResponse?:
+    | void
+    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void),
+  options?: RequestHandlerOptions,
+) => {
+  return http.delete(
+    'http://example.com/orgs/:orgId/roles/:roleId',
+    async (info) => {
+      if (typeof overrideResponse === 'function') {
+        await overrideResponse(info);
+      }
+      return new HttpResponse(null, { status: 204 });
+    },
+    options,
+  );
+};
+
+export const getDeleteRoleMockHandler204 = (
+  overrideResponse?:
+    | void
+    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void),
+  options?: RequestHandlerOptions,
+) => {
+  return http.delete(
+    'http://example.com/orgs/:orgId/roles/:roleId',
+    async (info) => {
+      if (typeof overrideResponse === 'function') {
+        await overrideResponse(info);
+      }
+      return new HttpResponse(null, { status: 204 });
+    },
+    options,
+  );
+};
+
+export const getDeleteRoleMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.delete>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.delete(
+    'http://example.com/orgs/:orgId/roles/:roleId',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getDeleteRoleResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getDeleteRoleMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.delete>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.delete(
+    'http://example.com/orgs/:orgId/roles/:roleId',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getDeleteRoleResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+export const getRoleMock = () => [
+  getListRolesMockHandler(),
+  getCreateRoleMockHandler(),
+  getGetRoleMockHandler(),
+  getUpdateRoleMockHandler(),
+  getDeleteRoleMockHandler(),
+];

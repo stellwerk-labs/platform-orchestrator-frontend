@@ -13,6 +13,7 @@ import { Providers } from '@src/containers/Orgs/Providers/Providers';
 import { ResourceTypes } from '@src/containers/Orgs/ResourceTypes/containers/ResourceTypes';
 import { ResourceTypeSchema } from '@src/containers/Orgs/ResourceTypes/containers/ResourceTypesDetails/containers/ResourceTypeSchema';
 import { ResourceTypesDetails } from '@src/containers/Orgs/ResourceTypes/containers/ResourceTypesDetails/ResourceTypesDetails';
+import { Roles } from '@src/containers/Orgs/Roles/Roles';
 import { RunnerConfiguration } from '@src/containers/Orgs/Runners/containers/RunnerDetails/components/RunnerConfiguration';
 import { RunnerRules } from '@src/containers/Orgs/Runners/containers/RunnerDetails/components/RunnerRules';
 import { RunnerStateStorageConfiguration } from '@src/containers/Orgs/Runners/containers/RunnerDetails/components/RunnerStateStorageConfiguration';
@@ -206,6 +207,13 @@ export const orgRoutes: RouteObject[] = [
       crumbs: () => [{ label: translations.SETTINGS, name: 'Service users' }],
     },
     element: <ServiceUsers />,
+  },
+  {
+    path: 'roles',
+    handle: {
+      crumbs: () => [{ label: translations.SETTINGS, name: 'Roles' }],
+    },
+    element: <Roles />,
   },
   {
     path: 'service-users/:serviceUserId',

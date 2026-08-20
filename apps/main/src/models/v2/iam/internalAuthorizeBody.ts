@@ -5,7 +5,7 @@
 import type { ResourcePermissionCheck } from './resourcePermissionCheck';
 
 /**
- * An authorization request by a backend service. This is somewhat modeled on what an underlying SpiceDB CheckBulkPermissions call would look like.
+ * An authorization request by a backend service.
  */
 export interface InternalAuthorizeBody {
   /** The user id we are checking against. Human or service token. */

@@ -85,6 +85,7 @@ const testRoleDeveloper = {
   created_at: '2024-01-01T10:00:00Z',
   created_by: 'admin',
   display_name: 'Developer',
+  is_system: false,
   permissions: ['read', 'write'],
 };
 
@@ -93,6 +94,7 @@ const testRoleDeployer = {
   created_at: '2024-01-01T10:00:00Z',
   created_by: 'admin',
   display_name: 'Deployer',
+  is_system: false,
   permissions: ['project:read', 'project:write'],
 };
 
@@ -124,6 +126,7 @@ const testRoleViewer = {
   created_at: '2024-01-01T10:30:00Z',
   created_by: 'admin',
   display_name: 'Viewer',
+  is_system: false,
   permissions: ['env:read', 'env:manage'],
 };
 

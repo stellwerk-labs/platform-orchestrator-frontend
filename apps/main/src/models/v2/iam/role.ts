@@ -17,4 +17,6 @@ export interface Role {
   created_by: string;
   /** The list of permissions associated with this role. */
   permissions: string[];
+  /** True for immutable built-in roles. */
+  is_system: boolean;
 }
