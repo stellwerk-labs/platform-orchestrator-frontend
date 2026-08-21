@@ -4,7 +4,9 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import {
   getCreateRoleMockHandler,
+  getDeleteRoleMockHandler,
   getListRolesMockHandler,
+  getUpdateRoleMockHandler,
 } from '@src/hooks/react-query/v2/iam/role/role.msw';
 import { getCheckPermissionsMockHandler } from '@src/hooks/react-query/v2/iam/user/user.msw';
 import { RoleWriteBody } from '@src/models/v2/iam';
@@ -14,10 +16,16 @@ import { server } from '@src/testing-utils/mswServer';
 import { Roles } from './Roles';
 
 let createRequest: RoleWriteBody | undefined;
+let updateRequest: RoleWriteBody | undefined;
+let updatedRoleId: string | undefined;
+let deletedRoleId: string | undefined;
 
 describe('Roles', () => {
   beforeEach(() => {
     createRequest = undefined;
+    updateRequest = undefined;
+    updatedRoleId = undefined;
+    deletedRoleId = undefined;
     server.use(
       getCheckPermissionsMockHandler({
         items: [
@@ -57,10 +65,24 @@ describe('Roles', () => {
           ...createRequest,
         };
       }),
+      getUpdateRoleMockHandler(async (info) => {
+        updatedRoleId = info.params.roleId as string;
+        updateRequest = (await info.request.json()) as RoleWriteBody;
+        return {
+          id: updatedRoleId,
+          created_at: '2026-01-01T00:00:00Z',
+          created_by: 'ffffffff-ffff-ffff-ffff-ffffffffffff',
+          is_system: false,
+          ...updateRequest,
+        };
+      }),
+      getDeleteRoleMockHandler((info) => {
+        deletedRoleId = info.params.roleId as string;
+      }),
     );
   });
 
-  it('marks built-in roles as immutable and creates custom roles', async () => {
+  it('marks built-in roles as immutable and manages custom roles', async () => {
     const user = userEvent.setup();
     render(
       <MockProviders route={{ path: '/orgs/:orgId/roles', url: '/orgs/my-org/roles' }}>
@@ -72,14 +94,14 @@ describe('Roles', () => {
     expect(screen.getAllByRole('button', { name: 'Open role menu' })).toHaveLength(1);
 
     await user.click(screen.getByRole('button', { name: /Create role/ }));
-    const dialog = await screen.findByRole('dialog');
-    await user.type(within(dialog).getByLabelText('Name'), 'Release operator');
-    await user.click(within(dialog).getByRole('combobox', { name: 'Permissions' }));
+    const createDialog = await screen.findByRole('dialog');
+    await user.type(within(createDialog).getByLabelText('Name'), 'Release operator');
+    await user.click(within(createDialog).getByRole('combobox', { name: 'Permissions' }));
     await user.type(
-      within(dialog).getByRole('combobox', { name: 'Permissions' }),
+      within(createDialog).getByRole('combobox', { name: 'Permissions' }),
       'write_all{enter}',
     );
-    await user.click(within(dialog).getByRole('button', { name: 'Create' }));
+    await user.click(within(createDialog).getByRole('button', { name: 'Create' }));
 
     await waitFor(() =>
       expect(createRequest).toEqual({
@@ -87,5 +109,38 @@ describe('Roles', () => {
         permissions: ['write_all'],
       }),
     );
+
+    await user.click(screen.getByRole('button', { name: 'Open role menu' }));
+    await user.click(await screen.findByRole('menuitem', { name: /Edit/ }));
+    const editDialog = await screen.findByRole('dialog');
+    const nameInput = within(editDialog).getByLabelText('Name');
+    await user.clear(nameInput);
+    await user.type(nameInput, 'Compliance auditor');
+    await user.click(within(editDialog).getByRole('button', { name: 'Save' }));
+
+    await waitFor(() => {
+      expect(updatedRoleId).toBe('22222222-2222-2222-2222-222222222222');
+      expect(updateRequest).toEqual({
+        display_name: 'Compliance auditor',
+        permissions: ['read_all'],
+      });
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Open role menu' }));
+    await user.click(await screen.findByRole('menuitem', { name: /Delete/ }));
+    await waitFor(() =>
+      expect(
+        screen
+          .getAllByRole('dialog')
+          .some((dialog) => dialog.textContent?.includes('Delete Auditor?')),
+      ).toBe(true),
+    );
+    const deleteDialog = screen
+      .getAllByRole('dialog')
+      .find((dialog) => dialog.textContent?.includes('Delete Auditor?'));
+    expect(deleteDialog).toBeDefined();
+    await user.click(within(deleteDialog!).getByRole('button', { name: 'Delete' }));
+
+    await waitFor(() => expect(deletedRoleId).toBe('22222222-2222-2222-2222-222222222222'));
   });
 });
