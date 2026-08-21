@@ -6,14 +6,17 @@ import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 import type { ErrorType } from '../../../../../custom-instance';
 import { customInstance } from '../../../../../custom-instance';
@@ -21,8 +24,10 @@ import type {
   ListRolesParams,
   N400BadRequestResponse,
   N404NotFoundResponse,
+  N409ConflictResponse,
   Role,
   RolePage,
+  RoleWriteBody,
 } from '../../../../../models/v2/iam';
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -157,6 +162,94 @@ export function useListRoles<
 }
 
 /**
+ * @summary Create a configurable role in this organization.
+ */
+export const createRole = (
+  orgId: string,
+  roleWriteBody: RoleWriteBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<Role>(
+    {
+      url: `/orgs/${orgId}/roles`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: roleWriteBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getCreateRoleMutationOptions = <
+  TError = ErrorType<N400BadRequestResponse | N409ConflictResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createRole>>,
+    TError,
+    { orgId: string; data: RoleWriteBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createRole>>,
+  TError,
+  { orgId: string; data: RoleWriteBody },
+  TContext
+> => {
+  const mutationKey = ['createRole'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createRole>>,
+    { orgId: string; data: RoleWriteBody }
+  > = (props) => {
+    const { orgId, data } = props ?? {};
+
+    return createRole(orgId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateRoleMutationResult = NonNullable<Awaited<ReturnType<typeof createRole>>>;
+export type CreateRoleMutationBody = RoleWriteBody;
+export type CreateRoleMutationError = ErrorType<N400BadRequestResponse | N409ConflictResponse>;
+
+/**
+ * @summary Create a configurable role in this organization.
+ */
+export const useCreateRole = <
+  TError = ErrorType<N400BadRequestResponse | N409ConflictResponse>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createRole>>,
+      TError,
+      { orgId: string; data: RoleWriteBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof createRole>>,
+  TError,
+  { orgId: string; data: RoleWriteBody },
+  TContext
+> => {
+  const mutationOptions = getCreateRoleMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+/**
  * @summary Obtain details of a Role in an Organization.
  */
 export const getRole = (
@@ -284,3 +377,171 @@ export function useGetRole<
 
   return query;
 }
+
+/**
+ * @summary Replace the name and permissions of a configurable role.
+ */
+export const updateRole = (
+  orgId: string,
+  roleId: string,
+  roleWriteBody: RoleWriteBody,
+  options?: SecondParameter<typeof customInstance>,
+) => {
+  return customInstance<Role>(
+    {
+      url: `/orgs/${orgId}/roles/${roleId}`,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      data: roleWriteBody,
+    },
+    options,
+  );
+};
+
+export const getUpdateRoleMutationOptions = <
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateRole>>,
+    TError,
+    { orgId: string; roleId: string; data: RoleWriteBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateRole>>,
+  TError,
+  { orgId: string; roleId: string; data: RoleWriteBody },
+  TContext
+> => {
+  const mutationKey = ['updateRole'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateRole>>,
+    { orgId: string; roleId: string; data: RoleWriteBody }
+  > = (props) => {
+    const { orgId, roleId, data } = props ?? {};
+
+    return updateRole(orgId, roleId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateRoleMutationResult = NonNullable<Awaited<ReturnType<typeof updateRole>>>;
+export type UpdateRoleMutationBody = RoleWriteBody;
+export type UpdateRoleMutationError = ErrorType<
+  N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+/**
+ * @summary Replace the name and permissions of a configurable role.
+ */
+export const useUpdateRole = <
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateRole>>,
+      TError,
+      { orgId: string; roleId: string; data: RoleWriteBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateRole>>,
+  TError,
+  { orgId: string; roleId: string; data: RoleWriteBody },
+  TContext
+> => {
+  const mutationOptions = getUpdateRoleMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+/**
+ * @summary Delete an unassigned configurable role.
+ */
+export const deleteRole = (
+  orgId: string,
+  roleId: string,
+  options?: SecondParameter<typeof customInstance>,
+) => {
+  return customInstance<void>({ url: `/orgs/${orgId}/roles/${roleId}`, method: 'DELETE' }, options);
+};
+
+export const getDeleteRoleMutationOptions = <
+  TError = ErrorType<N404NotFoundResponse | N409ConflictResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteRole>>,
+    TError,
+    { orgId: string; roleId: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteRole>>,
+  TError,
+  { orgId: string; roleId: string },
+  TContext
+> => {
+  const mutationKey = ['deleteRole'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteRole>>,
+    { orgId: string; roleId: string }
+  > = (props) => {
+    const { orgId, roleId } = props ?? {};
+
+    return deleteRole(orgId, roleId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteRoleMutationResult = NonNullable<Awaited<ReturnType<typeof deleteRole>>>;
+
+export type DeleteRoleMutationError = ErrorType<N404NotFoundResponse | N409ConflictResponse>;
+
+/**
+ * @summary Delete an unassigned configurable role.
+ */
+export const useDeleteRole = <
+  TError = ErrorType<N404NotFoundResponse | N409ConflictResponse>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deleteRole>>,
+      TError,
+      { orgId: string; roleId: string },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof deleteRole>>,
+  TError,
+  { orgId: string; roleId: string },
+  TContext
+> => {
+  const mutationOptions = getDeleteRoleMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};

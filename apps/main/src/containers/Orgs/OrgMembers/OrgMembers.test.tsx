@@ -78,6 +78,7 @@ describe('OrgMembers', () => {
             created_by: 'ffffffff-ffff-ffff-ffff-ffffffffffff',
             display_name: 'Admin',
             id: 'c77c670e-8464-4352-9c86-4fef1d523f22',
+            is_system: false,
             permissions: ['manage_all'],
           },
           {
@@ -85,6 +86,7 @@ describe('OrgMembers', () => {
             created_by: 'ffffffff-ffff-ffff-ffff-ffffffffffff',
             display_name: 'Viewer',
             id: '41d9ab07-037d-4138-b111-1527617d01a2',
+            is_system: false,
             permissions: ['read_all'],
           },
         ],

@@ -4,15 +4,13 @@
  */
 
 /**
- * The result of a scope sync operation
+ * The result of an authorization resource sync operation
  */
 export interface ScopeSyncResult {
   /** The number of projects synced */
   projects_synced: number;
   /** The number of environments synced */
   environments_synced: number;
-  /** The number of scoped roles created in the database */
-  scoped_roles_created: number;
-  /** The number of relationships added to SpiceDB */
-  relationships_added: number;
+  /** The number of authorization resources inserted or refreshed */
+  resources_upserted: number;
 }

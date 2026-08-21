@@ -15,7 +15,6 @@ import type {
   OrgMembership,
   RegisteredUser,
   ScopeSyncResult,
-  SpiceDBSyncResult,
   SsoConfiguration,
   SsoLoginResponse,
   User,
@@ -339,53 +338,12 @@ export const getInternalCreateOrgMembershipResponseMock409 = (
   ...overrideResponse,
 });
 
-export const getInternalSyncOrgToSpiceDBResponseMock = (
-  overrideResponse: Partial<SpiceDBSyncResult> = {},
-): SpiceDBSyncResult => ({
-  added: faker.number.int({ min: undefined, max: undefined }),
-  removed: faker.helpers.arrayElement([
-    faker.number.int({ min: undefined, max: undefined }),
-    undefined,
-  ]),
-  ...overrideResponse,
-});
-
-export const getInternalSyncOrgToSpiceDBResponseMock200 = (
-  overrideResponse: Partial<SpiceDBSyncResult> = {},
-): SpiceDBSyncResult => ({
-  added: faker.number.int({ min: undefined, max: undefined }),
-  removed: faker.helpers.arrayElement([
-    faker.number.int({ min: undefined, max: undefined }),
-    undefined,
-  ]),
-  ...overrideResponse,
-});
-
-export const getInternalSyncOrgToSpiceDBResponseMock400 = (
-  overrideResponse: Partial<N400BadRequestResponse> = {},
-): N400BadRequestResponse => ({
-  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
-  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
-  details: faker.helpers.arrayElement([{}, undefined]),
-  ...overrideResponse,
-});
-
-export const getInternalSyncOrgToSpiceDBResponseMock404 = (
-  overrideResponse: Partial<N404NotFoundResponse> = {},
-): N404NotFoundResponse => ({
-  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
-  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
-  details: faker.helpers.arrayElement([{}, undefined]),
-  ...overrideResponse,
-});
-
 export const getInternalSyncOrgScopesResponseMock = (
   overrideResponse: Partial<ScopeSyncResult> = {},
 ): ScopeSyncResult => ({
   projects_synced: faker.number.int({ min: undefined, max: undefined }),
   environments_synced: faker.number.int({ min: undefined, max: undefined }),
-  scoped_roles_created: faker.number.int({ min: undefined, max: undefined }),
-  relationships_added: faker.number.int({ min: undefined, max: undefined }),
+  resources_upserted: faker.number.int({ min: undefined, max: undefined }),
   ...overrideResponse,
 });
 
@@ -394,8 +352,7 @@ export const getInternalSyncOrgScopesResponseMock200 = (
 ): ScopeSyncResult => ({
   projects_synced: faker.number.int({ min: undefined, max: undefined }),
   environments_synced: faker.number.int({ min: undefined, max: undefined }),
-  scoped_roles_created: faker.number.int({ min: undefined, max: undefined }),
-  relationships_added: faker.number.int({ min: undefined, max: undefined }),
+  resources_upserted: faker.number.int({ min: undefined, max: undefined }),
   ...overrideResponse,
 });
 
@@ -1210,110 +1167,6 @@ export const getInternalRemoveAccessFromOrgMockHandler204 = (
   );
 };
 
-export const getInternalSyncOrgToSpiceDBMockHandler = (
-  overrideResponse?:
-    | SpiceDBSyncResult
-    | ((
-        info: Parameters<Parameters<typeof http.post>[1]>[0],
-      ) => Promise<SpiceDBSyncResult> | SpiceDBSyncResult),
-  options?: RequestHandlerOptions,
-) => {
-  return http.post(
-    'http://example.com/internal/orgs/:orgId/actions/sync-spicedb',
-    async (info) => {
-      return new HttpResponse(
-        JSON.stringify(
-          overrideResponse !== undefined
-            ? typeof overrideResponse === 'function'
-              ? await overrideResponse(info)
-              : overrideResponse
-            : getInternalSyncOrgToSpiceDBResponseMock(),
-        ),
-        { status: 200, headers: { 'Content-Type': 'application/json' } },
-      );
-    },
-    options,
-  );
-};
-
-export const getInternalSyncOrgToSpiceDBMockHandler200 = (
-  overrideResponse?:
-    | SpiceDBSyncResult
-    | ((
-        info: Parameters<Parameters<typeof http.post>[1]>[0],
-      ) => Promise<SpiceDBSyncResult> | SpiceDBSyncResult),
-  options?: RequestHandlerOptions,
-) => {
-  return http.post(
-    'http://example.com/internal/orgs/:orgId/actions/sync-spicedb',
-    async (info) => {
-      return new HttpResponse(
-        JSON.stringify(
-          overrideResponse !== undefined
-            ? typeof overrideResponse === 'function'
-              ? await overrideResponse(info)
-              : overrideResponse
-            : getInternalSyncOrgToSpiceDBResponseMock200(),
-        ),
-        { status: 200, headers: { 'Content-Type': 'application/json' } },
-      );
-    },
-    options,
-  );
-};
-
-export const getInternalSyncOrgToSpiceDBMockHandler400 = (
-  overrideResponse?:
-    | N400BadRequestResponse
-    | ((
-        info: Parameters<Parameters<typeof http.post>[1]>[0],
-      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
-  options?: RequestHandlerOptions,
-) => {
-  return http.post(
-    'http://example.com/internal/orgs/:orgId/actions/sync-spicedb',
-    async (info) => {
-      return new HttpResponse(
-        JSON.stringify(
-          overrideResponse !== undefined
-            ? typeof overrideResponse === 'function'
-              ? await overrideResponse(info)
-              : overrideResponse
-            : getInternalSyncOrgToSpiceDBResponseMock400(),
-        ),
-        { status: 400, headers: { 'Content-Type': 'application/json' } },
-      );
-    },
-    options,
-  );
-};
-
-export const getInternalSyncOrgToSpiceDBMockHandler404 = (
-  overrideResponse?:
-    | N404NotFoundResponse
-    | ((
-        info: Parameters<Parameters<typeof http.post>[1]>[0],
-      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
-  options?: RequestHandlerOptions,
-) => {
-  return http.post(
-    'http://example.com/internal/orgs/:orgId/actions/sync-spicedb',
-    async (info) => {
-      return new HttpResponse(
-        JSON.stringify(
-          overrideResponse !== undefined
-            ? typeof overrideResponse === 'function'
-              ? await overrideResponse(info)
-              : overrideResponse
-            : getInternalSyncOrgToSpiceDBResponseMock404(),
-        ),
-        { status: 404, headers: { 'Content-Type': 'application/json' } },
-      );
-    },
-    options,
-  );
-};
-
 export const getInternalSyncOrgScopesMockHandler = (
   overrideResponse?:
     | ScopeSyncResult
@@ -1577,7 +1430,6 @@ export const getInternalMock = () => [
   getLogoutSessionMockHandler(),
   getInternalCreateOrgMembershipMockHandler(),
   getInternalRemoveAccessFromOrgMockHandler(),
-  getInternalSyncOrgToSpiceDBMockHandler(),
   getInternalSyncOrgScopesMockHandler(),
   getInternalAuthenticateMockHandler(),
   getInternalAuthorizeMockHandler(),

@@ -34,7 +34,6 @@ import type {
   RegisteredUser,
   RegisterUserBody,
   ScopeSyncResult,
-  SpiceDBSyncResult,
   SsoConfiguration,
   SsoLoginCreateBody,
   SsoLoginResponse,
@@ -881,96 +880,9 @@ export const useInternalRemoveAccessFromOrg = <TError = ErrorType<unknown>, TCon
   return useMutation(mutationOptions, queryClient);
 };
 /**
- * Performs a snapshot sync of the organization's memberships and service user roles to SpiceDB. Deletes all existing relationships and bulk inserts fresh data.
+ * Checks that the organization exists and stores the organization, project, and environment hierarchy used for inherited role bindings.
  *
- * @summary Sync organization relationships to SpiceDB
- */
-export const internalSyncOrgToSpiceDB = (
-  orgId: string,
-  options?: SecondParameter<typeof customInstance>,
-  signal?: AbortSignal,
-) => {
-  return customInstance<SpiceDBSyncResult>(
-    { url: `/internal/orgs/${orgId}/actions/sync-spicedb`, method: 'POST', signal },
-    options,
-  );
-};
-
-export const getInternalSyncOrgToSpiceDBMutationOptions = <
-  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof internalSyncOrgToSpiceDB>>,
-    TError,
-    { orgId: string },
-    TContext
-  >;
-  request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof internalSyncOrgToSpiceDB>>,
-  TError,
-  { orgId: string },
-  TContext
-> => {
-  const mutationKey = ['internalSyncOrgToSpiceDB'];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof internalSyncOrgToSpiceDB>>,
-    { orgId: string }
-  > = (props) => {
-    const { orgId } = props ?? {};
-
-    return internalSyncOrgToSpiceDB(orgId, requestOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type InternalSyncOrgToSpiceDBMutationResult = NonNullable<
-  Awaited<ReturnType<typeof internalSyncOrgToSpiceDB>>
->;
-
-export type InternalSyncOrgToSpiceDBMutationError = ErrorType<
-  N400BadRequestResponse | N404NotFoundResponse
->;
-
-/**
- * @summary Sync organization relationships to SpiceDB
- */
-export const useInternalSyncOrgToSpiceDB = <
-  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse>,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof internalSyncOrgToSpiceDB>>,
-      TError,
-      { orgId: string },
-      TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof internalSyncOrgToSpiceDB>>,
-  TError,
-  { orgId: string },
-  TContext
-> => {
-  const mutationOptions = getInternalSyncOrgToSpiceDBMutationOptions(options);
-
-  return useMutation(mutationOptions, queryClient);
-};
-/**
- * Checks that the organization exists, lists all projects, and creates scoped roles and relationships for all projects and their environments in SpiceDB.
- *
- * @summary Sync scoped roles for all projects in an organization
+ * @summary Sync authorization resources for all projects in an organization
  */
 export const internalSyncOrgScopes = (
   orgId: string,
@@ -1028,7 +940,7 @@ export type InternalSyncOrgScopesMutationError = ErrorType<
 >;
 
 /**
- * @summary Sync scoped roles for all projects in an organization
+ * @summary Sync authorization resources for all projects in an organization
  */
 export const useInternalSyncOrgScopes = <
   TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse>,

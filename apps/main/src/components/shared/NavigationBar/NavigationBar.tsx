@@ -11,6 +11,7 @@ import {
   MailOutlined,
   ReconciliationOutlined,
   RobotOutlined,
+  SafetyCertificateOutlined,
   TeamOutlined,
 } from '@ant-design/icons';
 import { Flex, Layout, Menu, theme } from 'antd';
@@ -29,6 +30,7 @@ import {
   generateProjectsUrl,
   generateProvidersUrl,
   generateResourceTypesUrl,
+  generateRolesUrl,
   generateRunnersUrl,
   generateServiceUsersUrl,
 } from '@src/utilities/navigation';
@@ -151,6 +153,16 @@ const NavigationBar = () => {
               onKeyDown={handleMenuItemKeyDown}>
               <Link to={generateServiceUsersUrl(orgId)} tabIndex={-1}>
                 Service Users
+              </Link>
+            </Menu.Item>
+
+            <Menu.Item
+              key={'roles'}
+              icon={<SafetyCertificateOutlined />}
+              tabIndex={0}
+              onKeyDown={handleMenuItemKeyDown}>
+              <Link to={generateRolesUrl(orgId)} tabIndex={-1}>
+                Roles
               </Link>
             </Menu.Item>
           </Menu>
