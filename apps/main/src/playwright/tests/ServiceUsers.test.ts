@@ -23,7 +23,7 @@ test.describe('service users', () => {
           {
             permission_check: {
               resource: 'organization:playwright-org',
-              permission: 'write',
+              permission: 'service_user_write',
             },
             allowed: true,
           },
