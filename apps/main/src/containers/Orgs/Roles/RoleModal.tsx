@@ -1,24 +1,47 @@
-import { Form, Input, Modal, Select, Typography } from 'antd';
-import { useEffect } from 'react';
+import { Alert, Form, Input, Modal, Select, Space, Typography } from 'antd';
+import { useEffect, useMemo } from 'react';
 
-import { Role, RoleWriteBody } from '@src/models/v2/iam';
-
-const permissionOptions = [
-  { label: 'Manage everything', value: 'manage_all' },
-  { label: 'Read and write', value: 'write_all' },
-  { label: 'Read only', value: 'read_all' },
-];
+import { PermissionDefinition, Role, RoleWriteBody } from '@src/models/v2/iam';
 
 interface RoleModalProps {
   open: boolean;
   role?: Role;
+  permissions: PermissionDefinition[];
+  permissionsLoading: boolean;
+  permissionsError: boolean;
   loading: boolean;
   onCancel: () => void;
   onSubmit: (values: RoleWriteBody) => void;
 }
 
-export const RoleModal = ({ open, role, loading, onCancel, onSubmit }: RoleModalProps) => {
+export const RoleModal = ({
+  open,
+  role,
+  permissions,
+  permissionsLoading,
+  permissionsError,
+  loading,
+  onCancel,
+  onSubmit,
+}: RoleModalProps) => {
   const [form] = Form.useForm<RoleWriteBody>();
+  const groupedPermissions = useMemo(() => {
+    const groups = permissions.reduce<Record<string, PermissionDefinition[]>>(
+      (result, permission) => {
+        result[permission.category] = [...(result[permission.category] ?? []), permission];
+        return result;
+      },
+      {},
+    );
+    return Object.entries(groups).sort(([left], [right]) => left.localeCompare(right));
+  }, [permissions]);
+  const knownPermissionIds = useMemo(
+    () => new Set(permissions.map((permission) => permission.id)),
+    [permissions],
+  );
+  const legacyPermissions = (role?.permissions ?? []).filter(
+    (permission) => !knownPermissionIds.has(permission),
+  );
 
   useEffect(() => {
     if (open) {
@@ -37,6 +60,7 @@ export const RoleModal = ({ open, role, loading, onCancel, onSubmit }: RoleModal
       forceRender
       title={role ? 'Edit role' : 'Create role'}
       okText={role ? 'Save' : 'Create'}
+      okButtonProps={{ disabled: permissionsLoading || permissionsError }}
       confirmLoading={loading}
       onCancel={onCancel}
       onOk={() => form.submit()}>
@@ -44,6 +68,14 @@ export const RoleModal = ({ open, role, loading, onCancel, onSubmit }: RoleModal
         Roles apply at organization, project, or environment scope. Permission changes take effect
         immediately for every assignment.
       </Typography.Paragraph>
+      {permissionsError && (
+        <Alert
+          type={'error'}
+          showIcon
+          message={'The permission catalog could not be loaded. Try again before saving.'}
+          style={{ marginBottom: 16 }}
+        />
+      )}
       <Form form={form} layout={'vertical'} onFinish={onSubmit}>
         <Form.Item
           name={'display_name'}
@@ -57,26 +89,56 @@ export const RoleModal = ({ open, role, loading, onCancel, onSubmit }: RoleModal
         <Form.Item
           name={'permissions'}
           label={'Permissions'}
-          extra={'Choose a standard access level or enter application-specific permission names.'}
+          extra={
+            'Select every capability the role needs. Write permissions do not include read permissions.'
+          }
           rules={[
-            { required: true, type: 'array', min: 1, message: 'Add at least one permission' },
-            {
-              validator: (_, values: string[] | undefined) =>
-                values?.every((value) => /^[a-z][a-z0-9_]{1,62}[a-z0-9]$/.test(value))
-                  ? Promise.resolve()
-                  : Promise.reject(
-                      new Error(
-                        'Use lowercase letters, numbers, and underscores (3–64 characters)',
-                      ),
-                    ),
-            },
+            { required: true, type: 'array', min: 1, message: 'Select at least one permission' },
           ]}>
           <Select
-            mode={'tags'}
-            tokenSeparators={[',', ' ']}
-            options={permissionOptions}
-            placeholder={'Select or type permissions'}
-          />
+            mode={'multiple'}
+            loading={permissionsLoading}
+            disabled={permissionsError}
+            showSearch
+            optionFilterProp={'label'}
+            maxTagCount={'responsive'}
+            placeholder={'Select granular permissions'}>
+            {groupedPermissions.map(([category, categoryPermissions]) => (
+              <Select.OptGroup key={category} label={category}>
+                {categoryPermissions?.map((permission) => (
+                  <Select.Option
+                    key={permission.id}
+                    value={permission.id}
+                    label={`${permission.display_name} (${permission.id})`}>
+                    <Space direction={'vertical'} size={0}>
+                      <Typography.Text>{permission.display_name}</Typography.Text>
+                      <Typography.Text type={'secondary'}>{permission.description}</Typography.Text>
+                      <Typography.Text type={'secondary'}>
+                        {permission.id} · {permission.scopes.join(', ')}
+                      </Typography.Text>
+                    </Space>
+                  </Select.Option>
+                ))}
+              </Select.OptGroup>
+            ))}
+            {legacyPermissions.length > 0 && (
+              <Select.OptGroup label={'Legacy permissions'}>
+                {legacyPermissions.map((permission) => (
+                  <Select.Option
+                    key={permission}
+                    value={permission}
+                    label={`${permission} (legacy)`}>
+                    <Space direction={'vertical'} size={0}>
+                      <Typography.Text>{permission}</Typography.Text>
+                      <Typography.Text type={'secondary'}>
+                        Kept for compatibility. Replace it with granular permissions when possible.
+                      </Typography.Text>
+                    </Space>
+                  </Select.Option>
+                ))}
+              </Select.OptGroup>
+            )}
+          </Select>
         </Form.Item>
       </Form>
     </Modal>

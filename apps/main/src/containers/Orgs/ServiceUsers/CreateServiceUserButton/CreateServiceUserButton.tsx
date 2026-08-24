@@ -155,7 +155,7 @@ export const CreateServiceUserButton = () => {
 
   return (
     <>
-      <CheckRBAC permission={RBACPermission.MANAGE}>
+      <CheckRBAC permission={RBACPermission.SERVICE_USER_WRITE}>
         {(allowed) => (
           <ProtectedButton
             allowed={allowed}

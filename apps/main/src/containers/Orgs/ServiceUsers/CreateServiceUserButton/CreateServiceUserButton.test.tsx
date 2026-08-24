@@ -49,7 +49,7 @@ describe('CreateServiceUserButton', () => {
           {
             allowed: true,
             permission_check: {
-              permission: 'manage',
+              permission: 'service_user_write',
               resource: 'organization:my-org',
             },
           },
@@ -83,7 +83,7 @@ describe('CreateServiceUserButton', () => {
           {
             allowed: false,
             permission_check: {
-              permission: 'manage',
+              permission: 'service_user_write',
               resource: 'organization:my-org',
             },
           },

@@ -23,6 +23,7 @@ import { UpdateRoleModal } from './UpdateRoleModal';
 interface ScopedRolesTableProps {
   orgId: string;
   scopedRoles: ScopedRole[];
+  writePermission?: RBACPermission;
   onLoaded?: () => void;
   onCreate?: (newMembership: MembershipCreate[]) => Promise<void>;
   onDelete?: (scopedRole: EnrichedScopedRole) => Promise<void>;
@@ -32,6 +33,7 @@ interface ScopedRolesTableProps {
 export const ScopedRolesTable = ({
   orgId,
   scopedRoles,
+  writePermission = RBACPermission.MEMBERSHIP_WRITE,
   onLoaded,
   onUpdate,
   onCreate,
@@ -90,7 +92,7 @@ export const ScopedRolesTable = ({
             key: 'mark-update-or-delete',
             align: 'end' as const,
             render: (_: any, record: EnrichedScopedRole) => (
-              <CheckRBAC permission={RBACPermission.MANAGE}>
+              <CheckRBAC permission={writePermission}>
                 {(allowed) => (
                   <Flex gap={'small'} justify={'end'}>
                     {onUpdate && (
@@ -136,7 +138,7 @@ export const ScopedRolesTable = ({
         </Typography.Title>
 
         {onCreate && (
-          <CheckRBAC permission={RBACPermission.MANAGE}>
+          <CheckRBAC permission={writePermission}>
             {(allowed) => (
               <ProtectedButton
                 allowed={allowed}

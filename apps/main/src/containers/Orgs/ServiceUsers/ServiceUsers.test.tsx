@@ -26,7 +26,7 @@ const onlyReadPermissions: ResourcePermissionCheckResult = {
     {
       allowed: false,
       permission_check: {
-        permission: 'manage',
+        permission: 'service_user_write',
         resource: 'organization:my-org',
       },
     },
@@ -78,7 +78,7 @@ describe('ServiceUsers', () => {
           {
             allowed: true,
             permission_check: {
-              permission: 'manage',
+              permission: 'service_user_write',
               resource: 'organization:my-org',
             },
           },
