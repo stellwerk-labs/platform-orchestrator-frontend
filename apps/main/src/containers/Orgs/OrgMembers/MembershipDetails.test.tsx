@@ -413,7 +413,10 @@ describe('MembershipDetails', () => {
         getCheckPermissionsMockHandler({
           items: [
             {
-              permission_check: { resource: 'organization:test-org', permission: 'manage' },
+              permission_check: {
+                resource: 'organization:test-org',
+                permission: 'membership_write',
+              },
               allowed: true, // Admin user
             },
           ],
@@ -477,7 +480,10 @@ describe('MembershipDetails', () => {
         getCheckPermissionsMockHandler({
           items: [
             {
-              permission_check: { resource: 'organization:test-org', permission: 'manage' },
+              permission_check: {
+                resource: 'organization:test-org',
+                permission: 'membership_write',
+              },
               allowed: true,
             },
           ],
@@ -535,7 +541,10 @@ describe('MembershipDetails', () => {
         getCheckPermissionsMockHandler({
           items: [
             {
-              permission_check: { resource: 'organization:test-org', permission: 'manage' },
+              permission_check: {
+                resource: 'organization:test-org',
+                permission: 'membership_write',
+              },
               allowed: false, // Non-admin user
             },
           ],
@@ -598,7 +607,10 @@ describe('MembershipDetails', () => {
         getCheckPermissionsMockHandler({
           items: [
             {
-              permission_check: { resource: 'organization:test-org', permission: 'manage' },
+              permission_check: {
+                resource: 'organization:test-org',
+                permission: 'membership_write',
+              },
               allowed: true, // Admin user
             },
           ],
@@ -704,7 +716,10 @@ describe('MembershipDetails', () => {
         getCheckPermissionsMockHandler({
           items: [
             {
-              permission_check: { resource: 'organization:test-org', permission: 'manage' },
+              permission_check: {
+                resource: 'organization:test-org',
+                permission: 'membership_write',
+              },
               allowed: true, // Admin user
             },
           ],
@@ -832,7 +847,10 @@ describe('MembershipDetails', () => {
         getCheckPermissionsMockHandler({
           items: [
             {
-              permission_check: { resource: 'organization:test-org', permission: 'manage' },
+              permission_check: {
+                resource: 'organization:test-org',
+                permission: 'membership_write',
+              },
               allowed: true, // Admin user
             },
           ],

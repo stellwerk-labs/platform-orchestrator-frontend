@@ -120,7 +120,7 @@ export const ServiceUserTable = () => {
       align: 'end',
       render: (_, record) => {
         return (
-          <CheckRBAC permission={RBACPermission.MANAGE}>
+          <CheckRBAC permission={RBACPermission.SERVICE_USER_WRITE}>
             {(allowed) => (
               <Dropdown
                 menu={{

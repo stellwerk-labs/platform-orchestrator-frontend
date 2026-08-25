@@ -16,6 +16,7 @@ import {
 } from '@src/hooks/react-query/v2/iam/service-user/service-user';
 import { EnrichedScopedRole } from '@src/hooks/useEnrichScopedRoles';
 import { getAllPagesQueryKey, useAllPages } from '@src/hooks/useFetchAllPages';
+import { RBACPermission } from '@src/hooks/useRBAC';
 import { ServiceUserRole } from '@src/models/v2/iam';
 import { DATE_FORMATS_TYPES, formatDate } from '@src/utilities/datetime/datetime';
 import { generateServiceUsersUrl } from '@src/utilities/navigation';
@@ -244,6 +245,7 @@ export const ServiceUserDetails = () => {
 
         <ScopedRolesTable
           orgId={orgId}
+          writePermission={RBACPermission.SERVICE_USER_WRITE}
           scopedRoles={scopedRoles}
           onLoaded={() => setIsTableLoading(false)}
           onCreate={handleCreate}

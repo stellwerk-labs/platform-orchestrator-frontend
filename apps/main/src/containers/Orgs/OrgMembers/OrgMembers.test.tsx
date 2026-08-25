@@ -34,14 +34,14 @@ const onlyReadPermissions: ResourcePermissionCheckResult = {
     {
       allowed: false,
       permission_check: {
-        permission: 'manage',
+        permission: 'membership_write',
         resource: 'organization:my-org',
       },
     },
     {
       allowed: false,
       permission_check: {
-        permission: 'write',
+        permission: 'invitation_write',
         resource: 'organization:my-org',
       },
     },
@@ -59,6 +59,22 @@ let request: any;
 let deleteMemberRequestSent = false;
 let revokeInvitationRequestSent = false;
 let replaceUserMembershipsRequest: any;
+
+const openMemberMenu = async () => {
+  const memberRow = (await screen.findByRole('link')).closest('tr');
+  expect(memberRow).not.toBeNull();
+  await userEvent.click(await within(memberRow!).findByRole('button', { name: 'Open menu' }));
+};
+
+const openInvitationMenu = async () => {
+  await screen.findAllByRole('button', { name: 'Open menu' });
+  const invitationRow = (await screen.findAllByRole('row')).find(
+    (row) =>
+      within(row).queryByRole('button', { name: 'Open menu' }) && !within(row).queryByRole('link'),
+  );
+  expect(invitationRow).toBeDefined();
+  await userEvent.click(within(invitationRow!).getByRole('button', { name: 'Open menu' }));
+};
 
 describe('OrgMembers', () => {
   beforeEach(async () => {
@@ -96,14 +112,14 @@ describe('OrgMembers', () => {
           {
             allowed: true,
             permission_check: {
-              permission: 'manage',
+              permission: 'membership_write',
               resource: 'organization:my-org',
             },
           },
           {
             allowed: true,
             permission_check: {
-              permission: 'write',
+              permission: 'invitation_write',
               resource: 'organization:my-org',
             },
           },
@@ -235,7 +251,7 @@ describe('OrgMembers', () => {
       </MockProviders>,
     );
 
-    await userEvent.click((await screen.findAllByRole('button', { name: 'Open menu' }))[0]!);
+    await openMemberMenu();
 
     // Wait for dropdown menu to be rendered and find the menu item
     const removeMenuItem = await screen.findByRole('menuitem', { name: /Remove member/ });
@@ -255,7 +271,7 @@ describe('OrgMembers', () => {
       </MockProviders>,
     );
 
-    await userEvent.click((await screen.findAllByRole('button', { name: 'Open menu' }))[1]!);
+    await openInvitationMenu();
 
     // Wait for dropdown menu to be rendered and find the menu item
     const revokeMenuItem = await screen.findByRole('menuitem', { name: /Revoke invitation/ });
@@ -288,7 +304,7 @@ describe('OrgMembers', () => {
       </MockProviders>,
     );
 
-    await userEvent.click((await screen.findAllByRole('button', { name: 'Open menu' }))[0]!);
+    await openMemberMenu();
 
     // Wait for dropdown menu to be rendered and find the menu item
     const removeMenuItem = await screen.findByRole('menuitem', { name: /Remove member/ });
@@ -306,7 +322,7 @@ describe('OrgMembers', () => {
       </MockProviders>,
     );
 
-    await userEvent.click((await screen.findAllByRole('button', { name: 'Open menu' }))[1]!);
+    await openInvitationMenu();
 
     // Wait for dropdown menu to be rendered and find the menu item
     const revokeMenuItem = await screen.findByRole('menuitem', { name: /Revoke invitation/ });
@@ -367,8 +383,7 @@ describe('OrgMembers', () => {
     );
 
     // Wait for the table to load and click on "Manage membership" for the first member
-    const manageRolesButtons = await screen.findAllByRole('button', { name: 'Open menu' });
-    await userEvent.click(manageRolesButtons[0]!);
+    await openMemberMenu();
 
     // Click "Manage membership" menu item
     const manageRolesMenuItem = await screen.findByRole('menuitem', { name: /Manage membership/ });

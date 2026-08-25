@@ -4,7 +4,7 @@
  */
 
 /**
- * The configurable fields of an organization role.
+ * The complete configurable state of an organization role. PUT replaces both the display name and the full permission list. Use GET /orgs/{orgId}/permissions to discover valid permission identifiers.
  */
 export interface RoleWriteBody {
   /**
@@ -13,6 +13,10 @@ export interface RoleWriteBody {
    * @pattern ^[^\p{Cc}\p{Cs}\p{Z}\n]( |[^\p{Cc}\p{Cs}\p{Z}\n])*[^\p{Cc}\p{Cs}\p{Z}\n]$
    */
   display_name: string;
-  /** @minItems 1 */
+  /**
+   * Granular permission identifiers returned by the permission catalog. Include both read and write permissions when the role needs both capabilities.
+   *
+   * @minItems 1
+   */
   permissions: string[];
 }

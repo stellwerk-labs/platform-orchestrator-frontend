@@ -5,6 +5,7 @@ import { getListEnvironmentsInOrgMockHandler } from '@src/hooks/react-query/v2/c
 import { getListProjectsMockHandler } from '@src/hooks/react-query/v2/controlplane/project/project.msw';
 import { getListRolesMockHandler } from '@src/hooks/react-query/v2/iam/role/role.msw';
 import { getListServiceUsersMockHandler } from '@src/hooks/react-query/v2/iam/service-user/service-user.msw';
+import { getCheckPermissionsMockHandler } from '@src/hooks/react-query/v2/iam/user/user.msw';
 import { MockProviders } from '@src/testing-utils/MockProviders';
 import { server } from '@src/testing-utils/mswServer';
 
@@ -152,6 +153,17 @@ describe('ServiceUserDetails', () => {
       }),
       getListEnvironmentsInOrgMockHandler({
         items: [],
+      }),
+      getCheckPermissionsMockHandler({
+        items: [
+          {
+            allowed: true,
+            permission_check: {
+              permission: 'service_user_write',
+              resource: 'organization:test-org',
+            },
+          },
+        ],
       }),
     );
   });

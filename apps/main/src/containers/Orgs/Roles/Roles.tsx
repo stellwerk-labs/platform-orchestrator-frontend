@@ -1,8 +1,8 @@
 import { DeleteOutlined, EditOutlined, EllipsisOutlined, PlusOutlined } from '@ant-design/icons';
 import { useQueryClient } from '@tanstack/react-query';
-import { Button, Dropdown, message, Modal, Space, Table, Tag, Typography } from 'antd';
+import { Button, Dropdown, message, Modal, Space, Table, Tag, Tooltip, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 
 import { CheckRBAC } from '@src/components/shared/CheckRBAC';
@@ -13,6 +13,7 @@ import {
   listRoles,
   useCreateRole,
   useDeleteRole,
+  useListPermissions,
   useUpdateRole,
 } from '@src/hooks/react-query/v2/iam/role/role';
 import { getAllPagesQueryKey, useAllPages } from '@src/hooks/useFetchAllPages';
@@ -31,6 +32,15 @@ export const Roles = () => {
   const rolesQueryKey = getAllPagesQueryKey(getListRolesQueryKey(orgId));
   const { data: roles, isLoading } = useAllPages(rolesQueryKey, (params) =>
     listRoles(orgId, params),
+  );
+  const {
+    data: permissionCatalog,
+    isLoading: permissionsLoading,
+    isError: permissionsError,
+  } = useListPermissions(orgId);
+  const permissionsById = useMemo(
+    () => new Map(permissionCatalog?.items.map((permission) => [permission.id, permission]) ?? []),
+    [permissionCatalog],
   );
   const { mutate: createRole, isPending: isCreating } = useCreateRole();
   const { mutate: updateRole, isPending: isUpdating } = useUpdateRole();
@@ -72,7 +82,16 @@ export const Roles = () => {
       title: 'Permissions',
       dataIndex: 'permissions',
       render: (permissions: string[]) =>
-        permissions.map((permission) => <Tag key={permission}>{permission}</Tag>),
+        permissions.map((permission) => {
+          const definition = permissionsById.get(permission);
+          return (
+            <Tooltip
+              key={permission}
+              title={definition ? `${definition.description} (${definition.id})` : permission}>
+              <Tag>{definition?.display_name ?? permission}</Tag>
+            </Tooltip>
+          );
+        }),
     },
     {
       title: '',
@@ -81,7 +100,7 @@ export const Roles = () => {
       width: 64,
       render: (_, role) =>
         role.is_system ? null : (
-          <CheckRBAC permission={RBACPermission.MANAGE}>
+          <CheckRBAC permission={RBACPermission.ROLE_WRITE}>
             {(allowed) => (
               <Dropdown
                 trigger={['click']}
@@ -144,7 +163,7 @@ export const Roles = () => {
     <>
       <PageHeader
         rightContent={
-          <CheckRBAC permission={RBACPermission.MANAGE}>
+          <CheckRBAC permission={RBACPermission.ROLE_WRITE}>
             {(allowed) => (
               <Button
                 type={'primary'}
@@ -168,6 +187,9 @@ export const Roles = () => {
       <RoleModal
         open={roleModalOpen}
         role={editedRole}
+        permissions={permissionCatalog?.items ?? []}
+        permissionsLoading={permissionsLoading}
+        permissionsError={permissionsError}
         loading={isCreating || isUpdating}
         onCancel={closeModal}
         onSubmit={saveRole}

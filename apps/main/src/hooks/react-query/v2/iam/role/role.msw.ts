@@ -10,9 +10,38 @@ import type {
   N400BadRequestResponse,
   N404NotFoundResponse,
   N409ConflictResponse,
+  PermissionDefinitionPage,
   Role,
   RolePage,
 } from '../../../../../models/v2/iam';
+
+export const getListPermissionsResponseMock = (
+  overrideResponse: Partial<PermissionDefinitionPage> = {},
+): PermissionDefinitionPage => ({
+  items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    description: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    category: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    level: faker.helpers.arrayElement(['read', 'write', 'manage'] as const),
+    scopes: faker.helpers.arrayElements(['organization', 'project', 'environment'] as const),
+  })),
+  ...overrideResponse,
+});
+
+export const getListPermissionsResponseMock200 = (
+  overrideResponse: Partial<PermissionDefinitionPage> = {},
+): PermissionDefinitionPage => ({
+  items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    description: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    category: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    level: faker.helpers.arrayElement(['read', 'write', 'manage'] as const),
+    scopes: faker.helpers.arrayElements(['organization', 'project', 'environment'] as const),
+  })),
+  ...overrideResponse,
+});
 
 export const getListRolesResponseMock = (overrideResponse: Partial<RolePage> = {}): RolePage => ({
   items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
@@ -198,6 +227,58 @@ export const getDeleteRoleResponseMock409 = (
   details: faker.helpers.arrayElement([{}, undefined]),
   ...overrideResponse,
 });
+
+export const getListPermissionsMockHandler = (
+  overrideResponse?:
+    | PermissionDefinitionPage
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<PermissionDefinitionPage> | PermissionDefinitionPage),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/permissions',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListPermissionsResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListPermissionsMockHandler200 = (
+  overrideResponse?:
+    | PermissionDefinitionPage
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<PermissionDefinitionPage> | PermissionDefinitionPage),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/permissions',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListPermissionsResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
 
 export const getListRolesMockHandler = (
   overrideResponse?:
@@ -661,6 +742,7 @@ export const getDeleteRoleMockHandler409 = (
   );
 };
 export const getRoleMock = () => [
+  getListPermissionsMockHandler(),
   getListRolesMockHandler(),
   getCreateRoleMockHandler(),
   getGetRoleMockHandler(),

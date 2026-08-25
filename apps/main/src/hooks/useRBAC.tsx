@@ -14,24 +14,17 @@ export enum RBACPermission {
   MANAGE = 'manage',
   READ = 'read',
   WRITE = 'write',
+  INVITATION_WRITE = 'invitation_write',
+  MEMBERSHIP_WRITE = 'membership_write',
+  ROLE_WRITE = 'role_write',
+  SERVICE_USER_WRITE = 'service_user_write',
 }
 
 export const useRBAC = (permission: RBACPermission): RBACStatus => {
   const { orgId } = useParams<keyof MatchParams>() as MatchParams;
 
   const { data: permissions, isLoading } = useCheckPermissions([
-    {
-      resource: `organization:${orgId}`,
-      permission: RBACPermission.MANAGE,
-    },
-    {
-      resource: `organization:${orgId}`,
-      permission: RBACPermission.WRITE,
-    },
-    {
-      resource: `organization:${orgId}`,
-      permission: RBACPermission.READ,
-    },
+    { resource: `organization:${orgId}`, permission },
   ]);
 
   if (isLoading) {

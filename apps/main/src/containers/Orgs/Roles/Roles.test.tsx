@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
   getCreateRoleMockHandler,
   getDeleteRoleMockHandler,
+  getListPermissionsMockHandler,
   getListRolesMockHandler,
   getUpdateRoleMockHandler,
 } from '@src/hooks/react-query/v2/iam/role/role.msw';
@@ -31,7 +32,27 @@ describe('Roles', () => {
         items: [
           {
             allowed: true,
-            permission_check: { permission: 'manage', resource: 'organization:my-org' },
+            permission_check: { permission: 'role_write', resource: 'organization:my-org' },
+          },
+        ],
+      }),
+      getListPermissionsMockHandler({
+        items: [
+          {
+            id: 'deployment_read',
+            display_name: 'View deployments',
+            description: 'View deployments, logs, outputs, and calculated differences.',
+            category: 'Deployments',
+            level: 'read',
+            scopes: ['organization', 'project', 'environment'],
+          },
+          {
+            id: 'deployment_write',
+            display_name: 'Create deployments',
+            description: 'Create deployments and wait for their completion.',
+            category: 'Deployments',
+            level: 'write',
+            scopes: ['organization', 'project', 'environment'],
           },
         ],
       }),
@@ -97,16 +118,13 @@ describe('Roles', () => {
     const createDialog = await screen.findByRole('dialog');
     await user.type(within(createDialog).getByLabelText('Name'), 'Release operator');
     await user.click(within(createDialog).getByRole('combobox', { name: 'Permissions' }));
-    await user.type(
-      within(createDialog).getByRole('combobox', { name: 'Permissions' }),
-      'write_all{enter}',
-    );
+    await user.click(await screen.findByText('Create deployments'));
     await user.click(within(createDialog).getByRole('button', { name: 'Create' }));
 
     await waitFor(() =>
       expect(createRequest).toEqual({
         display_name: 'Release operator',
-        permissions: ['write_all'],
+        permissions: ['deployment_write'],
       }),
     );
 

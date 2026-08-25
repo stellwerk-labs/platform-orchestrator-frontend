@@ -321,7 +321,12 @@ export const OrgMembers = () => {
       key: 'actions',
       align: 'end',
       render: (_, record) => (
-        <CheckRBAC permission={RBACPermission.MANAGE}>
+        <CheckRBAC
+          permission={
+            record.type === 'invite'
+              ? RBACPermission.INVITATION_WRITE
+              : RBACPermission.MEMBERSHIP_WRITE
+          }>
           {(allowed) => (
             <Dropdown
               menu={{
@@ -379,7 +384,7 @@ export const OrgMembers = () => {
       <Space direction={'vertical'} style={{ width: '100%' }} size={'middle'}>
         {features.invites && (
           <Flex wrap={'wrap'} style={{ width: '100%' }}>
-            <CheckRBAC permission={RBACPermission.MANAGE}>
+            <CheckRBAC permission={RBACPermission.INVITATION_WRITE}>
               {(allowed) => (
                 <ProtectedButton
                   allowed={allowed}
