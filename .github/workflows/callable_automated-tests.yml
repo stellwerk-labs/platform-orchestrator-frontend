@@ -44,7 +44,7 @@ jobs:
 
       - name: Push main app test report to artifacts
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: vitest-report-main-app
           path: apps/main/vitest-report/
