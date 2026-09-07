@@ -32,6 +32,16 @@ test('real Module publication, promotion, comparison and lifecycle evidence', as
       id: moduleId,
       is_developer_accessible: true,
       output_schema: { type: 'object', properties: { name: { type: 'string' } } },
+      module_contract: {
+        type: 'object',
+        properties: {
+          module_inputs: {
+            type: 'object',
+            required: ['color'],
+            properties: { color: { type: 'string', minLength: 1 } },
+          },
+        },
+      },
     },
   });
   expect(resource.status()).toBe(201);
@@ -55,19 +65,27 @@ test('real Module publication, promotion, comparison and lifecycle evidence', as
       contentType: 'text/plain',
     });
   }
-  const publish = async (version: string, color: string) => {
+  const publish = async (version: string, color: string, external = false) => {
     await page.getByRole('button', { name: 'Publish Module Version', exact: true }).click();
     await page.getByLabel('Complete Module Version definition', { exact: true }).fill(
       JSON.stringify({
         semantic_version: version,
-        module_source: 'inline',
-        module_source_code:
-          'variable "color" { type = string }\noutput "name" { value = var.color }',
+        ...(external
+          ? {
+              module_source: 'git::https://example.invalid/release-demo.git?ref=reviewed-release',
+              source_revision: 'reviewed-release',
+            }
+          : {
+              module_source: 'inline',
+              module_source_code:
+                'variable "color" { type = string }\noutput "name" { value = var.color }',
+            }),
         module_inputs: { color },
         module_params: {},
         dependencies: {},
         coprovisioned: [],
         provider_mapping: {},
+        output_schema: { type: 'object', properties: { name: { type: 'string' } } },
         release_notes: `Release ${version}: ${color} service configuration`,
       }),
     );
@@ -132,6 +150,21 @@ test('real Module publication, promotion, comparison and lifecycle evidence', as
   await expect(dialog).toHaveCount(0);
   await expect(predecessor).toContainText('default');
 
+  // Publication checks declarations, not external artifact availability or verification.
+  await publish('1.2.0', 'amber', true);
+  const optionalDigest = await request.get(`${root}/modules/${moduleId}/versions/1.2.0`, {
+    headers,
+  });
+  expect(optionalDigest.status()).toBe(200);
+  const optionalDigestVersion = await optionalDigest.json();
+  // The existing read contract uses an empty string for an absent digest claim.
+  expect(optionalDigestVersion.version.artifact_digest).toBe('');
+  expect(optionalDigestVersion.version.verification_status).toBe('unverified');
+  expect(optionalDigestVersion.definition.output_schema).toEqual({
+    type: 'object',
+    properties: { name: { type: 'string' } },
+  });
+
   const readContext = await browser.newContext();
   try {
     const readPage = await readContext.newPage();
@@ -148,9 +181,14 @@ test('real Module publication, promotion, comparison and lifecycle evidence', as
     await expect(
       readPage.getByRole('button', { name: 'Archive Module', exact: true }),
     ).toBeDisabled();
-    await expect(
-      readPage.getByRole('button', { name: 'Mark Defective', exact: true }),
-    ).toBeDisabled();
+    for (const version of ['1.0.0', '1.2.0']) {
+      await expect(
+        readPage
+          .getByRole('row')
+          .filter({ hasText: version })
+          .getByRole('button', { name: 'Mark Defective', exact: true }),
+      ).toBeDisabled();
+    }
     await readPage.screenshot({
       path: testInfo.outputPath('module-read-only.png'),
       fullPage: true,
@@ -172,4 +210,11 @@ test('real Module publication, promotion, comparison and lifecycle evidence', as
   await expect(page.getByRole('link', { name: 'Progressive rollouts', exact: true })).toHaveCount(
     0,
   );
+  await page.goto(`/orgs/${org}/resource-types/${moduleId}/schema`);
+  await expect(page.getByRole('heading', { name: 'Module publication contract' })).toBeVisible();
+  await expect(page.getByText('module_inputs:', { exact: false })).toBeVisible();
+  await page.screenshot({
+    path: testInfo.outputPath('resource-type-contract.png'),
+    fullPage: true,
+  });
 });

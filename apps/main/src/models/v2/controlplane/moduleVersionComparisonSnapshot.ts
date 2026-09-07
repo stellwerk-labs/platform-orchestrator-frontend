@@ -3,12 +3,14 @@
  * Do not edit manually.
  */
 import type { ModuleCoProvisionManifest } from './moduleCoProvisionManifest';
+import type { ModuleOutputSchema } from './moduleOutputSchema';
 import type { ModuleVersionComparisonSnapshotDependencies } from './moduleVersionComparisonSnapshotDependencies';
 import type { ModuleVersionComparisonSnapshotModuleInputs } from './moduleVersionComparisonSnapshotModuleInputs';
 import type { ModuleVersionComparisonSnapshotModuleParams } from './moduleVersionComparisonSnapshotModuleParams';
 import type { ModuleVersionComparisonSnapshotProviderMapping } from './moduleVersionComparisonSnapshotProviderMapping';
 
 export interface ModuleVersionComparisonSnapshot {
+  output_schema?: ModuleOutputSchema;
   module_source: string;
   /** @nullable */
   module_source_code: string | null;

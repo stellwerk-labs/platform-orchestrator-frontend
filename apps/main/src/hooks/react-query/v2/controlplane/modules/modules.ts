@@ -190,7 +190,7 @@ export function useListModules<
 }
 
 /**
- * Compatibility authoring endpoint. Requires semantic_version and a complete definition; external sources also require artifact_digest. This does not promote the version. New clients should create a catalogue entry, publish a version, and promote explicitly.
+ * Compatibility authoring endpoint. Requires semantic_version and a complete definition; external sources may declare an optional artifact_digest. This does not promote the version. New clients should create a catalogue entry, publish a version, and promote explicitly.
  *
  * @summary Create a Module with an initial immutable Proposed version
  */

@@ -3,6 +3,7 @@
  * Do not edit manually.
  */
 import type { ModuleCoProvisionManifest } from './moduleCoProvisionManifest';
+import type { ModuleOutputSchema } from './moduleOutputSchema';
 import type { ModuleUpdateBodyDependencies } from './moduleUpdateBodyDependencies';
 import type { ModuleUpdateBodyModuleInputs } from './moduleUpdateBodyModuleInputs';
 import type { ModuleUpdateBodyModuleParams } from './moduleUpdateBodyModuleParams';
@@ -12,6 +13,7 @@ import type { ModuleUpdateBodyProviderMapping } from './moduleUpdateBodyProvider
  * A request to update an existing module
  */
 export interface ModuleUpdateBody {
+  output_schema?: ModuleOutputSchema;
   /** Canonical SemVer identity for the immutable Proposed version. */
   semantic_version?: string;
   /** @pattern ^sha256:[a-f0-9]{64}$ */

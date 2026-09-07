@@ -27,4 +27,5 @@ export interface ModuleVersionComparison {
   removed_dependencies: string[];
   changed_dependencies: string[];
   coprovisioning_changed: boolean;
+  output_schema_changed: boolean;
 }

@@ -64,7 +64,9 @@ type ComparisonDetail = {
   afterPresent: boolean;
 };
 
-const publicationBodyFromDetail = (source: CoreModuleVersionDetail): ModuleVersionPublishBody => ({
+export const publicationBodyFromDetail = (
+  source: CoreModuleVersionDetail,
+): ModuleVersionPublishBody => ({
   semantic_version: source.version.semantic_version ?? '',
   ...(source.version.artifact_digest ? { artifact_digest: source.version.artifact_digest } : {}),
   ...(source.version.source_revision ? { source_revision: source.version.source_revision } : {}),
@@ -79,6 +81,9 @@ const publicationBodyFromDetail = (source: CoreModuleVersionDetail): ModuleVersi
   provider_mapping: source.definition.provider_mapping,
   dependencies: source.definition.dependencies,
   coprovisioned: source.definition.coprovisioned,
+  ...(source.definition.output_schema === undefined
+    ? {}
+    : { output_schema: source.definition.output_schema }),
 });
 
 const emptyPublicationBody = (): ModuleVersionPublishBody => ({
@@ -149,7 +154,7 @@ const ModuleVersionEvidence = ({
               {version.source_revision || 'Not declared'}
             </Descriptions.Item>
             <Descriptions.Item label={'Artifact'}>
-              {version.artifact_digest || 'Inline source, no external artifact digest'}
+              {version.artifact_digest || 'Not declared'}
             </Descriptions.Item>
           </Descriptions>
           <Typography.Title level={4}>Observed adoption</Typography.Title>
@@ -226,6 +231,7 @@ const comparisonRows = (comparison?: ModuleVersionComparison) => {
     ['Source revision', comparison.source_revision_changed],
     ['Resource type', comparison.resource_type_changed],
     ['Co-provisioned resources', comparison.coprovisioning_changed],
+    ['Declared output interface', comparison.output_schema_changed],
   ] as const;
 };
 
@@ -351,6 +357,15 @@ export const moduleVersionComparisonDetails = (
     before.coprovisioned,
     after.coprovisioned,
   );
+  if (comparison.output_schema_changed) {
+    details.push({
+      path: 'Declared output interface',
+      before: before.output_schema,
+      after: after.output_schema,
+      beforePresent: before.output_schema !== undefined,
+      afterPresent: after.output_schema !== undefined,
+    });
+  }
   return details;
 };
 
@@ -622,7 +637,7 @@ export const ModuleVersions = () => {
       title: 'Artifact digest',
       dataIndex: 'artifact_digest',
       ellipsis: true,
-      render: (digest) => digest || 'Inline source',
+      render: (digest) => digest || 'Not declared',
     },
     {
       title: 'Published',
@@ -799,7 +814,7 @@ export const ModuleVersions = () => {
           showIcon
           message={'Publishing creates a permanent immutable version'}
           description={
-            'This editor starts from the current Default when one exists, otherwise from a complete inline skeleton. It creates no inheritance; review the full definition and choose a new canonical SemVer.'
+            'Review the complete definition and choose a new canonical SemVer. External artifact digests are optional claims, not verification. When the Resource Type declares outputs, include the matching output_schema explicitly; the server validates its immutable interface contract before publishing.'
           }
           style={{ marginBottom: 16 }}
         />

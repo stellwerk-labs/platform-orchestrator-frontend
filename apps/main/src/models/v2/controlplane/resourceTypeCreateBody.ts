@@ -3,6 +3,7 @@
  * Do not edit manually.
  */
 import type { ResourceTypeCreateBodyOutputSchema } from './resourceTypeCreateBodyOutputSchema';
+import type { ResourceTypeModuleContract } from './resourceTypeModuleContract';
 
 /**
  * A request to create a new resource type.
@@ -22,6 +23,7 @@ export interface ResourceTypeCreateBody {
   description?: string;
   /** Schema for output parameters */
   output_schema: ResourceTypeCreateBodyOutputSchema;
+  module_contract?: ResourceTypeModuleContract;
   /** Indicates if this resource type is for developers to use in the manifest. Resource types with this flag set to false, will not be available as types of resources in a manifest. If omitted, this property defaults to true. */
   is_developer_accessible?: boolean;
 }

@@ -3,6 +3,7 @@
  * Do not edit manually.
  */
 import type { ResourceTypeCatalogueStatus } from './resourceTypeCatalogueStatus';
+import type { ResourceTypeModuleContract } from './resourceTypeModuleContract';
 import type { ResourceTypeOutputSchema } from './resourceTypeOutputSchema';
 
 /**
@@ -19,6 +20,7 @@ export interface ResourceType {
   description?: string;
   /** Schema for output parameters */
   output_schema: ResourceTypeOutputSchema;
+  module_contract?: ResourceTypeModuleContract;
   /** The date and time when the resource type was created */
   created_at: string;
   /** Indicates if this is a built-in resource type */

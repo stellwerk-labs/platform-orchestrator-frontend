@@ -3,15 +3,21 @@
  * Do not edit manually.
  */
 import type { ModuleCoProvisionManifest } from './moduleCoProvisionManifest';
+import type { ModuleOutputSchema } from './moduleOutputSchema';
 import type { ModuleVersionPublishBodyDependencies } from './moduleVersionPublishBodyDependencies';
 import type { ModuleVersionPublishBodyModuleInputs } from './moduleVersionPublishBodyModuleInputs';
 import type { ModuleVersionPublishBodyModuleParams } from './moduleVersionPublishBodyModuleParams';
 import type { ModuleVersionPublishBodyProviderMapping } from './moduleVersionPublishBodyProviderMapping';
 
 export interface ModuleVersionPublishBody {
+  output_schema?: ModuleOutputSchema;
   /** @pattern ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$ */
   semantic_version: string;
-  /** @pattern ^sha256:[a-f0-9]{64}$ */
+  /**
+   * Optional immutable external artifact digest claim. Omit for inline source. Absence never implies verification.
+   *
+   * @pattern ^sha256:[a-f0-9]{64}$
+   */
   artifact_digest?: string;
   /** @maxLength 500 */
   source_revision?: string;

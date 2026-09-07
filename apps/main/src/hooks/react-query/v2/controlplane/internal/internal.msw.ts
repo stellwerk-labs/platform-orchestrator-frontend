@@ -719,6 +719,7 @@ export const getGenerateInternalModuleCatalogueResponseMock = (
           },
         },
         ...{
+          output_schema: faker.helpers.arrayElement([{}, undefined]),
           module_params: {
             [faker.string.alphanumeric(5)]: {
               type: faker.helpers.arrayElement([
@@ -868,6 +869,7 @@ export const getGenerateInternalModuleCatalogueResponseMock200 = (
           },
         },
         ...{
+          output_schema: faker.helpers.arrayElement([{}, undefined]),
           module_params: {
             [faker.string.alphanumeric(5)]: {
               type: faker.helpers.arrayElement([

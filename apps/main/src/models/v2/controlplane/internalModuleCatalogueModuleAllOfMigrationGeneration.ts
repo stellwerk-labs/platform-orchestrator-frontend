@@ -4,7 +4,7 @@
  */
 
 /**
- * Authoritative persisted migration provenance. Only migrated v0 versions may reference external artifacts without a declared digest.
+ * Authoritative persisted migration provenance. External digest claims are optional for both managed and migrated versions; v0 must not acquire invented metadata.
  */
 export type InternalModuleCatalogueModuleAllOfMigrationGeneration =
   (typeof InternalModuleCatalogueModuleAllOfMigrationGeneration)[keyof typeof InternalModuleCatalogueModuleAllOfMigrationGeneration];

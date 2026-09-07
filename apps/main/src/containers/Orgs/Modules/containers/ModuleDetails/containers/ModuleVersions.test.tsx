@@ -1,7 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import type { CoreModuleVersion, ModuleVersionComparison } from '@src/models/v2/controlplane';
+import type {
+  CoreModuleVersion,
+  CoreModuleVersionDetail,
+  ModuleVersionComparison,
+} from '@src/models/v2/controlplane';
 
 import {
   ComparisonList,
@@ -9,6 +13,7 @@ import {
   formatComparisonValue,
   moduleVersionComparisonDetails,
   moduleVersionLifecycleActions,
+  publicationBodyFromDetail,
   stableSuccessorSemanticVersion,
 } from './ModuleVersions';
 
@@ -49,6 +54,48 @@ describe('Module Version lifecycle actions', () => {
 });
 
 describe('Module Version comparison', () => {
+  it('preserves an explicit empty output declaration and does not invent a digest', () => {
+    const detail = {
+      version: { semantic_version: '1.0.0', artifact_digest: '', source_revision: 'release-one' },
+      definition: { module_source: 'git::https://example.invalid/module.git', output_schema: {} },
+    } as CoreModuleVersionDetail;
+    const body = publicationBodyFromDetail(detail);
+    expect(body).not.toHaveProperty('artifact_digest');
+    expect(body).toHaveProperty('output_schema', {});
+    expect(body.source_revision).toBe('release-one');
+    const historical = publicationBodyFromDetail({
+      ...detail,
+      definition: { ...detail.definition, output_schema: undefined },
+    });
+    expect(historical).not.toHaveProperty('output_schema');
+  });
+
+  it('shows absent and explicitly declared output interfaces as distinct before/after values', () => {
+    const comparison = {
+      before: { module_inputs: {}, module_params: {}, provider_mapping: {}, dependencies: {} },
+      after: {
+        module_inputs: {},
+        module_params: {},
+        provider_mapping: {},
+        dependencies: {},
+        output_schema: {},
+      },
+      output_schema_changed: true,
+    } as ModuleVersionComparison;
+    expect(moduleVersionComparisonDetails(comparison)).toEqual([
+      {
+        path: 'Declared output interface',
+        before: undefined,
+        after: {},
+        beforePresent: false,
+        afterPresent: true,
+      },
+    ]);
+    render(<ComparisonList comparison={comparison} />);
+    expect(screen.getByText('Not present')).toBeVisible();
+    expect(screen.getByText('{}')).toBeVisible();
+  });
+
   it('renders empty and legacy null difference arrays as no changes', () => {
     expect(formatComparisonItems([])).toBe('None');
     expect(formatComparisonItems(null)).toBe('None');
@@ -104,6 +151,7 @@ describe('Module Version comparison', () => {
       removed_dependencies: [],
       changed_dependencies: [],
       coprovisioning_changed: false,
+      output_schema_changed: false,
     } as ModuleVersionComparison;
 
     expect(moduleVersionComparisonDetails(comparison)).toEqual([

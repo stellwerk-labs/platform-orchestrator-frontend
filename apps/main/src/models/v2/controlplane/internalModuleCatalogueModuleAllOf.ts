@@ -15,7 +15,7 @@ export type InternalModuleCatalogueModuleAllOf = {
   version_uuid: string;
   /** Canonical SemVer for managed versions; empty only for migrated v0 versions. */
   semantic_version: string;
-  /** Authoritative persisted migration provenance. Only migrated v0 versions may reference external artifacts without a declared digest. */
+  /** Authoritative persisted migration provenance. External digest claims are optional for both managed and migrated versions; v0 must not acquire invented metadata. */
   migration_generation: InternalModuleCatalogueModuleAllOfMigrationGeneration;
   verification_status: ModuleVerificationStatus;
 };

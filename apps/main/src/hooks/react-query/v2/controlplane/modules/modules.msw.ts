@@ -120,6 +120,7 @@ export const getCreateModuleResponseMock = (): Module => ({
     },
   },
   ...{
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_params: {
       [faker.string.alphanumeric(5)]: {
         type: faker.helpers.arrayElement([
@@ -201,6 +202,7 @@ export const getCreateModuleResponseMock201 = (): Module => ({
     },
   },
   ...{
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_params: {
       [faker.string.alphanumeric(5)]: {
         type: faker.helpers.arrayElement([
@@ -300,6 +302,7 @@ export const getGetModuleResponseMock = (): Module => ({
     },
   },
   ...{
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_params: {
       [faker.string.alphanumeric(5)]: {
         type: faker.helpers.arrayElement([
@@ -381,6 +384,7 @@ export const getGetModuleResponseMock200 = (): Module => ({
     },
   },
   ...{
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_params: {
       [faker.string.alphanumeric(5)]: {
         type: faker.helpers.arrayElement([
@@ -471,6 +475,7 @@ export const getUpdateModuleResponseMock = (): Module => ({
     },
   },
   ...{
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_params: {
       [faker.string.alphanumeric(5)]: {
         type: faker.helpers.arrayElement([
@@ -552,6 +557,7 @@ export const getUpdateModuleResponseMock200 = (): Module => ({
     },
   },
   ...{
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_params: {
       [faker.string.alphanumeric(5)]: {
         type: faker.helpers.arrayElement([
@@ -677,6 +683,7 @@ export const getListModuleVersionsResponseMock = (
         ...{ created_at: `${faker.date.past().toISOString().split('.')[0]}Z` },
       },
       ...{
+        output_schema: faker.helpers.arrayElement([{}, undefined]),
         module_params: {
           [faker.string.alphanumeric(5)]: {
             type: faker.helpers.arrayElement([
@@ -781,6 +788,7 @@ export const getListModuleVersionsResponseMock = (
           ...{ created_at: `${faker.date.past().toISOString().split('.')[0]}Z` },
         },
         ...{
+          output_schema: faker.helpers.arrayElement([{}, undefined]),
           module_params: {
             [faker.string.alphanumeric(5)]: {
               type: faker.helpers.arrayElement([
@@ -873,6 +881,7 @@ export const getListModuleVersionsResponseMock200 = (
         ...{ created_at: `${faker.date.past().toISOString().split('.')[0]}Z` },
       },
       ...{
+        output_schema: faker.helpers.arrayElement([{}, undefined]),
         module_params: {
           [faker.string.alphanumeric(5)]: {
             type: faker.helpers.arrayElement([
@@ -977,6 +986,7 @@ export const getListModuleVersionsResponseMock200 = (
           ...{ created_at: `${faker.date.past().toISOString().split('.')[0]}Z` },
         },
         ...{
+          output_schema: faker.helpers.arrayElement([{}, undefined]),
           module_params: {
             [faker.string.alphanumeric(5)]: {
               type: faker.helpers.arrayElement([
@@ -1165,6 +1175,7 @@ export const getGetModuleVersionResponseMock = (): CoreModuleVersionDetail => ({
       ...{ created_at: `${faker.date.past().toISOString().split('.')[0]}Z` },
     },
     ...{
+      output_schema: faker.helpers.arrayElement([{}, undefined]),
       module_params: {
         [faker.string.alphanumeric(5)]: {
           type: faker.helpers.arrayElement([
@@ -1264,6 +1275,7 @@ export const getGetModuleVersionResponseMock = (): CoreModuleVersionDetail => ({
         ...{ created_at: `${faker.date.past().toISOString().split('.')[0]}Z` },
       },
       ...{
+        output_schema: faker.helpers.arrayElement([{}, undefined]),
         module_params: {
           [faker.string.alphanumeric(5)]: {
             type: faker.helpers.arrayElement([
@@ -1348,6 +1360,7 @@ export const getGetModuleVersionResponseMock200 = (): CoreModuleVersionDetail =>
       ...{ created_at: `${faker.date.past().toISOString().split('.')[0]}Z` },
     },
     ...{
+      output_schema: faker.helpers.arrayElement([{}, undefined]),
       module_params: {
         [faker.string.alphanumeric(5)]: {
           type: faker.helpers.arrayElement([
@@ -1447,6 +1460,7 @@ export const getGetModuleVersionResponseMock200 = (): CoreModuleVersionDetail =>
         ...{ created_at: `${faker.date.past().toISOString().split('.')[0]}Z` },
       },
       ...{
+        output_schema: faker.helpers.arrayElement([{}, undefined]),
         module_params: {
           [faker.string.alphanumeric(5)]: {
             type: faker.helpers.arrayElement([
@@ -2005,6 +2019,7 @@ export const getCompareModuleVersionsResponseMock = (
   from_version_uuid: faker.string.uuid(),
   to_version_uuid: faker.string.uuid(),
   before: {
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_source: faker.string.alpha({ length: { min: 10, max: 20 } }),
     module_source_code: faker.helpers.arrayElement([
       faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -2070,6 +2085,7 @@ export const getCompareModuleVersionsResponseMock = (
     })),
   },
   after: {
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_source: faker.string.alpha({ length: { min: 10, max: 20 } }),
     module_source_code: faker.helpers.arrayElement([
       faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -2188,6 +2204,7 @@ export const getCompareModuleVersionsResponseMock = (
     (_, i) => i + 1,
   ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
   coprovisioning_changed: faker.datatype.boolean(),
+  output_schema_changed: faker.datatype.boolean(),
   ...overrideResponse,
 });
 
@@ -2197,6 +2214,7 @@ export const getCompareModuleVersionsResponseMock200 = (
   from_version_uuid: faker.string.uuid(),
   to_version_uuid: faker.string.uuid(),
   before: {
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_source: faker.string.alpha({ length: { min: 10, max: 20 } }),
     module_source_code: faker.helpers.arrayElement([
       faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -2262,6 +2280,7 @@ export const getCompareModuleVersionsResponseMock200 = (
     })),
   },
   after: {
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_source: faker.string.alpha({ length: { min: 10, max: 20 } }),
     module_source_code: faker.helpers.arrayElement([
       faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -2380,6 +2399,7 @@ export const getCompareModuleVersionsResponseMock200 = (
     (_, i) => i + 1,
   ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
   coprovisioning_changed: faker.datatype.boolean(),
+  output_schema_changed: faker.datatype.boolean(),
   ...overrideResponse,
 });
 
