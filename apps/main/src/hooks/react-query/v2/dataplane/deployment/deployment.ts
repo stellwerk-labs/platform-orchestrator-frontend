@@ -712,7 +712,7 @@ export function useWaitForDeploymentComplete<
 /**
  * Returns the diff from another deployment to this one. The deployments must both be in the same environment.
 The diff details the nodes that have been added, removed, or changed.
- 
+ *
  * @summary Calculate the diff from another deployment to this one.
  */
 export const calculateDeploymentDiff = (
@@ -807,7 +807,7 @@ export const useCalculateDeploymentDiff = <
 /**
  * These logs are only stored and available for 30 days and they are returned encrypted or decrypted according to the existence or not of the
 decryption key query parameter.
- 
+ *
  * @summary Get the logs produced by the runner execution during the deployment.
  */
 export const getDeploymentLogs = (
@@ -944,7 +944,7 @@ export function useGetDeploymentLogs<
 /**
  * These outputs are only stored and available for a short time after the deployment completes and are returned encrypted by the private key
 that was given when the deployment was created. If no private key was provided, no outputs are available.
- 
+ *
  * @summary Get the encrypted outputs produced by the deployment.
  */
 export const getDeploymentEncryptedOutputs = (
@@ -1243,7 +1243,7 @@ export function useGetDeploymentBundle<
 
 /**
  * This receives the runner outcome for a specific deployment, eventually along with encrypted outputs and logs.
- 
+ *
  * @summary Return the runner outcome for a specific deployment.
  */
 export const updateDeploymentResults = (
@@ -1339,7 +1339,7 @@ export const useUpdateDeploymentResults = <
 /**
  * This returns the compiled TF file associated with a deployment. This is intended for debugging purposes.
 This does not return the contents of any inline modules.
- 
+ *
  * @summary Returns the compiled TF file associated with a deployment.
  */
 export const getDeploymentTf = (
@@ -1475,7 +1475,7 @@ export function useGetDeploymentTf<
  * Returns the resource graph calculated for this deployment. Works for all
 deployment types including plan-only and historical deployments. Unlike
 active-resources, this endpoint returns graph nodes without runtime metadata.
- 
+ *
  * @summary List resource nodes for a deployment
  */
 export const listDeploymentResourceNodes = (

@@ -9,7 +9,7 @@ module_params, provider_mapping, dependencies, coprovisioned and output_schema.
 Root type must be object. References and unsupported keywords are rejected.
 Maximum 64 KiB, 16 schema levels and 64 schema nodes. This validates author
 declarations, not external artifacts or resolved runtime values.
- 
+ *
  */
 export interface ResourceTypeModuleContract {
   [key: string]: unknown;

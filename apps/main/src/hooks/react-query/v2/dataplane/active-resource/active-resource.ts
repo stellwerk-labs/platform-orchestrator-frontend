@@ -28,7 +28,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 /**
  * List active resource nodes matching the query. At the moment, project_id and env_id are required.
- 
+ *
  * @summary List active resource nodes
  */
 export const listActiveResourceNodes = (

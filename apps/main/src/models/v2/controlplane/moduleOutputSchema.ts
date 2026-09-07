@@ -8,7 +8,7 @@
 publication when the Resource Type output_schema is nonempty, and must
 equal that contract as a JSON value. Never inferred from external source.
 Historical absence is preserved and does not imply artifact verification.
- 
+ *
  */
 export interface ModuleOutputSchema {
   [key: string]: unknown;

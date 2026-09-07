@@ -32,7 +32,7 @@ set to 'plan_only'.
    * A recipient public key must be provided in order to access encrypted outputs of the deployment. This must be an 'age' public key (see https://age-encryption.org).
 The caller must hold the matching private key in order to decrypt the outputs when the deployment completes. If the recipient key is not set, no outputs will be captured
 from the deployment.
-   
+   *
    * @minLength 1
    * @maxLength 200
    * @pattern ^age[a-z0-9]+$
@@ -42,7 +42,7 @@ from the deployment.
    * A recipient public key must be provided in order to encrypt the logs produced by the runner. This must be an 'age' public key (see https://age-encryption.org).
 The caller must hold the matching private key in order to decrypt the logs when the logs url is provided. If the recipient key is not set, no logs will be captured
 by the runner.
-   
+   *
    * @minLength 1
    * @maxLength 200
    * @pattern ^age[a-z0-9]+$

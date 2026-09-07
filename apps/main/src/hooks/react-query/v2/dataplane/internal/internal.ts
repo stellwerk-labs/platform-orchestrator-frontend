@@ -27,7 +27,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 /**
  * This should only be used once you have confirmed that the underlying runner job has stopped, failed, or will
 never execute.
- 
+ *
  * @summary Emergency API for force failing a deployment.
  */
 export const internalForceFailDeployment = (
@@ -120,7 +120,7 @@ export const useInternalForceFailDeployment = <
 /**
  * This is a simple and efficient API. It returns only the project environments which are using this module.
 A more complex public api should be created to list each individual resource node usage.
- 
+ *
  * @summary Check whether a given module is in use in a resource graph.
  */
 export const internalCheckModuleUsage = (

@@ -46,7 +46,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 /**
  * This is an escape hatch that may be used by privileged users to destroy an environment that cannot be fully destroyed or is facing errors that cannot be worked around.
 This may leave infrastructure or state behind that must be cleaned up manually outside of the Orchestrator.
- 
+ *
  * @summary Force delete the environment without a successful destroy deployment.
  */
 export const internalForceDeleteEnvironment = (

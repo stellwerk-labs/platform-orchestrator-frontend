@@ -6,7 +6,7 @@
 /**
  * The type of input supported for this parameter. This will be enforced by the orchestrator at graph creation
 time when values are known ahead of time. Use 'any' to indicate no type constraint.
- 
+ *
  */
 export type ModuleParamItemType = (typeof ModuleParamItemType)[keyof typeof ModuleParamItemType];
 
