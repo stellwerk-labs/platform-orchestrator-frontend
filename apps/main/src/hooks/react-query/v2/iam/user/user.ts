@@ -312,7 +312,7 @@ export function useListUserSessionTokens<
 }
 
 /**
- * @summary Revoke the session token for this user. Due to internal caching, this may take up to a minute for authorized sessions to be revoked.
+ * @summary Revoke the session token for this user.
  */
 export const revokeUserSessionToken = (
   userId: string,
@@ -370,7 +370,7 @@ export type RevokeUserSessionTokenMutationError = ErrorType<
 >;
 
 /**
- * @summary Revoke the session token for this user. Due to internal caching, this may take up to a minute for authorized sessions to be revoked.
+ * @summary Revoke the session token for this user.
  */
 export const useRevokeUserSessionToken = <
   TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse>,

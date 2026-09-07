@@ -25,7 +25,9 @@ import type {
   InternalListResourceTypesParams,
   ListAvailableResourceTypesParams,
   ListResourceTypesParams,
+  ModuleReasonedCommand,
   N400BadRequestResponse,
+  N403ForbiddenResponse,
   N404NotFoundResponse,
   N409ConflictResponse,
   ResourceType,
@@ -348,7 +350,7 @@ export const useInternalDeleteResourceType = <
   return useMutation(mutationOptions, queryClient);
 };
 /**
- * @summary Update a built-in resource type
+ * @summary Reject mutation of an immutable built-in resource type contract
  */
 export const internalUpdateResourceType = (
   typeId: string,
@@ -367,7 +369,7 @@ export const internalUpdateResourceType = (
 };
 
 export const getInternalUpdateResourceTypeMutationOptions = <
-  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse>,
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -407,14 +409,14 @@ export type InternalUpdateResourceTypeMutationResult = NonNullable<
 >;
 export type InternalUpdateResourceTypeMutationBody = ResourceTypeUpdateBody;
 export type InternalUpdateResourceTypeMutationError = ErrorType<
-  N400BadRequestResponse | N404NotFoundResponse
+  N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse
 >;
 
 /**
- * @summary Update a built-in resource type
+ * @summary Reject mutation of an immutable built-in resource type contract
  */
 export const useInternalUpdateResourceType = <
-  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse>,
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse>,
   TContext = unknown,
 >(
   options?: {
@@ -1053,7 +1055,7 @@ export function useGetResourceType<
 }
 
 /**
- * @summary Update a resource type
+ * @summary Reject mutation of an immutable resource type contract
  */
 export const updateResourceType = (
   orgId: string,
@@ -1073,7 +1075,7 @@ export const updateResourceType = (
 };
 
 export const getUpdateResourceTypeMutationOptions = <
-  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse>,
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -1113,14 +1115,14 @@ export type UpdateResourceTypeMutationResult = NonNullable<
 >;
 export type UpdateResourceTypeMutationBody = ResourceTypeUpdateBody;
 export type UpdateResourceTypeMutationError = ErrorType<
-  N400BadRequestResponse | N404NotFoundResponse
+  N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse
 >;
 
 /**
- * @summary Update a resource type
+ * @summary Reject mutation of an immutable resource type contract
  */
 export const useUpdateResourceType = <
-  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse>,
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse>,
   TContext = unknown,
 >(
   options?: {
@@ -1140,6 +1142,129 @@ export const useUpdateResourceType = <
   TContext
 > => {
   const mutationOptions = getUpdateResourceTypeMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+/**
+ * @summary Archive or unarchive an immutable resource type identity
+ */
+export const changeResourceTypeCatalogueStatus = (
+  orgId: string,
+  typeId: string,
+  catalogueAction: 'archive' | 'unarchive',
+  moduleReasonedCommand: ModuleReasonedCommand,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ResourceType>(
+    {
+      url: `/orgs/${orgId}/resource-types/${typeId}/actions/${catalogueAction}`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: moduleReasonedCommand,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getChangeResourceTypeCatalogueStatusMutationOptions = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof changeResourceTypeCatalogueStatus>>,
+    TError,
+    {
+      orgId: string;
+      typeId: string;
+      catalogueAction: 'archive' | 'unarchive';
+      data: ModuleReasonedCommand;
+    },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof changeResourceTypeCatalogueStatus>>,
+  TError,
+  {
+    orgId: string;
+    typeId: string;
+    catalogueAction: 'archive' | 'unarchive';
+    data: ModuleReasonedCommand;
+  },
+  TContext
+> => {
+  const mutationKey = ['changeResourceTypeCatalogueStatus'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof changeResourceTypeCatalogueStatus>>,
+    {
+      orgId: string;
+      typeId: string;
+      catalogueAction: 'archive' | 'unarchive';
+      data: ModuleReasonedCommand;
+    }
+  > = (props) => {
+    const { orgId, typeId, catalogueAction, data } = props ?? {};
+
+    return changeResourceTypeCatalogueStatus(orgId, typeId, catalogueAction, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ChangeResourceTypeCatalogueStatusMutationResult = NonNullable<
+  Awaited<ReturnType<typeof changeResourceTypeCatalogueStatus>>
+>;
+export type ChangeResourceTypeCatalogueStatusMutationBody = ModuleReasonedCommand;
+export type ChangeResourceTypeCatalogueStatusMutationError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+/**
+ * @summary Archive or unarchive an immutable resource type identity
+ */
+export const useChangeResourceTypeCatalogueStatus = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof changeResourceTypeCatalogueStatus>>,
+      TError,
+      {
+        orgId: string;
+        typeId: string;
+        catalogueAction: 'archive' | 'unarchive';
+        data: ModuleReasonedCommand;
+      },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof changeResourceTypeCatalogueStatus>>,
+  TError,
+  {
+    orgId: string;
+    typeId: string;
+    catalogueAction: 'archive' | 'unarchive';
+    data: ModuleReasonedCommand;
+  },
+  TContext
+> => {
+  const mutationOptions = getChangeResourceTypeCatalogueStatusMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };

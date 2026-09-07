@@ -15,4 +15,6 @@ export interface EnvironmentTypeSummary {
   created_at: string;
   /** Human readable name for the environment type */
   display_name: string;
+  /** Authoritative Production classification. Clients must not infer this from IDs, names or labels. */
+  is_production: boolean;
 }

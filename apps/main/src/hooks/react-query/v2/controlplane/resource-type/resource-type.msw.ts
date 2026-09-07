@@ -9,6 +9,7 @@ import { http, HttpResponse } from 'msw';
 import type {
   AvailableResourceTypePage,
   N400BadRequestResponse,
+  N403ForbiddenResponse,
   N404NotFoundResponse,
   N409ConflictResponse,
   ResourceType,
@@ -28,6 +29,17 @@ export const getInternalListResourceTypesResponseMock = (
     created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
     built_in: faker.datatype.boolean(),
     is_developer_accessible: faker.datatype.boolean(),
+    catalogue_status: faker.helpers.arrayElement(['active', 'archived'] as const),
+    resource_version: faker.number.int({ min: 1, max: undefined }),
+    archived_at: faker.helpers.arrayElement([
+      `${faker.date.past().toISOString().split('.')[0]}Z`,
+      undefined,
+    ]),
+    archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    archive_reason: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
   })),
   next_page_token: undefined,
   ...overrideResponse,
@@ -46,6 +58,17 @@ export const getInternalListResourceTypesResponseMock200 = (
     created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
     built_in: faker.datatype.boolean(),
     is_developer_accessible: faker.datatype.boolean(),
+    catalogue_status: faker.helpers.arrayElement(['active', 'archived'] as const),
+    resource_version: faker.number.int({ min: 1, max: undefined }),
+    archived_at: faker.helpers.arrayElement([
+      `${faker.date.past().toISOString().split('.')[0]}Z`,
+      undefined,
+    ]),
+    archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    archive_reason: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
   })),
   next_page_token: undefined,
   ...overrideResponse,
@@ -63,6 +86,17 @@ export const getInternalCreateResourceTypeResponseMock = (
   created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
   built_in: faker.datatype.boolean(),
   is_developer_accessible: faker.datatype.boolean(),
+  catalogue_status: faker.helpers.arrayElement(['active', 'archived'] as const),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  archived_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  archive_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
@@ -78,6 +112,17 @@ export const getInternalCreateResourceTypeResponseMock201 = (
   created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
   built_in: faker.datatype.boolean(),
   is_developer_accessible: faker.datatype.boolean(),
+  catalogue_status: faker.helpers.arrayElement(['active', 'archived'] as const),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  archived_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  archive_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
@@ -129,6 +174,17 @@ export const getInternalUpdateResourceTypeResponseMock = (
   created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
   built_in: faker.datatype.boolean(),
   is_developer_accessible: faker.datatype.boolean(),
+  catalogue_status: faker.helpers.arrayElement(['active', 'archived'] as const),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  archived_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  archive_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
@@ -144,6 +200,17 @@ export const getInternalUpdateResourceTypeResponseMock200 = (
   created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
   built_in: faker.datatype.boolean(),
   is_developer_accessible: faker.datatype.boolean(),
+  catalogue_status: faker.helpers.arrayElement(['active', 'archived'] as const),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  archived_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  archive_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
@@ -159,6 +226,15 @@ export const getInternalUpdateResourceTypeResponseMock400 = (
 export const getInternalUpdateResourceTypeResponseMock404 = (
   overrideResponse: Partial<N404NotFoundResponse> = {},
 ): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getInternalUpdateResourceTypeResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
   error: faker.string.alpha({ length: { min: 10, max: 20 } }),
   message: faker.string.alpha({ length: { min: 10, max: 20 } }),
   details: faker.helpers.arrayElement([{}, undefined]),
@@ -273,6 +349,17 @@ export const getListResourceTypesResponseMock = (
     created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
     built_in: faker.datatype.boolean(),
     is_developer_accessible: faker.datatype.boolean(),
+    catalogue_status: faker.helpers.arrayElement(['active', 'archived'] as const),
+    resource_version: faker.number.int({ min: 1, max: undefined }),
+    archived_at: faker.helpers.arrayElement([
+      `${faker.date.past().toISOString().split('.')[0]}Z`,
+      undefined,
+    ]),
+    archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    archive_reason: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
   })),
   next_page_token: undefined,
   ...overrideResponse,
@@ -291,6 +378,17 @@ export const getListResourceTypesResponseMock200 = (
     created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
     built_in: faker.datatype.boolean(),
     is_developer_accessible: faker.datatype.boolean(),
+    catalogue_status: faker.helpers.arrayElement(['active', 'archived'] as const),
+    resource_version: faker.number.int({ min: 1, max: undefined }),
+    archived_at: faker.helpers.arrayElement([
+      `${faker.date.past().toISOString().split('.')[0]}Z`,
+      undefined,
+    ]),
+    archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    archive_reason: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
   })),
   next_page_token: undefined,
   ...overrideResponse,
@@ -317,6 +415,17 @@ export const getCreateResourceTypeResponseMock = (
   created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
   built_in: faker.datatype.boolean(),
   is_developer_accessible: faker.datatype.boolean(),
+  catalogue_status: faker.helpers.arrayElement(['active', 'archived'] as const),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  archived_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  archive_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
@@ -332,6 +441,17 @@ export const getCreateResourceTypeResponseMock201 = (
   created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
   built_in: faker.datatype.boolean(),
   is_developer_accessible: faker.datatype.boolean(),
+  catalogue_status: faker.helpers.arrayElement(['active', 'archived'] as const),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  archived_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  archive_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
@@ -383,6 +503,17 @@ export const getGetResourceTypeResponseMock = (
   created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
   built_in: faker.datatype.boolean(),
   is_developer_accessible: faker.datatype.boolean(),
+  catalogue_status: faker.helpers.arrayElement(['active', 'archived'] as const),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  archived_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  archive_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
@@ -398,6 +529,17 @@ export const getGetResourceTypeResponseMock200 = (
   created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
   built_in: faker.datatype.boolean(),
   is_developer_accessible: faker.datatype.boolean(),
+  catalogue_status: faker.helpers.arrayElement(['active', 'archived'] as const),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  archived_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  archive_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
@@ -422,6 +564,17 @@ export const getUpdateResourceTypeResponseMock = (
   created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
   built_in: faker.datatype.boolean(),
   is_developer_accessible: faker.datatype.boolean(),
+  catalogue_status: faker.helpers.arrayElement(['active', 'archived'] as const),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  archived_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  archive_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
@@ -437,6 +590,17 @@ export const getUpdateResourceTypeResponseMock200 = (
   created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
   built_in: faker.datatype.boolean(),
   is_developer_accessible: faker.datatype.boolean(),
+  catalogue_status: faker.helpers.arrayElement(['active', 'archived'] as const),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  archived_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  archive_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
@@ -452,6 +616,103 @@ export const getUpdateResourceTypeResponseMock400 = (
 export const getUpdateResourceTypeResponseMock404 = (
   overrideResponse: Partial<N404NotFoundResponse> = {},
 ): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getUpdateResourceTypeResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getChangeResourceTypeCatalogueStatusResponseMock = (
+  overrideResponse: Partial<ResourceType> = {},
+): ResourceType => ({
+  id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  description: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 200 } }),
+    undefined,
+  ]),
+  output_schema: {},
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  built_in: faker.datatype.boolean(),
+  is_developer_accessible: faker.datatype.boolean(),
+  catalogue_status: faker.helpers.arrayElement(['active', 'archived'] as const),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  archived_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  archive_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getChangeResourceTypeCatalogueStatusResponseMock200 = (
+  overrideResponse: Partial<ResourceType> = {},
+): ResourceType => ({
+  id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  description: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 200 } }),
+    undefined,
+  ]),
+  output_schema: {},
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  built_in: faker.datatype.boolean(),
+  is_developer_accessible: faker.datatype.boolean(),
+  catalogue_status: faker.helpers.arrayElement(['active', 'archived'] as const),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  archived_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  archive_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getChangeResourceTypeCatalogueStatusResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getChangeResourceTypeCatalogueStatusResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getChangeResourceTypeCatalogueStatusResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getChangeResourceTypeCatalogueStatusResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
   error: faker.string.alpha({ length: { min: 10, max: 20 } }),
   message: faker.string.alpha({ length: { min: 10, max: 20 } }),
   details: faker.helpers.arrayElement([{}, undefined]),
@@ -800,6 +1061,32 @@ export const getInternalUpdateResourceTypeMockHandler404 = (
             : getInternalUpdateResourceTypeResponseMock404(),
         ),
         { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getInternalUpdateResourceTypeMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.patch>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.patch(
+    'http://example.com/internal/resource-types/:typeId',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getInternalUpdateResourceTypeResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
       );
     },
     options,
@@ -1335,6 +1622,188 @@ export const getUpdateResourceTypeMockHandler404 = (
     options,
   );
 };
+
+export const getUpdateResourceTypeMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.patch>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.patch(
+    'http://example.com/orgs/:orgId/resource-types/:typeId',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getUpdateResourceTypeResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getChangeResourceTypeCatalogueStatusMockHandler = (
+  overrideResponse?:
+    | ResourceType
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ResourceType> | ResourceType),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/resource-types/:typeId/actions/:catalogueAction',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getChangeResourceTypeCatalogueStatusResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getChangeResourceTypeCatalogueStatusMockHandler200 = (
+  overrideResponse?:
+    | ResourceType
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ResourceType> | ResourceType),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/resource-types/:typeId/actions/:catalogueAction',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getChangeResourceTypeCatalogueStatusResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getChangeResourceTypeCatalogueStatusMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/resource-types/:typeId/actions/:catalogueAction',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getChangeResourceTypeCatalogueStatusResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getChangeResourceTypeCatalogueStatusMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/resource-types/:typeId/actions/:catalogueAction',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getChangeResourceTypeCatalogueStatusResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getChangeResourceTypeCatalogueStatusMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/resource-types/:typeId/actions/:catalogueAction',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getChangeResourceTypeCatalogueStatusResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getChangeResourceTypeCatalogueStatusMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/resource-types/:typeId/actions/:catalogueAction',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getChangeResourceTypeCatalogueStatusResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
 export const getResourceTypeMock = () => [
   getInternalListResourceTypesMockHandler(),
   getInternalCreateResourceTypeMockHandler(),
@@ -1346,4 +1815,5 @@ export const getResourceTypeMock = () => [
   getDeleteResourceTypeMockHandler(),
   getGetResourceTypeMockHandler(),
   getUpdateResourceTypeMockHandler(),
+  getChangeResourceTypeCatalogueStatusMockHandler(),
 ];

@@ -12,6 +12,10 @@ import type { ModuleUpdateBodyProviderMapping } from './moduleUpdateBodyProvider
  * A request to update an existing module
  */
 export interface ModuleUpdateBody {
+  /** Canonical SemVer identity for the immutable Proposed version. */
+  semantic_version?: string;
+  /** @pattern ^sha256:[a-f0-9]{64}$ */
+  artifact_digest?: string;
   /**
    * An optional text description for this module
    *

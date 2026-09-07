@@ -9,6 +9,6 @@
 export type ProjectStatus = (typeof ProjectStatus)[keyof typeof ProjectStatus];
 
 export const ProjectStatus = {
-  active: 'active',
-  deleting: 'deleting',
+  ProjectStatusActive: 'active',
+  ProjectStatusDeleting: 'deleting',
 } as const;

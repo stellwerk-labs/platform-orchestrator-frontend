@@ -13,6 +13,14 @@ import type { ModuleId } from './moduleId';
  * A request to create a new module
  */
 export interface ModuleCreateBody {
+  /** Canonical SemVer identity of the immutable Core Module Version. */
+  semantic_version?: string;
+  /**
+   * Canonical digest protecting the referenced external artifact. Omitted for inline source.
+   *
+   * @pattern ^sha256:[a-f0-9]{64}$
+   */
+  artifact_digest?: string;
   id: ModuleId;
   /**
    * An optional text description for this module

@@ -9,4 +9,6 @@ import type { ServiceUserSummary } from './serviceUserSummary';
  */
 export interface ServiceUserPage {
   items: ServiceUserSummary[];
+  /** The page token to use to request the next page of items */
+  next_page_token?: string;
 }

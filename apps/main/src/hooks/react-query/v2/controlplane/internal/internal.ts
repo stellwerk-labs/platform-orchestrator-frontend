@@ -3,19 +3,40 @@
  * Do not edit manually.
  */
 import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
   MutationFunction,
   QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
   UseMutationOptions,
   UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult,
 } from '@tanstack/react-query';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 import type { ErrorType } from '../../../../../custom-instance';
 import { customInstance } from '../../../../../custom-instance';
 import type {
+  EnvironmentModuleVersionPin,
   InternalForceDeleteEnvironmentParams,
   InternalModuleCatalogue,
   InternalModuleCatalogueGenerateBody,
+  ListModuleExtensionContributionsParams,
+  ListModuleOperationReservationsParams,
+  ModuleExtensionContribution,
+  ModuleExtensionContributionUpsertBody,
+  ModuleOperationReservation,
+  ModuleOperationReservationAcquireBody,
+  ModuleReasonedCommand,
+  ModuleVersionPinOverrideBody,
+  ModuleVersionPinOverrideReconcileBody,
+  ModuleVersionPinRollbackRestoreBody,
+  N400BadRequestResponse,
+  N403ForbiddenResponse,
   N404NotFoundResponse,
   N409ConflictResponse,
 } from '../../../../../models/v2/controlplane';
@@ -140,6 +161,898 @@ export const useInternalForceDeleteEnvironment = <
   TContext
 > => {
   const mutationOptions = getInternalForceDeleteEnvironmentMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+export const beginEnvironmentModuleVersionPinOverride = (
+  orgId: string,
+  pinId: string,
+  moduleVersionPinOverrideBody: ModuleVersionPinOverrideBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<EnvironmentModuleVersionPin>(
+    {
+      url: `/internal/orgs/${orgId}/module-version-pins/${pinId}/actions/override`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: moduleVersionPinOverrideBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getBeginEnvironmentModuleVersionPinOverrideMutationOptions = <
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof beginEnvironmentModuleVersionPinOverride>>,
+    TError,
+    { orgId: string; pinId: string; data: ModuleVersionPinOverrideBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof beginEnvironmentModuleVersionPinOverride>>,
+  TError,
+  { orgId: string; pinId: string; data: ModuleVersionPinOverrideBody },
+  TContext
+> => {
+  const mutationKey = ['beginEnvironmentModuleVersionPinOverride'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof beginEnvironmentModuleVersionPinOverride>>,
+    { orgId: string; pinId: string; data: ModuleVersionPinOverrideBody }
+  > = (props) => {
+    const { orgId, pinId, data } = props ?? {};
+
+    return beginEnvironmentModuleVersionPinOverride(orgId, pinId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type BeginEnvironmentModuleVersionPinOverrideMutationResult = NonNullable<
+  Awaited<ReturnType<typeof beginEnvironmentModuleVersionPinOverride>>
+>;
+export type BeginEnvironmentModuleVersionPinOverrideMutationBody = ModuleVersionPinOverrideBody;
+export type BeginEnvironmentModuleVersionPinOverrideMutationError = ErrorType<
+  N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+export const useBeginEnvironmentModuleVersionPinOverride = <
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof beginEnvironmentModuleVersionPinOverride>>,
+      TError,
+      { orgId: string; pinId: string; data: ModuleVersionPinOverrideBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof beginEnvironmentModuleVersionPinOverride>>,
+  TError,
+  { orgId: string; pinId: string; data: ModuleVersionPinOverrideBody },
+  TContext
+> => {
+  const mutationOptions = getBeginEnvironmentModuleVersionPinOverrideMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+/**
+ * @summary List add-on reservations that exclusively protect a Module operation
+ */
+export const listModuleOperationReservations = (
+  orgId: string,
+  moduleId: string,
+  params?: ListModuleOperationReservationsParams,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleOperationReservation[]>(
+    {
+      url: `/internal/orgs/${orgId}/modules/${moduleId}/operation-reservations`,
+      method: 'GET',
+      params,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getListModuleOperationReservationsQueryKey = (
+  orgId?: string,
+  moduleId?: string,
+  params?: ListModuleOperationReservationsParams,
+) => {
+  return [
+    `/internal/orgs/${orgId}/modules/${moduleId}/operation-reservations`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getListModuleOperationReservationsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listModuleOperationReservations>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  params?: ListModuleOperationReservationsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listModuleOperationReservations>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListModuleOperationReservationsQueryKey(orgId, moduleId, params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listModuleOperationReservations>>> = ({
+    signal,
+  }) => listModuleOperationReservations(orgId, moduleId, params, requestOptions, signal);
+
+  return { queryKey, queryFn, enabled: !!(orgId && moduleId), ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listModuleOperationReservations>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ListModuleOperationReservationsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listModuleOperationReservations>>
+>;
+export type ListModuleOperationReservationsQueryError = ErrorType<
+  N403ForbiddenResponse | N404NotFoundResponse
+>;
+
+export function useListModuleOperationReservations<
+  TData = Awaited<ReturnType<typeof listModuleOperationReservations>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  params: undefined | ListModuleOperationReservationsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listModuleOperationReservations>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listModuleOperationReservations>>,
+          TError,
+          Awaited<ReturnType<typeof listModuleOperationReservations>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useListModuleOperationReservations<
+  TData = Awaited<ReturnType<typeof listModuleOperationReservations>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  params?: ListModuleOperationReservationsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listModuleOperationReservations>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listModuleOperationReservations>>,
+          TError,
+          Awaited<ReturnType<typeof listModuleOperationReservations>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useListModuleOperationReservations<
+  TData = Awaited<ReturnType<typeof listModuleOperationReservations>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  params?: ListModuleOperationReservationsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listModuleOperationReservations>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary List add-on reservations that exclusively protect a Module operation
+ */
+
+/**
+ *
+ */
+export function useListModuleOperationReservations<
+  TData = Awaited<ReturnType<typeof listModuleOperationReservations>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  params?: ListModuleOperationReservationsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listModuleOperationReservations>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getListModuleOperationReservationsQueryOptions(
+    orgId,
+    moduleId,
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
+ * @summary Acquire the Module's exclusive add-on operation reservation
+ */
+export const acquireModuleOperationReservation = (
+  orgId: string,
+  moduleId: string,
+  moduleOperationReservationAcquireBody: ModuleOperationReservationAcquireBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleOperationReservation>(
+    {
+      url: `/internal/orgs/${orgId}/modules/${moduleId}/operation-reservations`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: moduleOperationReservationAcquireBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getAcquireModuleOperationReservationMutationOptions = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof acquireModuleOperationReservation>>,
+    TError,
+    { orgId: string; moduleId: string; data: ModuleOperationReservationAcquireBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof acquireModuleOperationReservation>>,
+  TError,
+  { orgId: string; moduleId: string; data: ModuleOperationReservationAcquireBody },
+  TContext
+> => {
+  const mutationKey = ['acquireModuleOperationReservation'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof acquireModuleOperationReservation>>,
+    { orgId: string; moduleId: string; data: ModuleOperationReservationAcquireBody }
+  > = (props) => {
+    const { orgId, moduleId, data } = props ?? {};
+
+    return acquireModuleOperationReservation(orgId, moduleId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AcquireModuleOperationReservationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof acquireModuleOperationReservation>>
+>;
+export type AcquireModuleOperationReservationMutationBody = ModuleOperationReservationAcquireBody;
+export type AcquireModuleOperationReservationMutationError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+/**
+ * @summary Acquire the Module's exclusive add-on operation reservation
+ */
+export const useAcquireModuleOperationReservation = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof acquireModuleOperationReservation>>,
+      TError,
+      { orgId: string; moduleId: string; data: ModuleOperationReservationAcquireBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof acquireModuleOperationReservation>>,
+  TError,
+  { orgId: string; moduleId: string; data: ModuleOperationReservationAcquireBody },
+  TContext
+> => {
+  const mutationOptions = getAcquireModuleOperationReservationMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+/**
+ * @summary Release an exact add-on operation reservation
+ */
+export const releaseModuleOperationReservation = (
+  orgId: string,
+  moduleId: string,
+  reservationId: string,
+  moduleReasonedCommand: ModuleReasonedCommand,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleOperationReservation>(
+    {
+      url: `/internal/orgs/${orgId}/modules/${moduleId}/operation-reservations/${reservationId}/actions/release`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: moduleReasonedCommand,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getReleaseModuleOperationReservationMutationOptions = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof releaseModuleOperationReservation>>,
+    TError,
+    { orgId: string; moduleId: string; reservationId: string; data: ModuleReasonedCommand },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof releaseModuleOperationReservation>>,
+  TError,
+  { orgId: string; moduleId: string; reservationId: string; data: ModuleReasonedCommand },
+  TContext
+> => {
+  const mutationKey = ['releaseModuleOperationReservation'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof releaseModuleOperationReservation>>,
+    { orgId: string; moduleId: string; reservationId: string; data: ModuleReasonedCommand }
+  > = (props) => {
+    const { orgId, moduleId, reservationId, data } = props ?? {};
+
+    return releaseModuleOperationReservation(orgId, moduleId, reservationId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ReleaseModuleOperationReservationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof releaseModuleOperationReservation>>
+>;
+export type ReleaseModuleOperationReservationMutationBody = ModuleReasonedCommand;
+export type ReleaseModuleOperationReservationMutationError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+/**
+ * @summary Release an exact add-on operation reservation
+ */
+export const useReleaseModuleOperationReservation = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof releaseModuleOperationReservation>>,
+      TError,
+      { orgId: string; moduleId: string; reservationId: string; data: ModuleReasonedCommand },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof releaseModuleOperationReservation>>,
+  TError,
+  { orgId: string; moduleId: string; reservationId: string; data: ModuleReasonedCommand },
+  TContext
+> => {
+  const mutationOptions = getReleaseModuleOperationReservationMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+/**
+ * @summary List namespaced related resources and contextual actions registered by add-ons
+ */
+export const listModuleExtensionContributions = (
+  orgId: string,
+  moduleId: string,
+  params?: ListModuleExtensionContributionsParams,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleExtensionContribution[]>(
+    {
+      url: `/internal/orgs/${orgId}/modules/${moduleId}/extension-contributions`,
+      method: 'GET',
+      params,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getListModuleExtensionContributionsQueryKey = (
+  orgId?: string,
+  moduleId?: string,
+  params?: ListModuleExtensionContributionsParams,
+) => {
+  return [
+    `/internal/orgs/${orgId}/modules/${moduleId}/extension-contributions`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getListModuleExtensionContributionsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listModuleExtensionContributions>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  params?: ListModuleExtensionContributionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listModuleExtensionContributions>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListModuleExtensionContributionsQueryKey(orgId, moduleId, params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listModuleExtensionContributions>>> = ({
+    signal,
+  }) => listModuleExtensionContributions(orgId, moduleId, params, requestOptions, signal);
+
+  return { queryKey, queryFn, enabled: !!(orgId && moduleId), ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listModuleExtensionContributions>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ListModuleExtensionContributionsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listModuleExtensionContributions>>
+>;
+export type ListModuleExtensionContributionsQueryError = ErrorType<
+  N403ForbiddenResponse | N404NotFoundResponse
+>;
+
+export function useListModuleExtensionContributions<
+  TData = Awaited<ReturnType<typeof listModuleExtensionContributions>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  params: undefined | ListModuleExtensionContributionsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listModuleExtensionContributions>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listModuleExtensionContributions>>,
+          TError,
+          Awaited<ReturnType<typeof listModuleExtensionContributions>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useListModuleExtensionContributions<
+  TData = Awaited<ReturnType<typeof listModuleExtensionContributions>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  params?: ListModuleExtensionContributionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listModuleExtensionContributions>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listModuleExtensionContributions>>,
+          TError,
+          Awaited<ReturnType<typeof listModuleExtensionContributions>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useListModuleExtensionContributions<
+  TData = Awaited<ReturnType<typeof listModuleExtensionContributions>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  params?: ListModuleExtensionContributionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listModuleExtensionContributions>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary List namespaced related resources and contextual actions registered by add-ons
+ */
+
+/**
+ *
+ */
+export function useListModuleExtensionContributions<
+  TData = Awaited<ReturnType<typeof listModuleExtensionContributions>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  params?: ListModuleExtensionContributionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listModuleExtensionContributions>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getListModuleExtensionContributionsQueryOptions(
+    orgId,
+    moduleId,
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
+ * @summary Register or update a namespaced related resource or contextual action
+ */
+export const upsertModuleExtensionContribution = (
+  orgId: string,
+  moduleId: string,
+  moduleExtensionContributionUpsertBody: ModuleExtensionContributionUpsertBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleExtensionContribution>(
+    {
+      url: `/internal/orgs/${orgId}/modules/${moduleId}/extension-contributions`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: moduleExtensionContributionUpsertBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getUpsertModuleExtensionContributionMutationOptions = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof upsertModuleExtensionContribution>>,
+    TError,
+    { orgId: string; moduleId: string; data: ModuleExtensionContributionUpsertBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof upsertModuleExtensionContribution>>,
+  TError,
+  { orgId: string; moduleId: string; data: ModuleExtensionContributionUpsertBody },
+  TContext
+> => {
+  const mutationKey = ['upsertModuleExtensionContribution'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof upsertModuleExtensionContribution>>,
+    { orgId: string; moduleId: string; data: ModuleExtensionContributionUpsertBody }
+  > = (props) => {
+    const { orgId, moduleId, data } = props ?? {};
+
+    return upsertModuleExtensionContribution(orgId, moduleId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpsertModuleExtensionContributionMutationResult = NonNullable<
+  Awaited<ReturnType<typeof upsertModuleExtensionContribution>>
+>;
+export type UpsertModuleExtensionContributionMutationBody = ModuleExtensionContributionUpsertBody;
+export type UpsertModuleExtensionContributionMutationError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+/**
+ * @summary Register or update a namespaced related resource or contextual action
+ */
+export const useUpsertModuleExtensionContribution = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof upsertModuleExtensionContribution>>,
+      TError,
+      { orgId: string; moduleId: string; data: ModuleExtensionContributionUpsertBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof upsertModuleExtensionContribution>>,
+  TError,
+  { orgId: string; moduleId: string; data: ModuleExtensionContributionUpsertBody },
+  TContext
+> => {
+  const mutationOptions = getUpsertModuleExtensionContributionMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+export const reconcileEnvironmentModuleVersionPinOverride = (
+  orgId: string,
+  pinId: string,
+  moduleVersionPinOverrideReconcileBody: ModuleVersionPinOverrideReconcileBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<EnvironmentModuleVersionPin>(
+    {
+      url: `/internal/orgs/${orgId}/module-version-pins/${pinId}/actions/reconcile-override`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: moduleVersionPinOverrideReconcileBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getReconcileEnvironmentModuleVersionPinOverrideMutationOptions = <
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof reconcileEnvironmentModuleVersionPinOverride>>,
+    TError,
+    { orgId: string; pinId: string; data: ModuleVersionPinOverrideReconcileBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof reconcileEnvironmentModuleVersionPinOverride>>,
+  TError,
+  { orgId: string; pinId: string; data: ModuleVersionPinOverrideReconcileBody },
+  TContext
+> => {
+  const mutationKey = ['reconcileEnvironmentModuleVersionPinOverride'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof reconcileEnvironmentModuleVersionPinOverride>>,
+    { orgId: string; pinId: string; data: ModuleVersionPinOverrideReconcileBody }
+  > = (props) => {
+    const { orgId, pinId, data } = props ?? {};
+
+    return reconcileEnvironmentModuleVersionPinOverride(orgId, pinId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ReconcileEnvironmentModuleVersionPinOverrideMutationResult = NonNullable<
+  Awaited<ReturnType<typeof reconcileEnvironmentModuleVersionPinOverride>>
+>;
+export type ReconcileEnvironmentModuleVersionPinOverrideMutationBody =
+  ModuleVersionPinOverrideReconcileBody;
+export type ReconcileEnvironmentModuleVersionPinOverrideMutationError = ErrorType<
+  N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+export const useReconcileEnvironmentModuleVersionPinOverride = <
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof reconcileEnvironmentModuleVersionPinOverride>>,
+      TError,
+      { orgId: string; pinId: string; data: ModuleVersionPinOverrideReconcileBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof reconcileEnvironmentModuleVersionPinOverride>>,
+  TError,
+  { orgId: string; pinId: string; data: ModuleVersionPinOverrideReconcileBody },
+  TContext
+> => {
+  const mutationOptions = getReconcileEnvironmentModuleVersionPinOverrideMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+export const restoreEnvironmentModuleVersionPinAfterRollback = (
+  orgId: string,
+  pinId: string,
+  moduleVersionPinRollbackRestoreBody: ModuleVersionPinRollbackRestoreBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<EnvironmentModuleVersionPin>(
+    {
+      url: `/internal/orgs/${orgId}/module-version-pins/${pinId}/actions/restore-after-rollback`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: moduleVersionPinRollbackRestoreBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getRestoreEnvironmentModuleVersionPinAfterRollbackMutationOptions = <
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof restoreEnvironmentModuleVersionPinAfterRollback>>,
+    TError,
+    { orgId: string; pinId: string; data: ModuleVersionPinRollbackRestoreBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof restoreEnvironmentModuleVersionPinAfterRollback>>,
+  TError,
+  { orgId: string; pinId: string; data: ModuleVersionPinRollbackRestoreBody },
+  TContext
+> => {
+  const mutationKey = ['restoreEnvironmentModuleVersionPinAfterRollback'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof restoreEnvironmentModuleVersionPinAfterRollback>>,
+    { orgId: string; pinId: string; data: ModuleVersionPinRollbackRestoreBody }
+  > = (props) => {
+    const { orgId, pinId, data } = props ?? {};
+
+    return restoreEnvironmentModuleVersionPinAfterRollback(orgId, pinId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RestoreEnvironmentModuleVersionPinAfterRollbackMutationResult = NonNullable<
+  Awaited<ReturnType<typeof restoreEnvironmentModuleVersionPinAfterRollback>>
+>;
+export type RestoreEnvironmentModuleVersionPinAfterRollbackMutationBody =
+  ModuleVersionPinRollbackRestoreBody;
+export type RestoreEnvironmentModuleVersionPinAfterRollbackMutationError = ErrorType<
+  N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+export const useRestoreEnvironmentModuleVersionPinAfterRollback = <
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof restoreEnvironmentModuleVersionPinAfterRollback>>,
+      TError,
+      { orgId: string; pinId: string; data: ModuleVersionPinRollbackRestoreBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof restoreEnvironmentModuleVersionPinAfterRollback>>,
+  TError,
+  { orgId: string; pinId: string; data: ModuleVersionPinRollbackRestoreBody },
+  TContext
+> => {
+  const mutationOptions =
+    getRestoreEnvironmentModuleVersionPinAfterRollbackMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };

@@ -546,7 +546,7 @@ const UNIT_TEST_RULES = {
 };
 
 const E2E_TEST_RULES = {
-  files: ['apps/main/src/playwright/**/*.ts'],
+  files: ['apps/main/src/playwright/**/*.ts', 'apps/main/e2e-live/**/*.ts'],
   ...playwright.configs['flat/recommended'],
   rules: {
     'playwright/no-raw-locators': 'error',

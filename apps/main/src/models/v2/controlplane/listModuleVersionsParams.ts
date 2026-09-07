@@ -14,4 +14,6 @@ export type ListModuleVersionsParams = {
    * The page token to request from
    */
   page?: PageTokenQueryParamParameter;
+  include_deprecated?: boolean;
+  include_defective?: boolean;
 };

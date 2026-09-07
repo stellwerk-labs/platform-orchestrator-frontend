@@ -3,6 +3,7 @@
  * Do not edit manually.
  */
 import type { DeploymentCreateBodyMode } from './deploymentCreateBodyMode';
+import type { DeploymentCreateBodyModuleVersions } from './deploymentCreateBodyModuleVersions';
 import type { DeploymentCreateBodyRunnerLogLevel } from './deploymentCreateBodyRunnerLogLevel';
 import type { DeploymentManifest } from './deploymentManifest';
 
@@ -19,6 +20,10 @@ set to 'plan_only'.
   manifest?: DeploymentManifest;
   /** Optional ID to rollback to when the deployment mode is 'rollback' or 'rollback_plan'. */
   rollback_to_deployment_id?: string;
+  /** Exact canonical SemVer selections by Module slug. Proposed versions require the scoped module.version.use-proposed capability. */
+  module_versions?: DeploymentCreateBodyModuleVersions;
+  /** Exact Defective Module Version UUIDs explicitly confirmed for an authorised Pin carry-forward or Rollback. */
+  confirm_restricted_module_version_uuids?: string[];
   /** The Project to deploy to. */
   project_id: string;
   /** The environment to deploy to. */

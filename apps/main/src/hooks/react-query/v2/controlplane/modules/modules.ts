@@ -21,17 +21,41 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import type { ErrorType } from '../../../../../custom-instance';
 import { customInstance } from '../../../../../custom-instance';
 import type {
+  CoreModuleVersion,
+  CoreModuleVersionDetail,
+  CoreModuleVersionPage,
+  EnvironmentModuleVersionPin,
+  EnvironmentModuleVersionPinCreateBody,
+  ListEnvironmentModuleVersionPinsParams,
+  ListModuleCatalogueEntriesParams,
   ListModulesParams,
   ListModuleVersionsParams,
   Module,
+  ModuleCatalogueCreateBody,
+  ModuleCatalogueEntry,
+  ModuleCatalogueUpdateBody,
   ModuleCreateBody,
   ModulePage,
+  ModuleReasonedCommand,
   ModuleUpdateBody,
-  ModuleVersion,
-  ModuleVersionPage,
+  ModuleVersionComparison,
+  ModuleVersionLifecycleEvent,
+  ModuleVersionLifecycleTransactionBody,
+  ModuleVersionLifecycleTransactionResult,
+  ModuleVersionPinBulkCommandBody,
+  ModuleVersionPinBulkPreview,
+  ModuleVersionPinBulkPreviewBody,
+  ModuleVersionPinBulkResult,
+  ModuleVersionPinEvent,
+  ModuleVersionPinNoteBody,
+  ModuleVersionPublishBody,
+  ModuleVersionUsage,
   N400BadRequestResponse,
+  N403ForbiddenResponse,
   N404NotFoundResponse,
   N409ConflictResponse,
+  StableModuleVersionSuccessorBody,
+  StableModuleVersionSuccessorResult,
 } from '../../../../../models/v2/controlplane';
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -166,7 +190,9 @@ export function useListModules<
 }
 
 /**
- * @summary Create a new modules in the org
+ * Compatibility authoring endpoint. Requires semantic_version and a complete definition; external sources also require artifact_digest. This does not promote the version. New clients should create a catalogue entry, publish a version, and promote explicitly.
+ *
+ * @summary Create a Module with an initial immutable Proposed version
  */
 export const createModule = (
   orgId: string,
@@ -227,7 +253,7 @@ export type CreateModuleMutationBody = ModuleCreateBody;
 export type CreateModuleMutationError = ErrorType<N400BadRequestResponse | N409ConflictResponse>;
 
 /**
- * @summary Create a new modules in the org
+ * @summary Create a Module with an initial immutable Proposed version
  */
 export const useCreateModule = <
   TError = ErrorType<N400BadRequestResponse | N409ConflictResponse>,
@@ -383,7 +409,9 @@ export function useGetModule<
 }
 
 /**
- * @summary Update an existing module
+ * Compatibility authoring endpoint, not an in-place mutation or Default update. Requires a new semantic_version. Prefer publishModuleVersion and explicit lifecycle commands.
+ *
+ * @summary Publish a new immutable Proposed version for an existing Module
  */
 export const updateModule = (
   orgId: string,
@@ -445,7 +473,7 @@ export type UpdateModuleMutationError = ErrorType<
 >;
 
 /**
- * @summary Update an existing module
+ * @summary Publish a new immutable Proposed version for an existing Module
  */
 export const useUpdateModule = <
   TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse>,
@@ -472,7 +500,9 @@ export const useUpdateModule = <
   return useMutation(mutationOptions, queryClient);
 };
 /**
- * @summary Delete an existing module in the org if it is unused
+ * Requires module.archive. Published versions are never deleted. A 409 response with error module_history_retained directs clients to reasoned catalogue archival. Other 409 responses represent usage or deletion blockers and must not be treated as success.
+ *
+ * @summary Delete an unused empty Module catalogue entry
  */
 export const deleteModule = (
   orgId: string,
@@ -526,7 +556,7 @@ export type DeleteModuleMutationResult = NonNullable<Awaited<ReturnType<typeof d
 export type DeleteModuleMutationError = ErrorType<N404NotFoundResponse | N409ConflictResponse>;
 
 /**
- * @summary Delete an existing module in the org if it is unused
+ * @summary Delete an unused empty Module catalogue entry
  */
 export const useDeleteModule = <
   TError = ErrorType<N404NotFoundResponse | N409ConflictResponse>,
@@ -562,7 +592,7 @@ export const listModuleVersions = (
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal,
 ) => {
-  return customInstance<ModuleVersionPage>(
+  return customInstance<CoreModuleVersionPage>(
     { url: `/orgs/${orgId}/modules/${moduleId}/versions`, method: 'GET', params, signal },
     options,
   );
@@ -696,6 +726,103 @@ export function useListModuleVersions<
 }
 
 /**
+ * @summary Publish a complete immutable Proposed Module Version
+ */
+export const publishModuleVersion = (
+  orgId: string,
+  moduleId: string,
+  moduleVersionPublishBody: ModuleVersionPublishBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<CoreModuleVersion>(
+    {
+      url: `/orgs/${orgId}/modules/${moduleId}/versions`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: moduleVersionPublishBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getPublishModuleVersionMutationOptions = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof publishModuleVersion>>,
+    TError,
+    { orgId: string; moduleId: string; data: ModuleVersionPublishBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof publishModuleVersion>>,
+  TError,
+  { orgId: string; moduleId: string; data: ModuleVersionPublishBody },
+  TContext
+> => {
+  const mutationKey = ['publishModuleVersion'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof publishModuleVersion>>,
+    { orgId: string; moduleId: string; data: ModuleVersionPublishBody }
+  > = (props) => {
+    const { orgId, moduleId, data } = props ?? {};
+
+    return publishModuleVersion(orgId, moduleId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PublishModuleVersionMutationResult = NonNullable<
+  Awaited<ReturnType<typeof publishModuleVersion>>
+>;
+export type PublishModuleVersionMutationBody = ModuleVersionPublishBody;
+export type PublishModuleVersionMutationError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+/**
+ * @summary Publish a complete immutable Proposed Module Version
+ */
+export const usePublishModuleVersion = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof publishModuleVersion>>,
+      TError,
+      { orgId: string; moduleId: string; data: ModuleVersionPublishBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof publishModuleVersion>>,
+  TError,
+  { orgId: string; moduleId: string; data: ModuleVersionPublishBody },
+  TContext
+> => {
+  const mutationOptions = getPublishModuleVersionMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+/**
  * @summary Get a previous module version in the org
  */
 export const getModuleVersion = (
@@ -705,7 +832,7 @@ export const getModuleVersion = (
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal,
 ) => {
-  return customInstance<ModuleVersion>(
+  return customInstance<CoreModuleVersionDetail>(
     {
       url: `/orgs/${orgId}/modules/${moduleId}/versions/${moduleVersionId}`,
       method: 'GET',
@@ -841,3 +968,2356 @@ export function useGetModuleVersion<
 
   return query;
 }
+
+export const getModuleCatalogueEntry = (
+  orgId: string,
+  moduleId: string,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleCatalogueEntry>(
+    { url: `/orgs/${orgId}/modules/${moduleId}/catalogue`, method: 'GET', signal },
+    options,
+  );
+};
+
+export const getGetModuleCatalogueEntryQueryKey = (orgId?: string, moduleId?: string) => {
+  return [`/orgs/${orgId}/modules/${moduleId}/catalogue`] as const;
+};
+
+export const getGetModuleCatalogueEntryQueryOptions = <
+  TData = Awaited<ReturnType<typeof getModuleCatalogueEntry>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getModuleCatalogueEntry>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetModuleCatalogueEntryQueryKey(orgId, moduleId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getModuleCatalogueEntry>>> = ({
+    signal,
+  }) => getModuleCatalogueEntry(orgId, moduleId, requestOptions, signal);
+
+  return { queryKey, queryFn, enabled: !!(orgId && moduleId), ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getModuleCatalogueEntry>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetModuleCatalogueEntryQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getModuleCatalogueEntry>>
+>;
+export type GetModuleCatalogueEntryQueryError = ErrorType<
+  N403ForbiddenResponse | N404NotFoundResponse
+>;
+
+export function useGetModuleCatalogueEntry<
+  TData = Awaited<ReturnType<typeof getModuleCatalogueEntry>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getModuleCatalogueEntry>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getModuleCatalogueEntry>>,
+          TError,
+          Awaited<ReturnType<typeof getModuleCatalogueEntry>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetModuleCatalogueEntry<
+  TData = Awaited<ReturnType<typeof getModuleCatalogueEntry>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getModuleCatalogueEntry>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getModuleCatalogueEntry>>,
+          TError,
+          Awaited<ReturnType<typeof getModuleCatalogueEntry>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetModuleCatalogueEntry<
+  TData = Awaited<ReturnType<typeof getModuleCatalogueEntry>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getModuleCatalogueEntry>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+/**
+ *
+ */
+export function useGetModuleCatalogueEntry<
+  TData = Awaited<ReturnType<typeof getModuleCatalogueEntry>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getModuleCatalogueEntry>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetModuleCatalogueEntryQueryOptions(orgId, moduleId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const updateModuleCatalogueEntry = (
+  orgId: string,
+  moduleId: string,
+  moduleCatalogueUpdateBody: ModuleCatalogueUpdateBody,
+  options?: SecondParameter<typeof customInstance>,
+) => {
+  return customInstance<ModuleCatalogueEntry>(
+    {
+      url: `/orgs/${orgId}/modules/${moduleId}/catalogue`,
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      data: moduleCatalogueUpdateBody,
+    },
+    options,
+  );
+};
+
+export const getUpdateModuleCatalogueEntryMutationOptions = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateModuleCatalogueEntry>>,
+    TError,
+    { orgId: string; moduleId: string; data: ModuleCatalogueUpdateBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateModuleCatalogueEntry>>,
+  TError,
+  { orgId: string; moduleId: string; data: ModuleCatalogueUpdateBody },
+  TContext
+> => {
+  const mutationKey = ['updateModuleCatalogueEntry'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateModuleCatalogueEntry>>,
+    { orgId: string; moduleId: string; data: ModuleCatalogueUpdateBody }
+  > = (props) => {
+    const { orgId, moduleId, data } = props ?? {};
+
+    return updateModuleCatalogueEntry(orgId, moduleId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateModuleCatalogueEntryMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateModuleCatalogueEntry>>
+>;
+export type UpdateModuleCatalogueEntryMutationBody = ModuleCatalogueUpdateBody;
+export type UpdateModuleCatalogueEntryMutationError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+export const useUpdateModuleCatalogueEntry = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateModuleCatalogueEntry>>,
+      TError,
+      { orgId: string; moduleId: string; data: ModuleCatalogueUpdateBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateModuleCatalogueEntry>>,
+  TError,
+  { orgId: string; moduleId: string; data: ModuleCatalogueUpdateBody },
+  TContext
+> => {
+  const mutationOptions = getUpdateModuleCatalogueEntryMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+/**
+ * @summary List stable Module identities, including empty shells
+ */
+export const listModuleCatalogueEntries = (
+  orgId: string,
+  params?: ListModuleCatalogueEntriesParams,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleCatalogueEntry[]>(
+    { url: `/orgs/${orgId}/module-catalogue`, method: 'GET', params, signal },
+    options,
+  );
+};
+
+export const getListModuleCatalogueEntriesQueryKey = (
+  orgId?: string,
+  params?: ListModuleCatalogueEntriesParams,
+) => {
+  return [`/orgs/${orgId}/module-catalogue`, ...(params ? [params] : [])] as const;
+};
+
+export const getListModuleCatalogueEntriesQueryOptions = <
+  TData = Awaited<ReturnType<typeof listModuleCatalogueEntries>>,
+  TError = ErrorType<N403ForbiddenResponse>,
+>(
+  orgId: string,
+  params?: ListModuleCatalogueEntriesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listModuleCatalogueEntries>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListModuleCatalogueEntriesQueryKey(orgId, params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listModuleCatalogueEntries>>> = ({
+    signal,
+  }) => listModuleCatalogueEntries(orgId, params, requestOptions, signal);
+
+  return { queryKey, queryFn, enabled: !!orgId, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listModuleCatalogueEntries>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ListModuleCatalogueEntriesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listModuleCatalogueEntries>>
+>;
+export type ListModuleCatalogueEntriesQueryError = ErrorType<N403ForbiddenResponse>;
+
+export function useListModuleCatalogueEntries<
+  TData = Awaited<ReturnType<typeof listModuleCatalogueEntries>>,
+  TError = ErrorType<N403ForbiddenResponse>,
+>(
+  orgId: string,
+  params: undefined | ListModuleCatalogueEntriesParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listModuleCatalogueEntries>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listModuleCatalogueEntries>>,
+          TError,
+          Awaited<ReturnType<typeof listModuleCatalogueEntries>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useListModuleCatalogueEntries<
+  TData = Awaited<ReturnType<typeof listModuleCatalogueEntries>>,
+  TError = ErrorType<N403ForbiddenResponse>,
+>(
+  orgId: string,
+  params?: ListModuleCatalogueEntriesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listModuleCatalogueEntries>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listModuleCatalogueEntries>>,
+          TError,
+          Awaited<ReturnType<typeof listModuleCatalogueEntries>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useListModuleCatalogueEntries<
+  TData = Awaited<ReturnType<typeof listModuleCatalogueEntries>>,
+  TError = ErrorType<N403ForbiddenResponse>,
+>(
+  orgId: string,
+  params?: ListModuleCatalogueEntriesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listModuleCatalogueEntries>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary List stable Module identities, including empty shells
+ */
+
+/**
+ *
+ */
+export function useListModuleCatalogueEntries<
+  TData = Awaited<ReturnType<typeof listModuleCatalogueEntries>>,
+  TError = ErrorType<N403ForbiddenResponse>,
+>(
+  orgId: string,
+  params?: ListModuleCatalogueEntriesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listModuleCatalogueEntries>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getListModuleCatalogueEntriesQueryOptions(orgId, params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
+ * @summary Create an empty stable Module identity without publishing a version
+ */
+export const createModuleCatalogueEntry = (
+  orgId: string,
+  moduleCatalogueCreateBody: ModuleCatalogueCreateBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleCatalogueEntry>(
+    {
+      url: `/orgs/${orgId}/module-catalogue`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: moduleCatalogueCreateBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getCreateModuleCatalogueEntryMutationOptions = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createModuleCatalogueEntry>>,
+    TError,
+    { orgId: string; data: ModuleCatalogueCreateBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createModuleCatalogueEntry>>,
+  TError,
+  { orgId: string; data: ModuleCatalogueCreateBody },
+  TContext
+> => {
+  const mutationKey = ['createModuleCatalogueEntry'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createModuleCatalogueEntry>>,
+    { orgId: string; data: ModuleCatalogueCreateBody }
+  > = (props) => {
+    const { orgId, data } = props ?? {};
+
+    return createModuleCatalogueEntry(orgId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateModuleCatalogueEntryMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createModuleCatalogueEntry>>
+>;
+export type CreateModuleCatalogueEntryMutationBody = ModuleCatalogueCreateBody;
+export type CreateModuleCatalogueEntryMutationError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+/**
+ * @summary Create an empty stable Module identity without publishing a version
+ */
+export const useCreateModuleCatalogueEntry = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createModuleCatalogueEntry>>,
+      TError,
+      { orgId: string; data: ModuleCatalogueCreateBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof createModuleCatalogueEntry>>,
+  TError,
+  { orgId: string; data: ModuleCatalogueCreateBody },
+  TContext
+> => {
+  const mutationOptions = getCreateModuleCatalogueEntryMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+/**
+ * @summary Atomically publish a stable successor and deprecate the exact Proposed prerelease
+ */
+export const publishStableModuleVersionSuccessor = (
+  orgId: string,
+  moduleId: string,
+  moduleVersionId: string,
+  stableModuleVersionSuccessorBody: StableModuleVersionSuccessorBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<StableModuleVersionSuccessorResult>(
+    {
+      url: `/orgs/${orgId}/modules/${moduleId}/versions/${moduleVersionId}/stable-successor`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: stableModuleVersionSuccessorBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getPublishStableModuleVersionSuccessorMutationOptions = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof publishStableModuleVersionSuccessor>>,
+    TError,
+    {
+      orgId: string;
+      moduleId: string;
+      moduleVersionId: string;
+      data: StableModuleVersionSuccessorBody;
+    },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof publishStableModuleVersionSuccessor>>,
+  TError,
+  {
+    orgId: string;
+    moduleId: string;
+    moduleVersionId: string;
+    data: StableModuleVersionSuccessorBody;
+  },
+  TContext
+> => {
+  const mutationKey = ['publishStableModuleVersionSuccessor'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof publishStableModuleVersionSuccessor>>,
+    {
+      orgId: string;
+      moduleId: string;
+      moduleVersionId: string;
+      data: StableModuleVersionSuccessorBody;
+    }
+  > = (props) => {
+    const { orgId, moduleId, moduleVersionId, data } = props ?? {};
+
+    return publishStableModuleVersionSuccessor(
+      orgId,
+      moduleId,
+      moduleVersionId,
+      data,
+      requestOptions,
+    );
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PublishStableModuleVersionSuccessorMutationResult = NonNullable<
+  Awaited<ReturnType<typeof publishStableModuleVersionSuccessor>>
+>;
+export type PublishStableModuleVersionSuccessorMutationBody = StableModuleVersionSuccessorBody;
+export type PublishStableModuleVersionSuccessorMutationError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+/**
+ * @summary Atomically publish a stable successor and deprecate the exact Proposed prerelease
+ */
+export const usePublishStableModuleVersionSuccessor = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof publishStableModuleVersionSuccessor>>,
+      TError,
+      {
+        orgId: string;
+        moduleId: string;
+        moduleVersionId: string;
+        data: StableModuleVersionSuccessorBody;
+      },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof publishStableModuleVersionSuccessor>>,
+  TError,
+  {
+    orgId: string;
+    moduleId: string;
+    moduleVersionId: string;
+    data: StableModuleVersionSuccessorBody;
+  },
+  TContext
+> => {
+  const mutationOptions = getPublishStableModuleVersionSuccessorMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+/**
+ * @summary Structurally compare two immutable versions of one Module
+ */
+export const compareModuleVersions = (
+  orgId: string,
+  moduleId: string,
+  moduleVersionId: string,
+  otherModuleVersionId: string,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleVersionComparison>(
+    {
+      url: `/orgs/${orgId}/modules/${moduleId}/versions/${moduleVersionId}/compare/${otherModuleVersionId}`,
+      method: 'GET',
+      signal,
+    },
+    options,
+  );
+};
+
+export const getCompareModuleVersionsQueryKey = (
+  orgId?: string,
+  moduleId?: string,
+  moduleVersionId?: string,
+  otherModuleVersionId?: string,
+) => {
+  return [
+    `/orgs/${orgId}/modules/${moduleId}/versions/${moduleVersionId}/compare/${otherModuleVersionId}`,
+  ] as const;
+};
+
+export const getCompareModuleVersionsQueryOptions = <
+  TData = Awaited<ReturnType<typeof compareModuleVersions>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  moduleVersionId: string,
+  otherModuleVersionId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof compareModuleVersions>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getCompareModuleVersionsQueryKey(orgId, moduleId, moduleVersionId, otherModuleVersionId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof compareModuleVersions>>> = ({ signal }) =>
+    compareModuleVersions(
+      orgId,
+      moduleId,
+      moduleVersionId,
+      otherModuleVersionId,
+      requestOptions,
+      signal,
+    );
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!(orgId && moduleId && moduleVersionId && otherModuleVersionId),
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof compareModuleVersions>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type CompareModuleVersionsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof compareModuleVersions>>
+>;
+export type CompareModuleVersionsQueryError = ErrorType<
+  N403ForbiddenResponse | N404NotFoundResponse
+>;
+
+export function useCompareModuleVersions<
+  TData = Awaited<ReturnType<typeof compareModuleVersions>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  moduleVersionId: string,
+  otherModuleVersionId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof compareModuleVersions>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof compareModuleVersions>>,
+          TError,
+          Awaited<ReturnType<typeof compareModuleVersions>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useCompareModuleVersions<
+  TData = Awaited<ReturnType<typeof compareModuleVersions>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  moduleVersionId: string,
+  otherModuleVersionId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof compareModuleVersions>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof compareModuleVersions>>,
+          TError,
+          Awaited<ReturnType<typeof compareModuleVersions>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useCompareModuleVersions<
+  TData = Awaited<ReturnType<typeof compareModuleVersions>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  moduleVersionId: string,
+  otherModuleVersionId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof compareModuleVersions>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary Structurally compare two immutable versions of one Module
+ */
+
+/**
+ *
+ */
+export function useCompareModuleVersions<
+  TData = Awaited<ReturnType<typeof compareModuleVersions>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  moduleVersionId: string,
+  otherModuleVersionId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof compareModuleVersions>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getCompareModuleVersionsQueryOptions(
+    orgId,
+    moduleId,
+    moduleVersionId,
+    otherModuleVersionId,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
+ * @summary Inspect observed Environment adoption and Pin usage for one immutable Module Version
+ */
+export const getModuleVersionUsage = (
+  orgId: string,
+  moduleId: string,
+  moduleVersionId: string,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleVersionUsage>(
+    {
+      url: `/orgs/${orgId}/modules/${moduleId}/versions/${moduleVersionId}/usage`,
+      method: 'GET',
+      signal,
+    },
+    options,
+  );
+};
+
+export const getGetModuleVersionUsageQueryKey = (
+  orgId?: string,
+  moduleId?: string,
+  moduleVersionId?: string,
+) => {
+  return [`/orgs/${orgId}/modules/${moduleId}/versions/${moduleVersionId}/usage`] as const;
+};
+
+export const getGetModuleVersionUsageQueryOptions = <
+  TData = Awaited<ReturnType<typeof getModuleVersionUsage>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  moduleVersionId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getModuleVersionUsage>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetModuleVersionUsageQueryKey(orgId, moduleId, moduleVersionId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getModuleVersionUsage>>> = ({ signal }) =>
+    getModuleVersionUsage(orgId, moduleId, moduleVersionId, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!(orgId && moduleId && moduleVersionId),
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof getModuleVersionUsage>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type GetModuleVersionUsageQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getModuleVersionUsage>>
+>;
+export type GetModuleVersionUsageQueryError = ErrorType<
+  N403ForbiddenResponse | N404NotFoundResponse
+>;
+
+export function useGetModuleVersionUsage<
+  TData = Awaited<ReturnType<typeof getModuleVersionUsage>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  moduleVersionId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getModuleVersionUsage>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getModuleVersionUsage>>,
+          TError,
+          Awaited<ReturnType<typeof getModuleVersionUsage>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetModuleVersionUsage<
+  TData = Awaited<ReturnType<typeof getModuleVersionUsage>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  moduleVersionId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getModuleVersionUsage>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getModuleVersionUsage>>,
+          TError,
+          Awaited<ReturnType<typeof getModuleVersionUsage>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetModuleVersionUsage<
+  TData = Awaited<ReturnType<typeof getModuleVersionUsage>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  moduleVersionId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getModuleVersionUsage>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary Inspect observed Environment adoption and Pin usage for one immutable Module Version
+ */
+
+/**
+ *
+ */
+export function useGetModuleVersionUsage<
+  TData = Awaited<ReturnType<typeof getModuleVersionUsage>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  moduleVersionId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getModuleVersionUsage>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetModuleVersionUsageQueryOptions(
+    orgId,
+    moduleId,
+    moduleVersionId,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
+ * @summary Apply lifecycle changes across Modules in one atomic Core transaction
+ */
+export const transactModuleVersionLifecycles = (
+  orgId: string,
+  moduleVersionLifecycleTransactionBody: ModuleVersionLifecycleTransactionBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleVersionLifecycleTransactionResult>(
+    {
+      url: `/orgs/${orgId}/module-version-lifecycle-transactions`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: moduleVersionLifecycleTransactionBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getTransactModuleVersionLifecyclesMutationOptions = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof transactModuleVersionLifecycles>>,
+    TError,
+    { orgId: string; data: ModuleVersionLifecycleTransactionBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof transactModuleVersionLifecycles>>,
+  TError,
+  { orgId: string; data: ModuleVersionLifecycleTransactionBody },
+  TContext
+> => {
+  const mutationKey = ['transactModuleVersionLifecycles'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof transactModuleVersionLifecycles>>,
+    { orgId: string; data: ModuleVersionLifecycleTransactionBody }
+  > = (props) => {
+    const { orgId, data } = props ?? {};
+
+    return transactModuleVersionLifecycles(orgId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type TransactModuleVersionLifecyclesMutationResult = NonNullable<
+  Awaited<ReturnType<typeof transactModuleVersionLifecycles>>
+>;
+export type TransactModuleVersionLifecyclesMutationBody = ModuleVersionLifecycleTransactionBody;
+export type TransactModuleVersionLifecyclesMutationError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+/**
+ * @summary Apply lifecycle changes across Modules in one atomic Core transaction
+ */
+export const useTransactModuleVersionLifecycles = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof transactModuleVersionLifecycles>>,
+      TError,
+      { orgId: string; data: ModuleVersionLifecycleTransactionBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof transactModuleVersionLifecycles>>,
+  TError,
+  { orgId: string; data: ModuleVersionLifecycleTransactionBody },
+  TContext
+> => {
+  const mutationOptions = getTransactModuleVersionLifecyclesMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+export const changeModuleCatalogueStatus = (
+  orgId: string,
+  moduleId: string,
+  catalogueAction: 'archive' | 'unarchive',
+  moduleReasonedCommand: ModuleReasonedCommand,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleCatalogueEntry>(
+    {
+      url: `/orgs/${orgId}/modules/${moduleId}/catalogue/actions/${catalogueAction}`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: moduleReasonedCommand,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getChangeModuleCatalogueStatusMutationOptions = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof changeModuleCatalogueStatus>>,
+    TError,
+    {
+      orgId: string;
+      moduleId: string;
+      catalogueAction: 'archive' | 'unarchive';
+      data: ModuleReasonedCommand;
+    },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof changeModuleCatalogueStatus>>,
+  TError,
+  {
+    orgId: string;
+    moduleId: string;
+    catalogueAction: 'archive' | 'unarchive';
+    data: ModuleReasonedCommand;
+  },
+  TContext
+> => {
+  const mutationKey = ['changeModuleCatalogueStatus'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof changeModuleCatalogueStatus>>,
+    {
+      orgId: string;
+      moduleId: string;
+      catalogueAction: 'archive' | 'unarchive';
+      data: ModuleReasonedCommand;
+    }
+  > = (props) => {
+    const { orgId, moduleId, catalogueAction, data } = props ?? {};
+
+    return changeModuleCatalogueStatus(orgId, moduleId, catalogueAction, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ChangeModuleCatalogueStatusMutationResult = NonNullable<
+  Awaited<ReturnType<typeof changeModuleCatalogueStatus>>
+>;
+export type ChangeModuleCatalogueStatusMutationBody = ModuleReasonedCommand;
+export type ChangeModuleCatalogueStatusMutationError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+export const useChangeModuleCatalogueStatus = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof changeModuleCatalogueStatus>>,
+      TError,
+      {
+        orgId: string;
+        moduleId: string;
+        catalogueAction: 'archive' | 'unarchive';
+        data: ModuleReasonedCommand;
+      },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof changeModuleCatalogueStatus>>,
+  TError,
+  {
+    orgId: string;
+    moduleId: string;
+    catalogueAction: 'archive' | 'unarchive';
+    data: ModuleReasonedCommand;
+  },
+  TContext
+> => {
+  const mutationOptions = getChangeModuleCatalogueStatusMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+export const transitionModuleVersion = (
+  orgId: string,
+  moduleId: string,
+  moduleVersionId: string,
+  lifecycleAction: 'promote' | 'deprecate' | 'mark-defective' | 'restore',
+  moduleReasonedCommand: ModuleReasonedCommand,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<CoreModuleVersion>(
+    {
+      url: `/orgs/${orgId}/modules/${moduleId}/versions/${moduleVersionId}/actions/${lifecycleAction}`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: moduleReasonedCommand,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getTransitionModuleVersionMutationOptions = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof transitionModuleVersion>>,
+    TError,
+    {
+      orgId: string;
+      moduleId: string;
+      moduleVersionId: string;
+      lifecycleAction: 'promote' | 'deprecate' | 'mark-defective' | 'restore';
+      data: ModuleReasonedCommand;
+    },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof transitionModuleVersion>>,
+  TError,
+  {
+    orgId: string;
+    moduleId: string;
+    moduleVersionId: string;
+    lifecycleAction: 'promote' | 'deprecate' | 'mark-defective' | 'restore';
+    data: ModuleReasonedCommand;
+  },
+  TContext
+> => {
+  const mutationKey = ['transitionModuleVersion'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof transitionModuleVersion>>,
+    {
+      orgId: string;
+      moduleId: string;
+      moduleVersionId: string;
+      lifecycleAction: 'promote' | 'deprecate' | 'mark-defective' | 'restore';
+      data: ModuleReasonedCommand;
+    }
+  > = (props) => {
+    const { orgId, moduleId, moduleVersionId, lifecycleAction, data } = props ?? {};
+
+    return transitionModuleVersion(
+      orgId,
+      moduleId,
+      moduleVersionId,
+      lifecycleAction,
+      data,
+      requestOptions,
+    );
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type TransitionModuleVersionMutationResult = NonNullable<
+  Awaited<ReturnType<typeof transitionModuleVersion>>
+>;
+export type TransitionModuleVersionMutationBody = ModuleReasonedCommand;
+export type TransitionModuleVersionMutationError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+export const useTransitionModuleVersion = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof transitionModuleVersion>>,
+      TError,
+      {
+        orgId: string;
+        moduleId: string;
+        moduleVersionId: string;
+        lifecycleAction: 'promote' | 'deprecate' | 'mark-defective' | 'restore';
+        data: ModuleReasonedCommand;
+      },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof transitionModuleVersion>>,
+  TError,
+  {
+    orgId: string;
+    moduleId: string;
+    moduleVersionId: string;
+    lifecycleAction: 'promote' | 'deprecate' | 'mark-defective' | 'restore';
+    data: ModuleReasonedCommand;
+  },
+  TContext
+> => {
+  const mutationOptions = getTransitionModuleVersionMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+export const listModuleVersionLifecycleEvents = (
+  orgId: string,
+  moduleId: string,
+  moduleVersionId: string,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleVersionLifecycleEvent[]>(
+    {
+      url: `/orgs/${orgId}/modules/${moduleId}/versions/${moduleVersionId}/events`,
+      method: 'GET',
+      signal,
+    },
+    options,
+  );
+};
+
+export const getListModuleVersionLifecycleEventsQueryKey = (
+  orgId?: string,
+  moduleId?: string,
+  moduleVersionId?: string,
+) => {
+  return [`/orgs/${orgId}/modules/${moduleId}/versions/${moduleVersionId}/events`] as const;
+};
+
+export const getListModuleVersionLifecycleEventsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listModuleVersionLifecycleEvents>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  moduleVersionId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listModuleVersionLifecycleEvents>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getListModuleVersionLifecycleEventsQueryKey(orgId, moduleId, moduleVersionId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listModuleVersionLifecycleEvents>>> = ({
+    signal,
+  }) => listModuleVersionLifecycleEvents(orgId, moduleId, moduleVersionId, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!(orgId && moduleId && moduleVersionId),
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof listModuleVersionLifecycleEvents>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ListModuleVersionLifecycleEventsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listModuleVersionLifecycleEvents>>
+>;
+export type ListModuleVersionLifecycleEventsQueryError = ErrorType<
+  N403ForbiddenResponse | N404NotFoundResponse
+>;
+
+export function useListModuleVersionLifecycleEvents<
+  TData = Awaited<ReturnType<typeof listModuleVersionLifecycleEvents>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  moduleVersionId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listModuleVersionLifecycleEvents>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listModuleVersionLifecycleEvents>>,
+          TError,
+          Awaited<ReturnType<typeof listModuleVersionLifecycleEvents>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useListModuleVersionLifecycleEvents<
+  TData = Awaited<ReturnType<typeof listModuleVersionLifecycleEvents>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  moduleVersionId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listModuleVersionLifecycleEvents>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listModuleVersionLifecycleEvents>>,
+          TError,
+          Awaited<ReturnType<typeof listModuleVersionLifecycleEvents>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useListModuleVersionLifecycleEvents<
+  TData = Awaited<ReturnType<typeof listModuleVersionLifecycleEvents>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  moduleVersionId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listModuleVersionLifecycleEvents>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+/**
+ *
+ */
+export function useListModuleVersionLifecycleEvents<
+  TData = Awaited<ReturnType<typeof listModuleVersionLifecycleEvents>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  moduleId: string,
+  moduleVersionId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listModuleVersionLifecycleEvents>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getListModuleVersionLifecycleEventsQueryOptions(
+    orgId,
+    moduleId,
+    moduleVersionId,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const listEnvironmentModuleVersionPins = (
+  orgId: string,
+  params?: ListEnvironmentModuleVersionPinsParams,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<EnvironmentModuleVersionPin[]>(
+    { url: `/orgs/${orgId}/module-version-pins`, method: 'GET', params, signal },
+    options,
+  );
+};
+
+export const getListEnvironmentModuleVersionPinsQueryKey = (
+  orgId?: string,
+  params?: ListEnvironmentModuleVersionPinsParams,
+) => {
+  return [`/orgs/${orgId}/module-version-pins`, ...(params ? [params] : [])] as const;
+};
+
+export const getListEnvironmentModuleVersionPinsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listEnvironmentModuleVersionPins>>,
+  TError = ErrorType<N403ForbiddenResponse>,
+>(
+  orgId: string,
+  params?: ListEnvironmentModuleVersionPinsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listEnvironmentModuleVersionPins>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListEnvironmentModuleVersionPinsQueryKey(orgId, params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listEnvironmentModuleVersionPins>>> = ({
+    signal,
+  }) => listEnvironmentModuleVersionPins(orgId, params, requestOptions, signal);
+
+  return { queryKey, queryFn, enabled: !!orgId, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listEnvironmentModuleVersionPins>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ListEnvironmentModuleVersionPinsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listEnvironmentModuleVersionPins>>
+>;
+export type ListEnvironmentModuleVersionPinsQueryError = ErrorType<N403ForbiddenResponse>;
+
+export function useListEnvironmentModuleVersionPins<
+  TData = Awaited<ReturnType<typeof listEnvironmentModuleVersionPins>>,
+  TError = ErrorType<N403ForbiddenResponse>,
+>(
+  orgId: string,
+  params: undefined | ListEnvironmentModuleVersionPinsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listEnvironmentModuleVersionPins>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listEnvironmentModuleVersionPins>>,
+          TError,
+          Awaited<ReturnType<typeof listEnvironmentModuleVersionPins>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useListEnvironmentModuleVersionPins<
+  TData = Awaited<ReturnType<typeof listEnvironmentModuleVersionPins>>,
+  TError = ErrorType<N403ForbiddenResponse>,
+>(
+  orgId: string,
+  params?: ListEnvironmentModuleVersionPinsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listEnvironmentModuleVersionPins>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listEnvironmentModuleVersionPins>>,
+          TError,
+          Awaited<ReturnType<typeof listEnvironmentModuleVersionPins>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useListEnvironmentModuleVersionPins<
+  TData = Awaited<ReturnType<typeof listEnvironmentModuleVersionPins>>,
+  TError = ErrorType<N403ForbiddenResponse>,
+>(
+  orgId: string,
+  params?: ListEnvironmentModuleVersionPinsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listEnvironmentModuleVersionPins>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+/**
+ *
+ */
+export function useListEnvironmentModuleVersionPins<
+  TData = Awaited<ReturnType<typeof listEnvironmentModuleVersionPins>>,
+  TError = ErrorType<N403ForbiddenResponse>,
+>(
+  orgId: string,
+  params?: ListEnvironmentModuleVersionPinsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listEnvironmentModuleVersionPins>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getListEnvironmentModuleVersionPinsQueryOptions(orgId, params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const createEnvironmentModuleVersionPin = (
+  orgId: string,
+  environmentModuleVersionPinCreateBody: EnvironmentModuleVersionPinCreateBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<EnvironmentModuleVersionPin>(
+    {
+      url: `/orgs/${orgId}/module-version-pins`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: environmentModuleVersionPinCreateBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getCreateEnvironmentModuleVersionPinMutationOptions = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createEnvironmentModuleVersionPin>>,
+    TError,
+    { orgId: string; data: EnvironmentModuleVersionPinCreateBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createEnvironmentModuleVersionPin>>,
+  TError,
+  { orgId: string; data: EnvironmentModuleVersionPinCreateBody },
+  TContext
+> => {
+  const mutationKey = ['createEnvironmentModuleVersionPin'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createEnvironmentModuleVersionPin>>,
+    { orgId: string; data: EnvironmentModuleVersionPinCreateBody }
+  > = (props) => {
+    const { orgId, data } = props ?? {};
+
+    return createEnvironmentModuleVersionPin(orgId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateEnvironmentModuleVersionPinMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createEnvironmentModuleVersionPin>>
+>;
+export type CreateEnvironmentModuleVersionPinMutationBody = EnvironmentModuleVersionPinCreateBody;
+export type CreateEnvironmentModuleVersionPinMutationError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+export const useCreateEnvironmentModuleVersionPin = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createEnvironmentModuleVersionPin>>,
+      TError,
+      { orgId: string; data: EnvironmentModuleVersionPinCreateBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof createEnvironmentModuleVersionPin>>,
+  TError,
+  { orgId: string; data: EnvironmentModuleVersionPinCreateBody },
+  TContext
+> => {
+  const mutationOptions = getCreateEnvironmentModuleVersionPinMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+export const transitionEnvironmentModuleVersionPin = (
+  orgId: string,
+  pinId: string,
+  pinAction: 'unpin' | 'discard',
+  moduleReasonedCommand: ModuleReasonedCommand,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<EnvironmentModuleVersionPin>(
+    {
+      url: `/orgs/${orgId}/module-version-pins/${pinId}/actions/${pinAction}`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: moduleReasonedCommand,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getTransitionEnvironmentModuleVersionPinMutationOptions = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof transitionEnvironmentModuleVersionPin>>,
+    TError,
+    { orgId: string; pinId: string; pinAction: 'unpin' | 'discard'; data: ModuleReasonedCommand },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof transitionEnvironmentModuleVersionPin>>,
+  TError,
+  { orgId: string; pinId: string; pinAction: 'unpin' | 'discard'; data: ModuleReasonedCommand },
+  TContext
+> => {
+  const mutationKey = ['transitionEnvironmentModuleVersionPin'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof transitionEnvironmentModuleVersionPin>>,
+    { orgId: string; pinId: string; pinAction: 'unpin' | 'discard'; data: ModuleReasonedCommand }
+  > = (props) => {
+    const { orgId, pinId, pinAction, data } = props ?? {};
+
+    return transitionEnvironmentModuleVersionPin(orgId, pinId, pinAction, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type TransitionEnvironmentModuleVersionPinMutationResult = NonNullable<
+  Awaited<ReturnType<typeof transitionEnvironmentModuleVersionPin>>
+>;
+export type TransitionEnvironmentModuleVersionPinMutationBody = ModuleReasonedCommand;
+export type TransitionEnvironmentModuleVersionPinMutationError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+export const useTransitionEnvironmentModuleVersionPin = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof transitionEnvironmentModuleVersionPin>>,
+      TError,
+      { orgId: string; pinId: string; pinAction: 'unpin' | 'discard'; data: ModuleReasonedCommand },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof transitionEnvironmentModuleVersionPin>>,
+  TError,
+  { orgId: string; pinId: string; pinAction: 'unpin' | 'discard'; data: ModuleReasonedCommand },
+  TContext
+> => {
+  const mutationOptions = getTransitionEnvironmentModuleVersionPinMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+export const getEnvironmentModuleVersionPin = (
+  orgId: string,
+  pinId: string,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<EnvironmentModuleVersionPin>(
+    { url: `/orgs/${orgId}/module-version-pins/${pinId}`, method: 'GET', signal },
+    options,
+  );
+};
+
+export const getGetEnvironmentModuleVersionPinQueryKey = (orgId?: string, pinId?: string) => {
+  return [`/orgs/${orgId}/module-version-pins/${pinId}`] as const;
+};
+
+export const getGetEnvironmentModuleVersionPinQueryOptions = <
+  TData = Awaited<ReturnType<typeof getEnvironmentModuleVersionPin>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  pinId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getEnvironmentModuleVersionPin>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetEnvironmentModuleVersionPinQueryKey(orgId, pinId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getEnvironmentModuleVersionPin>>> = ({
+    signal,
+  }) => getEnvironmentModuleVersionPin(orgId, pinId, requestOptions, signal);
+
+  return { queryKey, queryFn, enabled: !!(orgId && pinId), ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getEnvironmentModuleVersionPin>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetEnvironmentModuleVersionPinQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getEnvironmentModuleVersionPin>>
+>;
+export type GetEnvironmentModuleVersionPinQueryError = ErrorType<
+  N403ForbiddenResponse | N404NotFoundResponse
+>;
+
+export function useGetEnvironmentModuleVersionPin<
+  TData = Awaited<ReturnType<typeof getEnvironmentModuleVersionPin>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  pinId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getEnvironmentModuleVersionPin>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getEnvironmentModuleVersionPin>>,
+          TError,
+          Awaited<ReturnType<typeof getEnvironmentModuleVersionPin>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetEnvironmentModuleVersionPin<
+  TData = Awaited<ReturnType<typeof getEnvironmentModuleVersionPin>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  pinId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getEnvironmentModuleVersionPin>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getEnvironmentModuleVersionPin>>,
+          TError,
+          Awaited<ReturnType<typeof getEnvironmentModuleVersionPin>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetEnvironmentModuleVersionPin<
+  TData = Awaited<ReturnType<typeof getEnvironmentModuleVersionPin>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  pinId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getEnvironmentModuleVersionPin>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+/**
+ *
+ */
+export function useGetEnvironmentModuleVersionPin<
+  TData = Awaited<ReturnType<typeof getEnvironmentModuleVersionPin>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  pinId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getEnvironmentModuleVersionPin>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetEnvironmentModuleVersionPinQueryOptions(orgId, pinId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const listEnvironmentModuleVersionPinEvents = (
+  orgId: string,
+  pinId: string,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleVersionPinEvent[]>(
+    { url: `/orgs/${orgId}/module-version-pins/${pinId}/events`, method: 'GET', signal },
+    options,
+  );
+};
+
+export const getListEnvironmentModuleVersionPinEventsQueryKey = (
+  orgId?: string,
+  pinId?: string,
+) => {
+  return [`/orgs/${orgId}/module-version-pins/${pinId}/events`] as const;
+};
+
+export const getListEnvironmentModuleVersionPinEventsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listEnvironmentModuleVersionPinEvents>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  pinId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listEnvironmentModuleVersionPinEvents>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListEnvironmentModuleVersionPinEventsQueryKey(orgId, pinId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listEnvironmentModuleVersionPinEvents>>
+  > = ({ signal }) => listEnvironmentModuleVersionPinEvents(orgId, pinId, requestOptions, signal);
+
+  return { queryKey, queryFn, enabled: !!(orgId && pinId), ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listEnvironmentModuleVersionPinEvents>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ListEnvironmentModuleVersionPinEventsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listEnvironmentModuleVersionPinEvents>>
+>;
+export type ListEnvironmentModuleVersionPinEventsQueryError = ErrorType<
+  N403ForbiddenResponse | N404NotFoundResponse
+>;
+
+export function useListEnvironmentModuleVersionPinEvents<
+  TData = Awaited<ReturnType<typeof listEnvironmentModuleVersionPinEvents>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  pinId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listEnvironmentModuleVersionPinEvents>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listEnvironmentModuleVersionPinEvents>>,
+          TError,
+          Awaited<ReturnType<typeof listEnvironmentModuleVersionPinEvents>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useListEnvironmentModuleVersionPinEvents<
+  TData = Awaited<ReturnType<typeof listEnvironmentModuleVersionPinEvents>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  pinId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listEnvironmentModuleVersionPinEvents>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listEnvironmentModuleVersionPinEvents>>,
+          TError,
+          Awaited<ReturnType<typeof listEnvironmentModuleVersionPinEvents>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useListEnvironmentModuleVersionPinEvents<
+  TData = Awaited<ReturnType<typeof listEnvironmentModuleVersionPinEvents>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  pinId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listEnvironmentModuleVersionPinEvents>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+/**
+ *
+ */
+export function useListEnvironmentModuleVersionPinEvents<
+  TData = Awaited<ReturnType<typeof listEnvironmentModuleVersionPinEvents>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  pinId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listEnvironmentModuleVersionPinEvents>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getListEnvironmentModuleVersionPinEventsQueryOptions(orgId, pinId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const appendEnvironmentModuleVersionPinNote = (
+  orgId: string,
+  pinId: string,
+  moduleVersionPinNoteBody: ModuleVersionPinNoteBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleVersionPinEvent>(
+    {
+      url: `/orgs/${orgId}/module-version-pins/${pinId}/notes`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: moduleVersionPinNoteBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getAppendEnvironmentModuleVersionPinNoteMutationOptions = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof appendEnvironmentModuleVersionPinNote>>,
+    TError,
+    { orgId: string; pinId: string; data: ModuleVersionPinNoteBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof appendEnvironmentModuleVersionPinNote>>,
+  TError,
+  { orgId: string; pinId: string; data: ModuleVersionPinNoteBody },
+  TContext
+> => {
+  const mutationKey = ['appendEnvironmentModuleVersionPinNote'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof appendEnvironmentModuleVersionPinNote>>,
+    { orgId: string; pinId: string; data: ModuleVersionPinNoteBody }
+  > = (props) => {
+    const { orgId, pinId, data } = props ?? {};
+
+    return appendEnvironmentModuleVersionPinNote(orgId, pinId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AppendEnvironmentModuleVersionPinNoteMutationResult = NonNullable<
+  Awaited<ReturnType<typeof appendEnvironmentModuleVersionPinNote>>
+>;
+export type AppendEnvironmentModuleVersionPinNoteMutationBody = ModuleVersionPinNoteBody;
+export type AppendEnvironmentModuleVersionPinNoteMutationError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+export const useAppendEnvironmentModuleVersionPinNote = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof appendEnvironmentModuleVersionPinNote>>,
+      TError,
+      { orgId: string; pinId: string; data: ModuleVersionPinNoteBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof appendEnvironmentModuleVersionPinNote>>,
+  TError,
+  { orgId: string; pinId: string; data: ModuleVersionPinNoteBody },
+  TContext
+> => {
+  const mutationOptions = getAppendEnvironmentModuleVersionPinNoteMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+export const previewEnvironmentModuleVersionPinBulkOperation = (
+  orgId: string,
+  moduleVersionPinBulkPreviewBody: ModuleVersionPinBulkPreviewBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleVersionPinBulkPreview>(
+    {
+      url: `/orgs/${orgId}/module-version-pins/bulk-preview`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: moduleVersionPinBulkPreviewBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getPreviewEnvironmentModuleVersionPinBulkOperationMutationOptions = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof previewEnvironmentModuleVersionPinBulkOperation>>,
+    TError,
+    { orgId: string; data: ModuleVersionPinBulkPreviewBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof previewEnvironmentModuleVersionPinBulkOperation>>,
+  TError,
+  { orgId: string; data: ModuleVersionPinBulkPreviewBody },
+  TContext
+> => {
+  const mutationKey = ['previewEnvironmentModuleVersionPinBulkOperation'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof previewEnvironmentModuleVersionPinBulkOperation>>,
+    { orgId: string; data: ModuleVersionPinBulkPreviewBody }
+  > = (props) => {
+    const { orgId, data } = props ?? {};
+
+    return previewEnvironmentModuleVersionPinBulkOperation(orgId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PreviewEnvironmentModuleVersionPinBulkOperationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof previewEnvironmentModuleVersionPinBulkOperation>>
+>;
+export type PreviewEnvironmentModuleVersionPinBulkOperationMutationBody =
+  ModuleVersionPinBulkPreviewBody;
+export type PreviewEnvironmentModuleVersionPinBulkOperationMutationError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+export const usePreviewEnvironmentModuleVersionPinBulkOperation = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof previewEnvironmentModuleVersionPinBulkOperation>>,
+      TError,
+      { orgId: string; data: ModuleVersionPinBulkPreviewBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof previewEnvironmentModuleVersionPinBulkOperation>>,
+  TError,
+  { orgId: string; data: ModuleVersionPinBulkPreviewBody },
+  TContext
+> => {
+  const mutationOptions =
+    getPreviewEnvironmentModuleVersionPinBulkOperationMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+export const executeEnvironmentModuleVersionPinBulkOperation = (
+  orgId: string,
+  moduleVersionPinBulkCommandBody: ModuleVersionPinBulkCommandBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleVersionPinBulkResult>(
+    {
+      url: `/orgs/${orgId}/module-version-pins/bulk`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: moduleVersionPinBulkCommandBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getExecuteEnvironmentModuleVersionPinBulkOperationMutationOptions = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof executeEnvironmentModuleVersionPinBulkOperation>>,
+    TError,
+    { orgId: string; data: ModuleVersionPinBulkCommandBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof executeEnvironmentModuleVersionPinBulkOperation>>,
+  TError,
+  { orgId: string; data: ModuleVersionPinBulkCommandBody },
+  TContext
+> => {
+  const mutationKey = ['executeEnvironmentModuleVersionPinBulkOperation'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof executeEnvironmentModuleVersionPinBulkOperation>>,
+    { orgId: string; data: ModuleVersionPinBulkCommandBody }
+  > = (props) => {
+    const { orgId, data } = props ?? {};
+
+    return executeEnvironmentModuleVersionPinBulkOperation(orgId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ExecuteEnvironmentModuleVersionPinBulkOperationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof executeEnvironmentModuleVersionPinBulkOperation>>
+>;
+export type ExecuteEnvironmentModuleVersionPinBulkOperationMutationBody =
+  ModuleVersionPinBulkCommandBody;
+export type ExecuteEnvironmentModuleVersionPinBulkOperationMutationError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+export const useExecuteEnvironmentModuleVersionPinBulkOperation = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof executeEnvironmentModuleVersionPinBulkOperation>>,
+      TError,
+      { orgId: string; data: ModuleVersionPinBulkCommandBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof executeEnvironmentModuleVersionPinBulkOperation>>,
+  TError,
+  { orgId: string; data: ModuleVersionPinBulkCommandBody },
+  TContext
+> => {
+  const mutationOptions =
+    getExecuteEnvironmentModuleVersionPinBulkOperationMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};

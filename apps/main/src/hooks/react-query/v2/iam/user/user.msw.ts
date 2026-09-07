@@ -21,7 +21,7 @@ export const getCheckPermissionsResponseMock = (
   items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     permission_check: {
       resource: faker.helpers.fromRegExp('^(organization|project|env):[a-zA-Z0-9/_|\-=+]+$'),
-      permission: faker.helpers.fromRegExp('^[a-z][a-z0-9_]{1,62}[a-z0-9]$'),
+      permission: faker.helpers.fromRegExp('^[a-z][a-z0-9_.-]{1,62}[a-z0-9]$'),
     },
     allowed: faker.datatype.boolean(),
   })),
@@ -34,7 +34,7 @@ export const getCheckPermissionsResponseMock200 = (
   items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     permission_check: {
       resource: faker.helpers.fromRegExp('^(organization|project|env):[a-zA-Z0-9/_|\-=+]+$'),
-      permission: faker.helpers.fromRegExp('^[a-z][a-z0-9_]{1,62}[a-z0-9]$'),
+      permission: faker.helpers.fromRegExp('^[a-z][a-z0-9_.-]{1,62}[a-z0-9]$'),
     },
     allowed: faker.datatype.boolean(),
   })),

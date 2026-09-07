@@ -1,4 +1,4 @@
-import { Empty, Flex, Table, TableColumnProps, Tooltip } from 'antd';
+import { Empty, Flex, Table, TableColumnProps, Tag, Tooltip } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
 
@@ -70,6 +70,11 @@ export const ResourceTypes = () => {
       dataIndex: 'built_in',
       ellipsis: true,
       render: (record) => (record.built_in ? 'Built in' : 'Custom'),
+    },
+    {
+      title: 'Catalogue',
+      dataIndex: 'catalogue_status',
+      render: (status) => <Tag color={status === 'archived' ? 'orange' : 'green'}>{status}</Tag>,
     },
     {
       title: 'Created at',

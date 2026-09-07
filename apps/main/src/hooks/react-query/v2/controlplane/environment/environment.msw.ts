@@ -8,13 +8,15 @@ import { http, HttpResponse } from 'msw';
 
 import type {
   Environment,
+  EnvironmentDeletionImpact,
   EnvironmentPage,
   N400BadRequestResponse,
+  N403ForbiddenResponse,
   N404NotFoundResponse,
   N409ConflictResponse,
   RefreshRunnerActionResult,
 } from '../../../../../models/v2/controlplane';
-import { EnvironmentStatus } from '../../../../../models/v2/controlplane';
+import { EnvironmentStatus, ModuleVersionPinStatus } from '../../../../../models/v2/controlplane';
 
 export const getListInternalEnvironmentsByProjectUuidResponseMock = (
   overrideResponse: Partial<EnvironmentPage> = {},
@@ -35,6 +37,12 @@ export const getListInternalEnvironmentsByProjectUuidResponseMock = (
     ]),
     runner_id: faker.helpers.arrayElement([
       faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    labels: faker.helpers.arrayElement([
+      {
+        [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      },
       undefined,
     ]),
   })),
@@ -61,6 +69,12 @@ export const getListInternalEnvironmentsByProjectUuidResponseMock200 = (
     ]),
     runner_id: faker.helpers.arrayElement([
       faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    labels: faker.helpers.arrayElement([
+      {
+        [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      },
       undefined,
     ]),
   })),
@@ -97,6 +111,12 @@ export const getGetInternalEnvironmentByUuidResponseMock = (
     faker.string.alpha({ length: { min: 10, max: 20 } }),
     undefined,
   ]),
+  labels: faker.helpers.arrayElement([
+    {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
@@ -118,6 +138,12 @@ export const getGetInternalEnvironmentByUuidResponseMock200 = (
   ]),
   runner_id: faker.helpers.arrayElement([
     faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  labels: faker.helpers.arrayElement([
+    {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
     undefined,
   ]),
   ...overrideResponse,
@@ -153,6 +179,12 @@ export const getListEnvironmentsResponseMock = (
       faker.string.alpha({ length: { min: 10, max: 20 } }),
       undefined,
     ]),
+    labels: faker.helpers.arrayElement([
+      {
+        [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      },
+      undefined,
+    ]),
   })),
   next_page_token: undefined,
   ...overrideResponse,
@@ -177,6 +209,12 @@ export const getListEnvironmentsResponseMock200 = (
     ]),
     runner_id: faker.helpers.arrayElement([
       faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    labels: faker.helpers.arrayElement([
+      {
+        [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      },
       undefined,
     ]),
   })),
@@ -213,6 +251,12 @@ export const getCreateEnvironmentResponseMock = (
     faker.string.alpha({ length: { min: 10, max: 20 } }),
     undefined,
   ]),
+  labels: faker.helpers.arrayElement([
+    {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
@@ -234,6 +278,12 @@ export const getCreateEnvironmentResponseMock201 = (
   ]),
   runner_id: faker.helpers.arrayElement([
     faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  labels: faker.helpers.arrayElement([
+    {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
     undefined,
   ]),
   ...overrideResponse,
@@ -277,6 +327,12 @@ export const getDeleteEnvironmentResponseMock = (
     faker.string.alpha({ length: { min: 10, max: 20 } }),
     undefined,
   ]),
+  labels: faker.helpers.arrayElement([
+    {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
@@ -298,6 +354,12 @@ export const getDeleteEnvironmentResponseMock202 = (
   ]),
   runner_id: faker.helpers.arrayElement([
     faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  labels: faker.helpers.arrayElement([
+    {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
     undefined,
   ]),
   ...overrideResponse,
@@ -341,6 +403,12 @@ export const getGetEnvironmentResponseMock = (
     faker.string.alpha({ length: { min: 10, max: 20 } }),
     undefined,
   ]),
+  labels: faker.helpers.arrayElement([
+    {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
@@ -362,6 +430,12 @@ export const getGetEnvironmentResponseMock200 = (
   ]),
   runner_id: faker.helpers.arrayElement([
     faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  labels: faker.helpers.arrayElement([
+    {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
     undefined,
   ]),
   ...overrideResponse,
@@ -396,6 +470,12 @@ export const getUpdateEnvironmentResponseMock = (
     faker.string.alpha({ length: { min: 10, max: 20 } }),
     undefined,
   ]),
+  labels: faker.helpers.arrayElement([
+    {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
@@ -419,10 +499,158 @@ export const getUpdateEnvironmentResponseMock200 = (
     faker.string.alpha({ length: { min: 10, max: 20 } }),
     undefined,
   ]),
+  labels: faker.helpers.arrayElement([
+    {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
 export const getUpdateEnvironmentResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getGetEnvironmentDeletionImpactResponseMock = (
+  overrideResponse: Partial<EnvironmentDeletionImpact> = {},
+): EnvironmentDeletionImpact => ({
+  environment_uuid: faker.string.uuid(),
+  blocked: faker.datatype.boolean(),
+  blockers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ),
+  pins: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    id: faker.string.uuid(),
+    org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    project_uuid: faker.string.uuid(),
+    project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    environment_uuid: faker.string.uuid(),
+    environment_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_uuid: faker.string.uuid(),
+    version_uuid: faker.string.uuid(),
+    status: faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+    resource_version: faker.number.int({ min: 1, max: undefined }),
+    activation_event_id: faker.string.uuid(),
+    bulk_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    override_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    override_target_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    override_actor: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    override_reason: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    override_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    created_by: faker.string.uuid(),
+    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    removed_at: faker.helpers.arrayElement([
+      `${faker.date.past().toISOString().split('.')[0]}Z`,
+      undefined,
+    ]),
+  })),
+  related_resources: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => ({
+    id: faker.string.uuid(),
+    module_uuid: faker.string.uuid(),
+    version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    environment_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    namespace: faker.helpers.fromRegExp('^[a-z][a-z0-9.-]*$'),
+    external_resource_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    kind: faker.helpers.arrayElement(['related_resource', 'contextual_action'] as const),
+    lifecycle_state: faker.helpers.arrayElement(['draft', 'active', 'terminal'] as const),
+    label: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    target_url: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    payload: {},
+    created_by: faker.string.uuid(),
+    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  })),
+  ...overrideResponse,
+});
+
+export const getGetEnvironmentDeletionImpactResponseMock200 = (
+  overrideResponse: Partial<EnvironmentDeletionImpact> = {},
+): EnvironmentDeletionImpact => ({
+  environment_uuid: faker.string.uuid(),
+  blocked: faker.datatype.boolean(),
+  blockers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ),
+  pins: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    id: faker.string.uuid(),
+    org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    project_uuid: faker.string.uuid(),
+    project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    environment_uuid: faker.string.uuid(),
+    environment_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_uuid: faker.string.uuid(),
+    version_uuid: faker.string.uuid(),
+    status: faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+    resource_version: faker.number.int({ min: 1, max: undefined }),
+    activation_event_id: faker.string.uuid(),
+    bulk_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    override_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    override_target_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    override_actor: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    override_reason: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    override_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    created_by: faker.string.uuid(),
+    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    removed_at: faker.helpers.arrayElement([
+      `${faker.date.past().toISOString().split('.')[0]}Z`,
+      undefined,
+    ]),
+  })),
+  related_resources: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => ({
+    id: faker.string.uuid(),
+    module_uuid: faker.string.uuid(),
+    version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    environment_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    namespace: faker.helpers.fromRegExp('^[a-z][a-z0-9.-]*$'),
+    external_resource_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    kind: faker.helpers.arrayElement(['related_resource', 'contextual_action'] as const),
+    lifecycle_state: faker.helpers.arrayElement(['draft', 'active', 'terminal'] as const),
+    label: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    target_url: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    payload: {},
+    created_by: faker.string.uuid(),
+    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  })),
+  ...overrideResponse,
+});
+
+export const getGetEnvironmentDeletionImpactResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getGetEnvironmentDeletionImpactResponseMock404 = (
   overrideResponse: Partial<N404NotFoundResponse> = {},
 ): N404NotFoundResponse => ({
   error: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -452,6 +680,12 @@ export const getListEnvironmentsInOrgResponseMock = (
       faker.string.alpha({ length: { min: 10, max: 20 } }),
       undefined,
     ]),
+    labels: faker.helpers.arrayElement([
+      {
+        [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      },
+      undefined,
+    ]),
   })),
   next_page_token: undefined,
   ...overrideResponse,
@@ -476,6 +710,12 @@ export const getListEnvironmentsInOrgResponseMock200 = (
     ]),
     runner_id: faker.helpers.arrayElement([
       faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    labels: faker.helpers.arrayElement([
+      {
+        [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      },
       undefined,
     ]),
   })),
@@ -512,6 +752,12 @@ export const getInternalUpdateEnvironmentResponseMock = (
     faker.string.alpha({ length: { min: 10, max: 20 } }),
     undefined,
   ]),
+  labels: faker.helpers.arrayElement([
+    {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
@@ -533,6 +779,12 @@ export const getInternalUpdateEnvironmentResponseMock200 = (
   ]),
   runner_id: faker.helpers.arrayElement([
     faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  labels: faker.helpers.arrayElement([
+    {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
     undefined,
   ]),
   ...overrideResponse,
@@ -1208,6 +1460,110 @@ export const getUpdateEnvironmentMockHandler404 = (
   );
 };
 
+export const getGetEnvironmentDeletionImpactMockHandler = (
+  overrideResponse?:
+    | EnvironmentDeletionImpact
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<EnvironmentDeletionImpact> | EnvironmentDeletionImpact),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/projects/:projectId/envs/:envId/deletion-impact',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getGetEnvironmentDeletionImpactResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetEnvironmentDeletionImpactMockHandler200 = (
+  overrideResponse?:
+    | EnvironmentDeletionImpact
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<EnvironmentDeletionImpact> | EnvironmentDeletionImpact),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/projects/:projectId/envs/:envId/deletion-impact',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getGetEnvironmentDeletionImpactResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetEnvironmentDeletionImpactMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/projects/:projectId/envs/:envId/deletion-impact',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getGetEnvironmentDeletionImpactResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetEnvironmentDeletionImpactMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/projects/:projectId/envs/:envId/deletion-impact',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getGetEnvironmentDeletionImpactResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
 export const getListEnvironmentsInOrgMockHandler = (
   overrideResponse?:
     | EnvironmentPage
@@ -1527,6 +1883,7 @@ export const getEnvironmentMock = () => [
   getDeleteEnvironmentMockHandler(),
   getGetEnvironmentMockHandler(),
   getUpdateEnvironmentMockHandler(),
+  getGetEnvironmentDeletionImpactMockHandler(),
   getListEnvironmentsInOrgMockHandler(),
   getInternalUpdateEnvironmentMockHandler(),
   getUpdateRunnerInAnEnvironmentMockHandler(),
