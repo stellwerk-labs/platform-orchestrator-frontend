@@ -40,6 +40,7 @@ import { RBACPermission, useRBACPermissions } from '@src/hooks/useRBAC';
 import type {
   CoreModuleVersion,
   CoreModuleVersionDetail,
+  CoreModuleVersionPage,
   ModuleVersionComparison,
   ModuleVersionPublishBody,
 } from '@src/models/v2/controlplane';
@@ -376,6 +377,24 @@ export const formatComparisonValue = (value: unknown, present = true) => {
   return JSON.stringify(value, null, 2);
 };
 
+export const moduleVersionHistoryErrorCopy = (status?: number) =>
+  status === 403
+    ? {
+        message: 'Version history requires module.version.read',
+        description:
+          'This Module is readable, but immutable Module Versions use a separate permission.',
+      }
+    : {
+        message: 'Version history could not be loaded',
+        description:
+          'Reload the page to try again. If the problem persists, contact your administrator.',
+      };
+
+export const visibleModuleVersionItems = (versions: {
+  data?: CoreModuleVersionPage;
+  isError: boolean;
+}): CoreModuleVersionPage['items'] => (versions.isError ? [] : (versions.data?.items ?? []));
+
 const ComparisonValue = ({
   value,
   present,
@@ -536,6 +555,8 @@ export const ModuleVersions = () => {
     include_deprecated: true,
     include_defective: true,
   });
+  const versionHistoryError = moduleVersionHistoryErrorCopy(versions.error?.response?.status);
+  const versionItems = visibleModuleVersionItems(versions);
   const comparison = useCompareModuleVersions(
     orgId,
     moduleId,
@@ -712,16 +733,29 @@ export const ModuleVersions = () => {
           onClick={openPublish}
           disabled={
             !canPublish ||
-            versions.data?.items.some((item) => item.version.lifecycle_status === 'proposed')
+            versions.isPending ||
+            versions.isError ||
+            versionItems.some((item) => item.version.lifecycle_status === 'proposed')
           }>
           Publish Module Version
         </Button>
       </Flex>
+      {versions.isError && (
+        <Alert
+          type={'error'}
+          showIcon
+          message={versionHistoryError.message}
+          description={versionHistoryError.description}
+        />
+      )}
       <Table
         rowKey={'uuid'}
         loading={versions.isPending}
-        dataSource={versions.data?.items.map((item) => item.version) ?? []}
+        dataSource={versionItems.map((item) => item.version)}
         columns={columns}
+        locale={{
+          emptyText: versions.isError ? 'Version history unavailable' : 'No Module Versions found',
+        }}
         expandable={{
           expandedRowRender: (version) => (
             <Flex vertical gap={'small'}>
@@ -900,7 +934,7 @@ export const ModuleVersions = () => {
             value={compareToUuid || undefined}
             placeholder={'Choose another immutable version'}
             onChange={setCompareToUuid}
-            options={(versions.data?.items ?? [])
+            options={versionItems
               .filter((item) => item.version.uuid !== compareFrom?.uuid)
               .map((item) => ({
                 value: item.version.uuid,

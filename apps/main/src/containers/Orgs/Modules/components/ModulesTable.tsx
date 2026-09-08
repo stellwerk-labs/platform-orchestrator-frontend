@@ -23,10 +23,14 @@ const ModuleLifecycleSummary = ({ module }: { module: ModuleCatalogueEntry }) =>
     include_deprecated: true,
     include_defective: true,
   });
-  const items = versions.data?.items ?? [];
+  const items = versions.isError ? [] : (versions.data?.items ?? []);
+  const hasVersionHistory = !versions.isError && items.length > 0;
   const currentDefault = items.find(
     (item) => item.version.uuid === module.current_default_version_uuid,
   );
+  const hasDeclaredDefault = Boolean(module.current_default_version_uuid);
+  const versionHistoryForbidden = versions.error?.response?.status === 403;
+  const versionHistoryFailed = versions.isError;
   const proposed = items.find((item) => item.version.lifecycle_status === 'proposed');
   const defective = items.some((item) => item.version.lifecycle_status === 'defective');
   const unverified = items.some((item) => item.version.verification_status === 'unverified');
@@ -36,12 +40,43 @@ const ModuleLifecycleSummary = ({ module }: { module: ModuleCatalogueEntry }) =>
     currentDefault?.version.uuid ?? '',
     { query: { enabled: Boolean(currentDefault) } },
   );
+  const defaultLabel = currentDefault?.version.semantic_version
+    ? currentDefault.version.semantic_version
+    : hasDeclaredDefault || versions.isError
+      ? 'unavailable'
+      : 'none';
+  let summary = 'Incomplete Module, no versions';
+
+  if (versions.isPending) {
+    summary = 'Loading version history…';
+  } else if (versionHistoryFailed) {
+    summary = versionHistoryForbidden
+      ? 'Version history requires module.version.read'
+      : 'Version history could not be loaded';
+  } else if (usage.isError) {
+    summary =
+      usage.error?.response?.status === 403
+        ? 'Adoption requires module.version.read'
+        : 'Adoption could not be loaded';
+  } else if (usage.data) {
+    summary = `${usage.data.active_environment_count} active Environments${
+      usage.data.unknown_environments.length
+        ? `, ${usage.data.unknown_environments.length} unknown`
+        : ''
+    }`;
+  } else if (currentDefault) {
+    summary = 'Loading adoption…';
+  } else if (hasDeclaredDefault) {
+    summary = 'Default version was not returned';
+  } else if (hasVersionHistory) {
+    summary = 'No Default version';
+  }
 
   return (
     <Flex vertical gap={4}>
       <Flex gap={4} wrap={'wrap'}>
-        <Tag color={currentDefault ? 'green' : 'default'}>
-          Default {currentDefault?.version.semantic_version ?? 'none'}
+        <Tag color={currentDefault ? 'green' : hasDeclaredDefault ? 'gold' : 'default'}>
+          Default {defaultLabel}
         </Tag>
         {currentDefault?.version.migration_generation === 'v0' && (
           <Tag color={'gold'}>Legacy v0</Tag>
@@ -50,17 +85,7 @@ const ModuleLifecycleSummary = ({ module }: { module: ModuleCatalogueEntry }) =>
         {defective && <Tag color={'red'}>Defective history</Tag>}
         {unverified && <Tag>Unverified</Tag>}
       </Flex>
-      <Typography.Text type={'secondary'}>
-        {usage.data
-          ? `${usage.data.active_environment_count} active Environments${
-              usage.data.unknown_environments.length
-                ? `, ${usage.data.unknown_environments.length} unknown`
-                : ''
-            }`
-          : currentDefault
-            ? 'Loading adoption…'
-            : 'Incomplete Module, no versions'}
-      </Typography.Text>
+      <Typography.Text type={'secondary'}>{summary}</Typography.Text>
     </Flex>
   );
 };
@@ -70,12 +95,20 @@ const LastPublication = ({ module }: { module: ModuleCatalogueEntry }) => {
     include_deprecated: true,
     include_defective: true,
   });
+  if (versions.isPending) return 'Loading…';
+  if (versions.isError) {
+    return versions.error?.response?.status === 403 ? 'Permission required' : 'Unavailable';
+  }
   const latest = versions.data?.items.reduce<string | undefined>(
     (current, item) =>
       !current || item.version.created_at > current ? item.version.created_at : current,
     undefined,
   );
-  return latest ? formatDate(latest, DATE_FORMATS_TYPES.DATE_MONTH_YEAR_HOUR_MINUTE) : 'Never';
+  return latest
+    ? formatDate(latest, DATE_FORMATS_TYPES.DATE_MONTH_YEAR_HOUR_MINUTE)
+    : module.current_default_version_uuid || versions.data?.items.length
+      ? 'Unavailable'
+      : 'Never';
 };
 
 export const ModulesTable = ({ modules, modulesLoading }: ResourcesTableProps) => {
