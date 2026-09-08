@@ -25,7 +25,7 @@ RUN sed -i '/^pid/d' /etc/nginx/nginx.conf && \
              /var/cache/nginx/scgi_temp && \
     chown -R nginx:nginx /var/cache/nginx /var/log/nginx
 
-COPY apps/main/docker/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --chmod=0644 apps/main/docker/nginx.conf /etc/nginx/conf.d/default.conf
 COPY apps/main/docker/ /app/docker
 COPY --from=build /app/apps/main/dist /app/build
 WORKDIR /app
