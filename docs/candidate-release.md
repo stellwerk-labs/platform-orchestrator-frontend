@@ -1,11 +1,11 @@
-# Manual Release Candidates
+# Manual release candidates
 
 The normal main-branch release remains unchanged. A separate manual CI path can
 publish an explicitly approved, already tagged release candidate without updating
 stable/latest channels. It is enabled only in the original
 `stellwerk-labs/platform-orchestrator-frontend` repository.
 
-## Before Dispatch
+## Before dispatch
 
 - Transfer this workflow/helper/docs change separately through an approved
   workflow-only source change. Use `[skip release]` on that bootstrap change and
@@ -20,7 +20,7 @@ stable/latest channels. It is enabled only in the original
 - Keep the coordinated CP, DP, IAM and Runner candidate endpoints/images pinned
   to the manifest-approved set used during the browser and API-flow checks.
 
-## Dispatch and Recovery
+## Dispatch and recovery
 
 Dispatch the Tests workflow with `candidate_tag` and `candidate_sha`. Lint,
 typecheck, duplicate detection, unit tests, production build and Playwright checks
