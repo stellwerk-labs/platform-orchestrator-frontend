@@ -24,6 +24,7 @@ import type {
   DeleteEnvironmentParams,
   Environment,
   EnvironmentCreateBody,
+  EnvironmentDeletionImpact,
   EnvironmentInternalUpdateBody,
   EnvironmentPage,
   EnvironmentUpdateBody,
@@ -31,6 +32,7 @@ import type {
   ListEnvironmentsParams,
   ListInternalEnvironmentsByProjectUuidParams,
   N400BadRequestResponse,
+  N403ForbiddenResponse,
   N404NotFoundResponse,
   N409ConflictResponse,
   RefreshRunnerActionResult,
@@ -914,6 +916,173 @@ export const useUpdateEnvironment = <TError = ErrorType<N404NotFoundResponse>, T
 
   return useMutation(mutationOptions, queryClient);
 };
+/**
+ * @summary Preview retained Module Pins and add-on resources affected by Environment deletion.
+ */
+export const getEnvironmentDeletionImpact = (
+  orgId: string,
+  projectId: string,
+  envId: string,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<EnvironmentDeletionImpact>(
+    {
+      url: `/orgs/${orgId}/projects/${projectId}/envs/${envId}/deletion-impact`,
+      method: 'GET',
+      signal,
+    },
+    options,
+  );
+};
+
+export const getGetEnvironmentDeletionImpactQueryKey = (
+  orgId?: string,
+  projectId?: string,
+  envId?: string,
+) => {
+  return [`/orgs/${orgId}/projects/${projectId}/envs/${envId}/deletion-impact`] as const;
+};
+
+export const getGetEnvironmentDeletionImpactQueryOptions = <
+  TData = Awaited<ReturnType<typeof getEnvironmentDeletionImpact>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  projectId: string,
+  envId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getEnvironmentDeletionImpact>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetEnvironmentDeletionImpactQueryKey(orgId, projectId, envId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getEnvironmentDeletionImpact>>> = ({
+    signal,
+  }) => getEnvironmentDeletionImpact(orgId, projectId, envId, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!(orgId && projectId && envId),
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof getEnvironmentDeletionImpact>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type GetEnvironmentDeletionImpactQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getEnvironmentDeletionImpact>>
+>;
+export type GetEnvironmentDeletionImpactQueryError = ErrorType<
+  N403ForbiddenResponse | N404NotFoundResponse
+>;
+
+export function useGetEnvironmentDeletionImpact<
+  TData = Awaited<ReturnType<typeof getEnvironmentDeletionImpact>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  projectId: string,
+  envId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getEnvironmentDeletionImpact>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getEnvironmentDeletionImpact>>,
+          TError,
+          Awaited<ReturnType<typeof getEnvironmentDeletionImpact>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetEnvironmentDeletionImpact<
+  TData = Awaited<ReturnType<typeof getEnvironmentDeletionImpact>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  projectId: string,
+  envId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getEnvironmentDeletionImpact>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getEnvironmentDeletionImpact>>,
+          TError,
+          Awaited<ReturnType<typeof getEnvironmentDeletionImpact>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetEnvironmentDeletionImpact<
+  TData = Awaited<ReturnType<typeof getEnvironmentDeletionImpact>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  projectId: string,
+  envId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getEnvironmentDeletionImpact>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary Preview retained Module Pins and add-on resources affected by Environment deletion.
+ */
+
+/**
+ *
+ */
+export function useGetEnvironmentDeletionImpact<
+  TData = Awaited<ReturnType<typeof getEnvironmentDeletionImpact>>,
+  TError = ErrorType<N403ForbiddenResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  projectId: string,
+  envId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getEnvironmentDeletionImpact>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetEnvironmentDeletionImpactQueryOptions(
+    orgId,
+    projectId,
+    envId,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
 /**
  * @summary List environments in an organization
  */

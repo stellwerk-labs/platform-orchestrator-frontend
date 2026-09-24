@@ -7,9 +7,19 @@ import type { RequestHandlerOptions } from 'msw';
 import { http, HttpResponse } from 'msw';
 
 import type {
+  EnvironmentModuleVersionPin,
   InternalModuleCatalogue,
+  ModuleExtensionContribution,
+  ModuleOperationReservation,
+  N400BadRequestResponse,
+  N403ForbiddenResponse,
   N404NotFoundResponse,
   N409ConflictResponse,
+} from '../../../../../models/v2/controlplane';
+import {
+  ModuleVerificationStatus,
+  ModuleVersionPinStatus,
+  ModuleVersionSemanticStatus,
 } from '../../../../../models/v2/controlplane';
 
 export const getInternalForceDeleteEnvironmentResponseMock404 = (
@@ -22,6 +32,658 @@ export const getInternalForceDeleteEnvironmentResponseMock404 = (
 });
 
 export const getInternalForceDeleteEnvironmentResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getBeginEnvironmentModuleVersionPinOverrideResponseMock = (
+  overrideResponse: Partial<EnvironmentModuleVersionPin> = {},
+): EnvironmentModuleVersionPin => ({
+  id: faker.string.uuid(),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  project_uuid: faker.string.uuid(),
+  project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  environment_uuid: faker.string.uuid(),
+  environment_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  version_uuid: faker.string.uuid(),
+  status: faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  activation_event_id: faker.string.uuid(),
+  bulk_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_target_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_actor: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  override_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_by: faker.string.uuid(),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  removed_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getBeginEnvironmentModuleVersionPinOverrideResponseMock200 = (
+  overrideResponse: Partial<EnvironmentModuleVersionPin> = {},
+): EnvironmentModuleVersionPin => ({
+  id: faker.string.uuid(),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  project_uuid: faker.string.uuid(),
+  project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  environment_uuid: faker.string.uuid(),
+  environment_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  version_uuid: faker.string.uuid(),
+  status: faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  activation_event_id: faker.string.uuid(),
+  bulk_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_target_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_actor: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  override_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_by: faker.string.uuid(),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  removed_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getBeginEnvironmentModuleVersionPinOverrideResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getBeginEnvironmentModuleVersionPinOverrideResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getBeginEnvironmentModuleVersionPinOverrideResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getListModuleOperationReservationsResponseMock = (): ModuleOperationReservation[] =>
+  Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    id: faker.string.uuid(),
+    module_uuid: faker.string.uuid(),
+    namespace: faker.helpers.fromRegExp('^[a-z][a-z0-9.-]*$'),
+    operation_id: faker.string.uuid(),
+    related_resource_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    reason: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    resource_version: faker.number.int({ min: 1, max: undefined }),
+    acquired_by: faker.string.uuid(),
+    acquired_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    released_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    released_at: faker.helpers.arrayElement([
+      `${faker.date.past().toISOString().split('.')[0]}Z`,
+      undefined,
+    ]),
+    release_reason: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+  }));
+
+export const getListModuleOperationReservationsResponseMock200 = (): ModuleOperationReservation[] =>
+  Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    id: faker.string.uuid(),
+    module_uuid: faker.string.uuid(),
+    namespace: faker.helpers.fromRegExp('^[a-z][a-z0-9.-]*$'),
+    operation_id: faker.string.uuid(),
+    related_resource_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    reason: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    resource_version: faker.number.int({ min: 1, max: undefined }),
+    acquired_by: faker.string.uuid(),
+    acquired_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    released_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    released_at: faker.helpers.arrayElement([
+      `${faker.date.past().toISOString().split('.')[0]}Z`,
+      undefined,
+    ]),
+    release_reason: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+  }));
+
+export const getListModuleOperationReservationsResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getListModuleOperationReservationsResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getAcquireModuleOperationReservationResponseMock = (
+  overrideResponse: Partial<ModuleOperationReservation> = {},
+): ModuleOperationReservation => ({
+  id: faker.string.uuid(),
+  module_uuid: faker.string.uuid(),
+  namespace: faker.helpers.fromRegExp('^[a-z][a-z0-9.-]*$'),
+  operation_id: faker.string.uuid(),
+  related_resource_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  reason: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  acquired_by: faker.string.uuid(),
+  acquired_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  released_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  released_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  release_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getAcquireModuleOperationReservationResponseMock201 = (
+  overrideResponse: Partial<ModuleOperationReservation> = {},
+): ModuleOperationReservation => ({
+  id: faker.string.uuid(),
+  module_uuid: faker.string.uuid(),
+  namespace: faker.helpers.fromRegExp('^[a-z][a-z0-9.-]*$'),
+  operation_id: faker.string.uuid(),
+  related_resource_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  reason: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  acquired_by: faker.string.uuid(),
+  acquired_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  released_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  released_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  release_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getAcquireModuleOperationReservationResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getAcquireModuleOperationReservationResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getAcquireModuleOperationReservationResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getAcquireModuleOperationReservationResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getReleaseModuleOperationReservationResponseMock = (
+  overrideResponse: Partial<ModuleOperationReservation> = {},
+): ModuleOperationReservation => ({
+  id: faker.string.uuid(),
+  module_uuid: faker.string.uuid(),
+  namespace: faker.helpers.fromRegExp('^[a-z][a-z0-9.-]*$'),
+  operation_id: faker.string.uuid(),
+  related_resource_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  reason: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  acquired_by: faker.string.uuid(),
+  acquired_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  released_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  released_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  release_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getReleaseModuleOperationReservationResponseMock200 = (
+  overrideResponse: Partial<ModuleOperationReservation> = {},
+): ModuleOperationReservation => ({
+  id: faker.string.uuid(),
+  module_uuid: faker.string.uuid(),
+  namespace: faker.helpers.fromRegExp('^[a-z][a-z0-9.-]*$'),
+  operation_id: faker.string.uuid(),
+  related_resource_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  reason: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  acquired_by: faker.string.uuid(),
+  acquired_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  released_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  released_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  release_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getReleaseModuleOperationReservationResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getReleaseModuleOperationReservationResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getReleaseModuleOperationReservationResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getReleaseModuleOperationReservationResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getListModuleExtensionContributionsResponseMock = (): ModuleExtensionContribution[] =>
+  Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    id: faker.string.uuid(),
+    module_uuid: faker.string.uuid(),
+    version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    environment_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    namespace: faker.helpers.fromRegExp('^[a-z][a-z0-9.-]*$'),
+    external_resource_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    kind: faker.helpers.arrayElement(['related_resource', 'contextual_action'] as const),
+    lifecycle_state: faker.helpers.arrayElement(['draft', 'active', 'terminal'] as const),
+    label: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    target_url: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    payload: {},
+    created_by: faker.string.uuid(),
+    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  }));
+
+export const getListModuleExtensionContributionsResponseMock200 =
+  (): ModuleExtensionContribution[] =>
+    Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+      id: faker.string.uuid(),
+      module_uuid: faker.string.uuid(),
+      version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+      environment_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+      namespace: faker.helpers.fromRegExp('^[a-z][a-z0-9.-]*$'),
+      external_resource_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      kind: faker.helpers.arrayElement(['related_resource', 'contextual_action'] as const),
+      lifecycle_state: faker.helpers.arrayElement(['draft', 'active', 'terminal'] as const),
+      label: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      target_url: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 20 } }),
+        undefined,
+      ]),
+      payload: {},
+      created_by: faker.string.uuid(),
+      created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+      updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    }));
+
+export const getListModuleExtensionContributionsResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getListModuleExtensionContributionsResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getUpsertModuleExtensionContributionResponseMock = (
+  overrideResponse: Partial<ModuleExtensionContribution> = {},
+): ModuleExtensionContribution => ({
+  id: faker.string.uuid(),
+  module_uuid: faker.string.uuid(),
+  version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  environment_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  namespace: faker.helpers.fromRegExp('^[a-z][a-z0-9.-]*$'),
+  external_resource_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  kind: faker.helpers.arrayElement(['related_resource', 'contextual_action'] as const),
+  lifecycle_state: faker.helpers.arrayElement(['draft', 'active', 'terminal'] as const),
+  label: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  target_url: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  payload: {},
+  created_by: faker.string.uuid(),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  ...overrideResponse,
+});
+
+export const getUpsertModuleExtensionContributionResponseMock200 = (
+  overrideResponse: Partial<ModuleExtensionContribution> = {},
+): ModuleExtensionContribution => ({
+  id: faker.string.uuid(),
+  module_uuid: faker.string.uuid(),
+  version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  environment_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  namespace: faker.helpers.fromRegExp('^[a-z][a-z0-9.-]*$'),
+  external_resource_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  kind: faker.helpers.arrayElement(['related_resource', 'contextual_action'] as const),
+  lifecycle_state: faker.helpers.arrayElement(['draft', 'active', 'terminal'] as const),
+  label: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  target_url: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  payload: {},
+  created_by: faker.string.uuid(),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  ...overrideResponse,
+});
+
+export const getUpsertModuleExtensionContributionResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getUpsertModuleExtensionContributionResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getUpsertModuleExtensionContributionResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getUpsertModuleExtensionContributionResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getReconcileEnvironmentModuleVersionPinOverrideResponseMock = (
+  overrideResponse: Partial<EnvironmentModuleVersionPin> = {},
+): EnvironmentModuleVersionPin => ({
+  id: faker.string.uuid(),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  project_uuid: faker.string.uuid(),
+  project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  environment_uuid: faker.string.uuid(),
+  environment_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  version_uuid: faker.string.uuid(),
+  status: faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  activation_event_id: faker.string.uuid(),
+  bulk_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_target_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_actor: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  override_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_by: faker.string.uuid(),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  removed_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getReconcileEnvironmentModuleVersionPinOverrideResponseMock200 = (
+  overrideResponse: Partial<EnvironmentModuleVersionPin> = {},
+): EnvironmentModuleVersionPin => ({
+  id: faker.string.uuid(),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  project_uuid: faker.string.uuid(),
+  project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  environment_uuid: faker.string.uuid(),
+  environment_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  version_uuid: faker.string.uuid(),
+  status: faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  activation_event_id: faker.string.uuid(),
+  bulk_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_target_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_actor: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  override_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_by: faker.string.uuid(),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  removed_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getReconcileEnvironmentModuleVersionPinOverrideResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getReconcileEnvironmentModuleVersionPinOverrideResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getReconcileEnvironmentModuleVersionPinOverrideResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getRestoreEnvironmentModuleVersionPinAfterRollbackResponseMock = (
+  overrideResponse: Partial<EnvironmentModuleVersionPin> = {},
+): EnvironmentModuleVersionPin => ({
+  id: faker.string.uuid(),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  project_uuid: faker.string.uuid(),
+  project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  environment_uuid: faker.string.uuid(),
+  environment_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  version_uuid: faker.string.uuid(),
+  status: faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  activation_event_id: faker.string.uuid(),
+  bulk_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_target_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_actor: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  override_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_by: faker.string.uuid(),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  removed_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getRestoreEnvironmentModuleVersionPinAfterRollbackResponseMock200 = (
+  overrideResponse: Partial<EnvironmentModuleVersionPin> = {},
+): EnvironmentModuleVersionPin => ({
+  id: faker.string.uuid(),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  project_uuid: faker.string.uuid(),
+  project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  environment_uuid: faker.string.uuid(),
+  environment_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  version_uuid: faker.string.uuid(),
+  status: faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  activation_event_id: faker.string.uuid(),
+  bulk_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_target_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_actor: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  override_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_by: faker.string.uuid(),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  removed_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getRestoreEnvironmentModuleVersionPinAfterRollbackResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getRestoreEnvironmentModuleVersionPinAfterRollbackResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getRestoreEnvironmentModuleVersionPinAfterRollbackResponseMock409 = (
   overrideResponse: Partial<N409ConflictResponse> = {},
 ): N409ConflictResponse => ({
   error: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -57,6 +719,7 @@ export const getGenerateInternalModuleCatalogueResponseMock = (
           },
         },
         ...{
+          output_schema: faker.helpers.arrayElement([{}, undefined]),
           module_params: {
             [faker.string.alphanumeric(5)]: {
               type: faker.helpers.arrayElement([
@@ -147,6 +810,13 @@ export const getGenerateInternalModuleCatalogueResponseMock = (
             ]),
           }),
         ),
+        artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        semantic_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+        module_uuid: faker.string.uuid(),
+        version_uuid: faker.string.uuid(),
+        semantic_version: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        migration_generation: faker.helpers.arrayElement(['v0', 'v1', 'managed'] as const),
+        verification_status: faker.helpers.arrayElement(Object.values(ModuleVerificationStatus)),
       },
     }),
   ),
@@ -199,6 +869,7 @@ export const getGenerateInternalModuleCatalogueResponseMock200 = (
           },
         },
         ...{
+          output_schema: faker.helpers.arrayElement([{}, undefined]),
           module_params: {
             [faker.string.alphanumeric(5)]: {
               type: faker.helpers.arrayElement([
@@ -289,6 +960,13 @@ export const getGenerateInternalModuleCatalogueResponseMock200 = (
             ]),
           }),
         ),
+        artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        semantic_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+        module_uuid: faker.string.uuid(),
+        version_uuid: faker.string.uuid(),
+        semantic_version: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        migration_generation: faker.helpers.arrayElement(['v0', 'v1', 'managed'] as const),
+        verification_status: faker.helpers.arrayElement(Object.values(ModuleVerificationStatus)),
       },
     }),
   ),
@@ -420,6 +1098,1072 @@ export const getInternalForceDeleteEnvironmentMockHandler409 = (
   );
 };
 
+export const getBeginEnvironmentModuleVersionPinOverrideMockHandler = (
+  overrideResponse?:
+    | EnvironmentModuleVersionPin
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<EnvironmentModuleVersionPin> | EnvironmentModuleVersionPin),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/module-version-pins/:pinId/actions/override',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getBeginEnvironmentModuleVersionPinOverrideResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getBeginEnvironmentModuleVersionPinOverrideMockHandler200 = (
+  overrideResponse?:
+    | EnvironmentModuleVersionPin
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<EnvironmentModuleVersionPin> | EnvironmentModuleVersionPin),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/module-version-pins/:pinId/actions/override',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getBeginEnvironmentModuleVersionPinOverrideResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getBeginEnvironmentModuleVersionPinOverrideMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/module-version-pins/:pinId/actions/override',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getBeginEnvironmentModuleVersionPinOverrideResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getBeginEnvironmentModuleVersionPinOverrideMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/module-version-pins/:pinId/actions/override',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getBeginEnvironmentModuleVersionPinOverrideResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getBeginEnvironmentModuleVersionPinOverrideMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/module-version-pins/:pinId/actions/override',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getBeginEnvironmentModuleVersionPinOverrideResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListModuleOperationReservationsMockHandler = (
+  overrideResponse?:
+    | ModuleOperationReservation[]
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ModuleOperationReservation[]> | ModuleOperationReservation[]),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/operation-reservations',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListModuleOperationReservationsResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListModuleOperationReservationsMockHandler200 = (
+  overrideResponse?:
+    | ModuleOperationReservation[]
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ModuleOperationReservation[]> | ModuleOperationReservation[]),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/operation-reservations',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListModuleOperationReservationsResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListModuleOperationReservationsMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/operation-reservations',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListModuleOperationReservationsResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListModuleOperationReservationsMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/operation-reservations',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListModuleOperationReservationsResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getAcquireModuleOperationReservationMockHandler = (
+  overrideResponse?:
+    | ModuleOperationReservation
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ModuleOperationReservation> | ModuleOperationReservation),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/operation-reservations',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getAcquireModuleOperationReservationResponseMock(),
+        ),
+        { status: 201, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getAcquireModuleOperationReservationMockHandler201 = (
+  overrideResponse?:
+    | ModuleOperationReservation
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ModuleOperationReservation> | ModuleOperationReservation),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/operation-reservations',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getAcquireModuleOperationReservationResponseMock201(),
+        ),
+        { status: 201, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getAcquireModuleOperationReservationMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/operation-reservations',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getAcquireModuleOperationReservationResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getAcquireModuleOperationReservationMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/operation-reservations',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getAcquireModuleOperationReservationResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getAcquireModuleOperationReservationMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/operation-reservations',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getAcquireModuleOperationReservationResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getAcquireModuleOperationReservationMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/operation-reservations',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getAcquireModuleOperationReservationResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getReleaseModuleOperationReservationMockHandler = (
+  overrideResponse?:
+    | ModuleOperationReservation
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ModuleOperationReservation> | ModuleOperationReservation),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/operation-reservations/:reservationId/actions/release',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getReleaseModuleOperationReservationResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getReleaseModuleOperationReservationMockHandler200 = (
+  overrideResponse?:
+    | ModuleOperationReservation
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ModuleOperationReservation> | ModuleOperationReservation),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/operation-reservations/:reservationId/actions/release',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getReleaseModuleOperationReservationResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getReleaseModuleOperationReservationMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/operation-reservations/:reservationId/actions/release',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getReleaseModuleOperationReservationResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getReleaseModuleOperationReservationMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/operation-reservations/:reservationId/actions/release',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getReleaseModuleOperationReservationResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getReleaseModuleOperationReservationMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/operation-reservations/:reservationId/actions/release',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getReleaseModuleOperationReservationResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getReleaseModuleOperationReservationMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/operation-reservations/:reservationId/actions/release',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getReleaseModuleOperationReservationResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListModuleExtensionContributionsMockHandler = (
+  overrideResponse?:
+    | ModuleExtensionContribution[]
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ModuleExtensionContribution[]> | ModuleExtensionContribution[]),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/extension-contributions',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListModuleExtensionContributionsResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListModuleExtensionContributionsMockHandler200 = (
+  overrideResponse?:
+    | ModuleExtensionContribution[]
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ModuleExtensionContribution[]> | ModuleExtensionContribution[]),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/extension-contributions',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListModuleExtensionContributionsResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListModuleExtensionContributionsMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/extension-contributions',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListModuleExtensionContributionsResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListModuleExtensionContributionsMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/extension-contributions',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListModuleExtensionContributionsResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpsertModuleExtensionContributionMockHandler = (
+  overrideResponse?:
+    | ModuleExtensionContribution
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ModuleExtensionContribution> | ModuleExtensionContribution),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/extension-contributions',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getUpsertModuleExtensionContributionResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpsertModuleExtensionContributionMockHandler200 = (
+  overrideResponse?:
+    | ModuleExtensionContribution
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ModuleExtensionContribution> | ModuleExtensionContribution),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/extension-contributions',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getUpsertModuleExtensionContributionResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpsertModuleExtensionContributionMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/extension-contributions',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getUpsertModuleExtensionContributionResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpsertModuleExtensionContributionMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/extension-contributions',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getUpsertModuleExtensionContributionResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpsertModuleExtensionContributionMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/extension-contributions',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getUpsertModuleExtensionContributionResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpsertModuleExtensionContributionMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/modules/:moduleId/extension-contributions',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getUpsertModuleExtensionContributionResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getReconcileEnvironmentModuleVersionPinOverrideMockHandler = (
+  overrideResponse?:
+    | EnvironmentModuleVersionPin
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<EnvironmentModuleVersionPin> | EnvironmentModuleVersionPin),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/module-version-pins/:pinId/actions/reconcile-override',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getReconcileEnvironmentModuleVersionPinOverrideResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getReconcileEnvironmentModuleVersionPinOverrideMockHandler200 = (
+  overrideResponse?:
+    | EnvironmentModuleVersionPin
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<EnvironmentModuleVersionPin> | EnvironmentModuleVersionPin),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/module-version-pins/:pinId/actions/reconcile-override',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getReconcileEnvironmentModuleVersionPinOverrideResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getReconcileEnvironmentModuleVersionPinOverrideMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/module-version-pins/:pinId/actions/reconcile-override',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getReconcileEnvironmentModuleVersionPinOverrideResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getReconcileEnvironmentModuleVersionPinOverrideMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/module-version-pins/:pinId/actions/reconcile-override',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getReconcileEnvironmentModuleVersionPinOverrideResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getReconcileEnvironmentModuleVersionPinOverrideMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/module-version-pins/:pinId/actions/reconcile-override',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getReconcileEnvironmentModuleVersionPinOverrideResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getRestoreEnvironmentModuleVersionPinAfterRollbackMockHandler = (
+  overrideResponse?:
+    | EnvironmentModuleVersionPin
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<EnvironmentModuleVersionPin> | EnvironmentModuleVersionPin),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/module-version-pins/:pinId/actions/restore-after-rollback',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getRestoreEnvironmentModuleVersionPinAfterRollbackResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getRestoreEnvironmentModuleVersionPinAfterRollbackMockHandler200 = (
+  overrideResponse?:
+    | EnvironmentModuleVersionPin
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<EnvironmentModuleVersionPin> | EnvironmentModuleVersionPin),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/module-version-pins/:pinId/actions/restore-after-rollback',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getRestoreEnvironmentModuleVersionPinAfterRollbackResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getRestoreEnvironmentModuleVersionPinAfterRollbackMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/module-version-pins/:pinId/actions/restore-after-rollback',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getRestoreEnvironmentModuleVersionPinAfterRollbackResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getRestoreEnvironmentModuleVersionPinAfterRollbackMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/module-version-pins/:pinId/actions/restore-after-rollback',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getRestoreEnvironmentModuleVersionPinAfterRollbackResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getRestoreEnvironmentModuleVersionPinAfterRollbackMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/internal/orgs/:orgId/module-version-pins/:pinId/actions/restore-after-rollback',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getRestoreEnvironmentModuleVersionPinAfterRollbackResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
 export const getGenerateInternalModuleCatalogueMockHandler = (
   overrideResponse?:
     | InternalModuleCatalogue
@@ -525,5 +2269,13 @@ export const getGenerateInternalModuleCatalogueMockHandler409 = (
 };
 export const getInternalMock = () => [
   getInternalForceDeleteEnvironmentMockHandler(),
+  getBeginEnvironmentModuleVersionPinOverrideMockHandler(),
+  getListModuleOperationReservationsMockHandler(),
+  getAcquireModuleOperationReservationMockHandler(),
+  getReleaseModuleOperationReservationMockHandler(),
+  getListModuleExtensionContributionsMockHandler(),
+  getUpsertModuleExtensionContributionMockHandler(),
+  getReconcileEnvironmentModuleVersionPinOverrideMockHandler(),
+  getRestoreEnvironmentModuleVersionPinAfterRollbackMockHandler(),
   getGenerateInternalModuleCatalogueMockHandler(),
 ];

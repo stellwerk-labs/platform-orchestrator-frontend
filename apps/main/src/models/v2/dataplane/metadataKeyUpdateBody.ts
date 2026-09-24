@@ -8,7 +8,11 @@ import type { UpdateMetadataKeySchema } from './updateMetadataKeySchema';
  * A metadata key for an organization.
  */
 export interface MetadataKeyUpdateBody {
-  /** A human-readable description of the metadata key. */
-  description?: string;
+  /**
+   * A human-readable description of the metadata key.
+   *
+   * @nullable
+   */
+  description?: string | null;
   schema?: UpdateMetadataKeySchema;
 }

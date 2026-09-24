@@ -123,6 +123,15 @@ export const getInternalCheckModuleUsageResponseMock = (
       (_, i) => i + 1,
     ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
   },
+  items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    env_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    environment_uuid: faker.string.uuid(),
+    module_version: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    deployment_id: faker.string.uuid(),
+    observed_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  })),
+  observed_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
   ...overrideResponse,
 });
 
@@ -135,6 +144,15 @@ export const getInternalCheckModuleUsageResponseMock200 = (
       (_, i) => i + 1,
     ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
   },
+  items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    env_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    environment_uuid: faker.string.uuid(),
+    module_version: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    deployment_id: faker.string.uuid(),
+    observed_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  })),
+  observed_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
   ...overrideResponse,
 });
 
@@ -356,60 +374,6 @@ export const getInternalCheckModuleUsageMockHandler404 = (
   );
 };
 
-export const getInternalPushMessageToRemoteRunnerMockHandler = (
-  overrideResponse?:
-    | void
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void),
-  options?: RequestHandlerOptions,
-) => {
-  return http.post(
-    'http://example.com/internal/orgs/:orgId/remote-runners/:runnerId/actions/push-message',
-    async (info) => {
-      if (typeof overrideResponse === 'function') {
-        await overrideResponse(info);
-      }
-      return new HttpResponse(null, { status: 204 });
-    },
-    options,
-  );
-};
-
-export const getInternalPushMessageToRemoteRunnerMockHandler204 = (
-  overrideResponse?:
-    | void
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void),
-  options?: RequestHandlerOptions,
-) => {
-  return http.post(
-    'http://example.com/internal/orgs/:orgId/remote-runners/:runnerId/actions/push-message',
-    async (info) => {
-      if (typeof overrideResponse === 'function') {
-        await overrideResponse(info);
-      }
-      return new HttpResponse(null, { status: 204 });
-    },
-    options,
-  );
-};
-
-export const getInternalPushMessageToRemoteRunnerMockHandler503 = (
-  overrideResponse?:
-    | void
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void),
-  options?: RequestHandlerOptions,
-) => {
-  return http.post(
-    'http://example.com/internal/orgs/:orgId/remote-runners/:runnerId/actions/push-message',
-    async (info) => {
-      if (typeof overrideResponse === 'function') {
-        await overrideResponse(info);
-      }
-      return new HttpResponse(null, { status: 503 });
-    },
-    options,
-  );
-};
-
 export const getInternalDeleteDeploymentsMockHandler = (
   overrideResponse?:
     | void
@@ -526,6 +490,5 @@ export const getInternalDeleteDeploymentsMockHandler409 = (
 export const getInternalMock = () => [
   getInternalForceFailDeploymentMockHandler(),
   getInternalCheckModuleUsageMockHandler(),
-  getInternalPushMessageToRemoteRunnerMockHandler(),
   getInternalDeleteDeploymentsMockHandler(),
 ];

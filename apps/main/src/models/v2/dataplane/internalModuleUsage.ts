@@ -3,7 +3,10 @@
  * Do not edit manually.
  */
 import type { InternalModuleUsageEnvIdsByProjectId } from './internalModuleUsageEnvIdsByProjectId';
+import type { InternalModuleUsageItem } from './internalModuleUsageItem';
 
 export interface InternalModuleUsage {
   env_ids_by_project_id: InternalModuleUsageEnvIdsByProjectId;
+  items: InternalModuleUsageItem[];
+  observed_at: string;
 }

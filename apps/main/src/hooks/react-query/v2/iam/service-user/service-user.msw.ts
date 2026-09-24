@@ -34,6 +34,7 @@ export const getListServiceUsersResponseMock = (
       }),
     ),
   })),
+  next_page_token: undefined,
   ...overrideResponse,
 });
 
@@ -56,6 +57,16 @@ export const getListServiceUsersResponseMock200 = (
       }),
     ),
   })),
+  next_page_token: undefined,
+  ...overrideResponse,
+});
+
+export const getListServiceUsersResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
   ...overrideResponse,
 });
 
@@ -292,6 +303,32 @@ export const getListServiceUsersMockHandler200 = (
             : getListServiceUsersResponseMock200(),
         ),
         { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListServiceUsersMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/service-users',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListServiceUsersResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
       );
     },
     options,

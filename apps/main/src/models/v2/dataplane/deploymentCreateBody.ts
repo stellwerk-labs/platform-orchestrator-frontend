@@ -3,6 +3,7 @@
  * Do not edit manually.
  */
 import type { DeploymentCreateBodyMode } from './deploymentCreateBodyMode';
+import type { DeploymentCreateBodyModuleVersions } from './deploymentCreateBodyModuleVersions';
 import type { DeploymentCreateBodyRunnerLogLevel } from './deploymentCreateBodyRunnerLogLevel';
 import type { DeploymentManifest } from './deploymentManifest';
 
@@ -19,6 +20,10 @@ set to 'plan_only'.
   manifest?: DeploymentManifest;
   /** Optional ID to rollback to when the deployment mode is 'rollback' or 'rollback_plan'. */
   rollback_to_deployment_id?: string;
+  /** Exact canonical SemVer selections by Module slug. Proposed versions require the scoped module.version.use-proposed capability. */
+  module_versions?: DeploymentCreateBodyModuleVersions;
+  /** Exact Defective Module Version UUIDs explicitly confirmed for an authorised Pin carry-forward or Rollback. */
+  confirm_restricted_module_version_uuids?: string[];
   /** The Project to deploy to. */
   project_id: string;
   /** The environment to deploy to. */
@@ -27,7 +32,7 @@ set to 'plan_only'.
    * A recipient public key must be provided in order to access encrypted outputs of the deployment. This must be an 'age' public key (see https://age-encryption.org).
 The caller must hold the matching private key in order to decrypt the outputs when the deployment completes. If the recipient key is not set, no outputs will be captured
 from the deployment.
-   
+   *
    * @minLength 1
    * @maxLength 200
    * @pattern ^age[a-z0-9]+$
@@ -37,7 +42,7 @@ from the deployment.
    * A recipient public key must be provided in order to encrypt the logs produced by the runner. This must be an 'age' public key (see https://age-encryption.org).
 The caller must hold the matching private key in order to decrypt the logs when the logs url is provided. If the recipient key is not set, no logs will be captured
 by the runner.
-   
+   *
    * @minLength 1
    * @maxLength 200
    * @pattern ^age[a-z0-9]+$

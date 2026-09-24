@@ -7,6 +7,7 @@ import {
 import {
   getCheckPermissionsMockHandler,
   getGetCurrentUserMockHandler,
+  getGetCurrentUserResponseMock,
 } from '@src/hooks/react-query/v2/iam/user/user.msw';
 import { runA11yAudit } from '@src/playwright/a11y-helpers';
 
@@ -15,7 +16,10 @@ import { test } from '../testFixtures';
 test.describe('service users', () => {
   test('should list all available service users', async ({ page, network }) => {
     network.use(
-      getGetCurrentUserMockHandler(),
+      getGetCurrentUserMockHandler({
+        ...getGetCurrentUserResponseMock(),
+        organization_memberships: [{ id: 'playwright-org' }],
+      }),
       getListServiceUsersMockHandler(),
       getCreateServiceUserMockHandler(),
       getCheckPermissionsMockHandler({

@@ -7,6 +7,6 @@ import type { ModuleParamItem } from './moduleParamItem';
 /**
  * The parameters supported by the matched module. The orchestrator enforces that any required parameters are
 provided and that they keys do not overlap with the 'module_inputs'.
- 
+ *
  */
 export type AvailableResourceTypeOptionModuleParams = { [key: string]: ModuleParamItem };

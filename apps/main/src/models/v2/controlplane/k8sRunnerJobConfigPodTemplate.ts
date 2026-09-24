@@ -5,6 +5,6 @@
 
 /**
  * The Pod Template Spec manifest which defines the runner job pod in the target cluster. It will be merged with the default Job Pod Template Spec.
- 
+ *
  */
 export type K8sRunnerJobConfigPodTemplate = { [key: string]: unknown };

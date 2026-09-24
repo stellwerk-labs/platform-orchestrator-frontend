@@ -16,7 +16,7 @@ export interface RuleCreateBody {
   /**
    * The environment type to match this rule. This environment type must exist in the org.
 Mutually exclusive with env_id.
-   
+   *
    * @pattern ^[a-z](?:-?[a-z0-9]+)+$
    */
   env_type_id?: string;
@@ -29,7 +29,7 @@ Mutually exclusive with env_id.
   /**
    * Environment identifier to match this rule. This environment must exist in the app given by project_id.
 Requires project_id to be set, mutually exclusive with env_type_id.
-   
+   *
    * @pattern ^[a-z](?:-?[a-z0-9]+)+$
    */
   env_id?: string;

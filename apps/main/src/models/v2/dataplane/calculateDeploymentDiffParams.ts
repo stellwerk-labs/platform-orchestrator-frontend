@@ -7,7 +7,7 @@ export type CalculateDeploymentDiffParams = {
   /**
    * The id of the previous deployment in the same environment. If this is not specified, the diff
 will be calculated from the previous stateful deployment.
-   
+   *
    */
   fromDeploymentId?: string;
 };

@@ -125,282 +125,35 @@ export const getListDeploymentsResponseMock404 = (
   ...overrideResponse,
 });
 
-export const getCreateDeploymentResponseMock = (
-  overrideResponse: Partial<DeploymentDryRun | Deployment> = {},
-): DeploymentDryRun | Deployment =>
-  faker.helpers.arrayElement([
-    {
-      runner_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
-      diff: {
-        from_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
-        to_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
-        changes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-          () => ({
-            id: faker.string.alpha({ length: { min: 10, max: 20 } }),
-            resource: faker.string.alpha({ length: { min: 10, max: 20 } }),
-            type: faker.helpers.arrayElement([
-              'added',
-              'removed',
-              'module_changed',
-              'params_changed',
-            ] as const),
-            summary: faker.string.alpha({ length: { min: 10, max: 20 } }),
-          }),
-        ),
-        num_added: faker.number.int({ min: undefined, max: undefined }),
-        num_changed: faker.number.int({ min: undefined, max: undefined }),
-        num_removed: faker.number.int({ min: undefined, max: undefined }),
-      },
-      ...overrideResponse,
-    },
-    {
-      ...{
-        org_id: faker.string.alpha({ length: { min: 2, max: 20 } }),
-        project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
-        env_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
-        id: faker.string.uuid(),
-        created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
-        created_by: faker.string.uuid(),
-        completed_at: faker.helpers.arrayElement([
-          `${faker.date.past().toISOString().split('.')[0]}Z`,
-          undefined,
-        ]),
-        mode: faker.string.alpha({ length: { min: 10, max: 20 } }),
-        plan_only: faker.datatype.boolean(),
-        rollback_to_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
-        status: faker.string.alpha({ length: { min: 10, max: 20 } }),
-        status_message: faker.string.alpha({ length: { min: 10, max: 20 } }),
-        metrics: {
-          num_workloads: faker.number.int({ min: undefined, max: undefined }),
-          num_resource_nodes: faker.number.int({ min: undefined, max: undefined }),
-          num_tf_resources: faker.helpers.arrayElement([
-            faker.number.int({ min: undefined, max: undefined }),
-            undefined,
-          ]),
-          num_tf_resources_added: faker.helpers.arrayElement([
-            faker.number.int({ min: undefined, max: undefined }),
-            undefined,
-          ]),
-          num_tf_resources_removed: faker.helpers.arrayElement([
-            faker.number.int({ min: undefined, max: undefined }),
-            undefined,
-          ]),
-          num_tf_resources_changed: faker.helpers.arrayElement([
-            faker.number.int({ min: undefined, max: undefined }),
-            undefined,
-          ]),
-        },
-      },
-      ...{
-        manifest: {
-          workloads: {
-            [faker.string.alphanumeric(5)]: {
-              resources: faker.helpers.arrayElement([
-                {
-                  [faker.string.alphanumeric(5)]: {
-                    type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
-                    class: faker.helpers.arrayElement([
-                      faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
-                      undefined,
-                    ]),
-                    id: faker.helpers.arrayElement([
-                      faker.helpers.fromRegExp(
-                        '^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$',
-                      ),
-                      undefined,
-                    ]),
-                    params: faker.helpers.arrayElement([{}, undefined]),
-                  },
-                },
-                undefined,
-              ]),
-              outputs: faker.helpers.arrayElement([
-                {
-                  [faker.string.alphanumeric(5)]: faker.string.alpha({
-                    length: { min: 10, max: 20 },
-                  }),
-                },
-                undefined,
-              ]),
-              variables: faker.helpers.arrayElement([
-                {
-                  [faker.string.alphanumeric(5)]: faker.string.alpha({
-                    length: { min: 10, max: 20 },
-                  }),
-                },
-                undefined,
-              ]),
-            },
-          },
-          shared: faker.helpers.arrayElement([
-            {
-              [faker.string.alphanumeric(5)]: {
-                type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
-                class: faker.helpers.arrayElement([
-                  faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
-                  undefined,
-                ]),
-                id: faker.helpers.arrayElement([
-                  faker.helpers.fromRegExp(
-                    '^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$',
-                  ),
-                  undefined,
-                ]),
-                params: faker.helpers.arrayElement([{}, undefined]),
-              },
-            },
-            undefined,
-          ]),
-        },
-        runner_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
-      },
-      ...overrideResponse,
-    },
-  ]);
+export const getCreateDeploymentResponseMock = () =>
+  (() => ({
+    runner_id: 'mock-runner',
+    diff: { changes: [], num_added: 0, num_changed: 0, num_removed: 0 },
+  }))();
 
-export const getCreateDeploymentResponseMock200 = (
-  overrideResponse: Partial<DeploymentDryRun> = {},
-): DeploymentDryRun => ({
-  runner_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
-  diff: {
-    from_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
-    to_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
-    changes: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-      () => ({
-        id: faker.string.alpha({ length: { min: 10, max: 20 } }),
-        resource: faker.string.alpha({ length: { min: 10, max: 20 } }),
-        type: faker.helpers.arrayElement([
-          'added',
-          'removed',
-          'module_changed',
-          'params_changed',
-        ] as const),
-        summary: faker.string.alpha({ length: { min: 10, max: 20 } }),
-      }),
-    ),
-    num_added: faker.number.int({ min: undefined, max: undefined }),
-    num_changed: faker.number.int({ min: undefined, max: undefined }),
-    num_removed: faker.number.int({ min: undefined, max: undefined }),
-  },
-  ...overrideResponse,
-});
+export const getCreateDeploymentResponseMock200 = () =>
+  (() => ({
+    runner_id: 'mock-runner',
+    diff: { changes: [], num_added: 0, num_changed: 0, num_removed: 0 },
+  }))();
 
-export const getCreateDeploymentResponseMock201 = (): Deployment => ({
-  ...{
-    org_id: faker.string.alpha({ length: { min: 2, max: 20 } }),
-    project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
-    env_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
-    id: faker.string.uuid(),
-    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
-    created_by: faker.string.uuid(),
-    completed_at: faker.helpers.arrayElement([
-      `${faker.date.past().toISOString().split('.')[0]}Z`,
-      undefined,
-    ]),
-    mode: faker.string.alpha({ length: { min: 10, max: 20 } }),
-    plan_only: faker.datatype.boolean(),
-    rollback_to_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
-    status: faker.string.alpha({ length: { min: 10, max: 20 } }),
-    status_message: faker.string.alpha({ length: { min: 10, max: 20 } }),
-    metrics: {
-      num_workloads: faker.number.int({ min: undefined, max: undefined }),
-      num_resource_nodes: faker.number.int({ min: undefined, max: undefined }),
-      num_tf_resources: faker.helpers.arrayElement([
-        faker.number.int({ min: undefined, max: undefined }),
-        undefined,
-      ]),
-      num_tf_resources_added: faker.helpers.arrayElement([
-        faker.number.int({ min: undefined, max: undefined }),
-        undefined,
-      ]),
-      num_tf_resources_removed: faker.helpers.arrayElement([
-        faker.number.int({ min: undefined, max: undefined }),
-        undefined,
-      ]),
-      num_tf_resources_changed: faker.helpers.arrayElement([
-        faker.number.int({ min: undefined, max: undefined }),
-        undefined,
-      ]),
-    },
-  },
-  ...{
-    manifest: {
-      workloads: {
-        [faker.string.alphanumeric(5)]: {
-          resources: faker.helpers.arrayElement([
-            {
-              [faker.string.alphanumeric(5)]: {
-                type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
-                class: faker.helpers.arrayElement([
-                  faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
-                  undefined,
-                ]),
-                id: faker.helpers.arrayElement([
-                  faker.helpers.fromRegExp(
-                    '^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$',
-                  ),
-                  undefined,
-                ]),
-                params: faker.helpers.arrayElement([{}, undefined]),
-              },
-            },
-            undefined,
-          ]),
-          outputs: faker.helpers.arrayElement([
-            {
-              [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
-            },
-            undefined,
-          ]),
-          variables: faker.helpers.arrayElement([
-            {
-              [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
-            },
-            undefined,
-          ]),
-        },
-      },
-      shared: faker.helpers.arrayElement([
-        {
-          [faker.string.alphanumeric(5)]: {
-            type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
-            class: faker.helpers.arrayElement([
-              faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
-              undefined,
-            ]),
-            id: faker.helpers.arrayElement([
-              faker.helpers.fromRegExp(
-                '^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$',
-              ),
-              undefined,
-            ]),
-            params: faker.helpers.arrayElement([{}, undefined]),
-          },
-        },
-        undefined,
-      ]),
-    },
-    runner_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
-  },
-});
+export const getCreateDeploymentResponseMock201 = () =>
+  (() => ({
+    runner_id: 'mock-runner',
+    diff: { changes: [], num_added: 0, num_changed: 0, num_removed: 0 },
+  }))();
 
-export const getCreateDeploymentResponseMock400 = (
-  overrideResponse: Partial<N400BadRequestResponse> = {},
-): N400BadRequestResponse => ({
-  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
-  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
-  details: faker.helpers.arrayElement([{}, undefined]),
-  ...overrideResponse,
-});
+export const getCreateDeploymentResponseMock400 = () =>
+  (() => ({
+    runner_id: 'mock-runner',
+    diff: { changes: [], num_added: 0, num_changed: 0, num_removed: 0 },
+  }))();
 
-export const getCreateDeploymentResponseMock409 = (
-  overrideResponse: Partial<N409ConflictResponse> = {},
-): N409ConflictResponse => ({
-  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
-  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
-  details: faker.helpers.arrayElement([{}, undefined]),
-  ...overrideResponse,
-});
+export const getCreateDeploymentResponseMock409 = () =>
+  (() => ({
+    runner_id: 'mock-runner',
+    diff: { changes: [], num_added: 0, num_changed: 0, num_removed: 0 },
+  }))();
 
 export const getListLastDeploymentsResponseMock = (
   overrideResponse: Partial<DeploymentPage> = {},

@@ -22,6 +22,7 @@ export const getListEnvironmentTypesResponseMock = (
     uuid: faker.string.uuid(),
     created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
     display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    is_production: faker.datatype.boolean(),
   })),
   next_page_token: undefined,
   ...overrideResponse,
@@ -35,6 +36,7 @@ export const getListEnvironmentTypesResponseMock200 = (
     uuid: faker.string.uuid(),
     created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
     display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    is_production: faker.datatype.boolean(),
   })),
   next_page_token: undefined,
   ...overrideResponse,
@@ -55,6 +57,7 @@ export const getCreateEnvironmentTypeResponseMock = (): EnvironmentType => ({
     uuid: faker.string.uuid(),
     created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
     display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    is_production: faker.datatype.boolean(),
   },
 });
 
@@ -64,6 +67,7 @@ export const getCreateEnvironmentTypeResponseMock201 = (): EnvironmentType => ({
     uuid: faker.string.uuid(),
     created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
     display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    is_production: faker.datatype.boolean(),
   },
 });
 
@@ -91,6 +95,7 @@ export const getGetEnvironmentTypeResponseMock = (): EnvironmentType => ({
     uuid: faker.string.uuid(),
     created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
     display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    is_production: faker.datatype.boolean(),
   },
 });
 
@@ -100,6 +105,7 @@ export const getGetEnvironmentTypeResponseMock200 = (): EnvironmentType => ({
     uuid: faker.string.uuid(),
     created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
     display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    is_production: faker.datatype.boolean(),
   },
 });
 
@@ -136,6 +142,7 @@ export const getUpdateEnvironmentTypeResponseMock = (): EnvironmentType => ({
     uuid: faker.string.uuid(),
     created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
     display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    is_production: faker.datatype.boolean(),
   },
 });
 
@@ -145,6 +152,7 @@ export const getUpdateEnvironmentTypeResponseMock200 = (): EnvironmentType => ({
     uuid: faker.string.uuid(),
     created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
     display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    is_production: faker.datatype.boolean(),
   },
 });
 

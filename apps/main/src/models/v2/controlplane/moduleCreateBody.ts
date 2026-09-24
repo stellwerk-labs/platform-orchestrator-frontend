@@ -8,11 +8,21 @@ import type { ModuleCreateBodyModuleInputs } from './moduleCreateBodyModuleInput
 import type { ModuleCreateBodyModuleParams } from './moduleCreateBodyModuleParams';
 import type { ModuleCreateBodyProviderMapping } from './moduleCreateBodyProviderMapping';
 import type { ModuleId } from './moduleId';
+import type { ModuleOutputSchema } from './moduleOutputSchema';
 
 /**
  * A request to create a new module
  */
 export interface ModuleCreateBody {
+  output_schema?: ModuleOutputSchema;
+  /** Canonical SemVer identity of the immutable Core Module Version. */
+  semantic_version?: string;
+  /**
+   * Optional immutable external artifact digest claim, not verification evidence. Omitted for inline source.
+   *
+   * @pattern ^sha256:[a-f0-9]{64}$
+   */
+  artifact_digest?: string;
   id: ModuleId;
   /**
    * An optional text description for this module

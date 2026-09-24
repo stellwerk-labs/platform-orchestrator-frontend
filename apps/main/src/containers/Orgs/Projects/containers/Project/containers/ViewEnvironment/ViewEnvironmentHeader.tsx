@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@src/components/shared/PageHeader/PageHeader';
 import { Environment } from '@src/models/v2/controlplane';
 
+import { EnvironmentDeletionDialog } from './EnvironmentDeletionDialog';
+
 interface ViewEnvironmentHeaderProps {
   environment?: Environment;
 }
@@ -16,7 +18,11 @@ export const ViewEnvironmentHeader = ({ environment }: ViewEnvironmentHeaderProp
 
   return (
     <>
-      <PageHeader environment={environment} showPageContext />
+      <PageHeader
+        environment={environment}
+        showPageContext
+        rightContent={<EnvironmentDeletionDialog environment={environment} />}
+      />
       {showEnvironmentId && (
         <>
           <div className={'txt-translucent txt-sm'}>{uiTranslations.ENVIRONMENT_ID}</div>

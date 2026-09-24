@@ -19,4 +19,6 @@ export interface EnvironmentTypeCreateBody {
    * @maxLength 60
    */
   display_name?: string;
+  /** Whether Environments of this type are Production targets. */
+  is_production?: boolean;
 }

@@ -10,8 +10,16 @@ import type { UpdateMetadataKeySchemaType } from './updateMetadataKeySchemaType'
 export interface UpdateMetadataKeySchema {
   /** The type of the metadata key. */
   type?: UpdateMetadataKeySchemaType;
-  /** The format of the metadata key. */
-  format?: string;
-  /** A regular expression pattern for the metadata key. */
-  pattern?: string;
+  /**
+   * The format of the metadata key.
+   *
+   * @nullable
+   */
+  format?: string | null;
+  /**
+   * A regular expression pattern for the metadata key.
+   *
+   * @nullable
+   */
+  pattern?: string | null;
 }

@@ -9,8 +9,8 @@
 export interface InternalModuleCatalogueGenerateBody {
   /** The normal response body only includes the latest versions for modules. However if there are pinned resources, we need to request the pinned versions as well which may no longer have rules associated with them. */
   pinned_module_versions?: string[];
-  /** The normal response body only includes the modules and providers currently configured. However if we are removing nodes that still rely on providers we need to fetch their details without having the modules. */
+  /** The normal response body only includes the latest versions for modules. However if there are pinned resources, we need to request providers retained by the previous graph. */
   pinned_providers?: string[];
-  /** When running a destroy deployment, we only care about pinned module version and do not need to check the rules. This option can be used to skip rule evaluation. */
+  /** When running a destroy deployment, only pinned module versions are required and rule evaluation is skipped. */
   are_rules_ignored?: boolean;
 }

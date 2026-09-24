@@ -7,7 +7,7 @@
  * The mode of the deployment. Defaults to 'deploy'. Can be set to 'rollback' to rollback to the graph used in
 the deployment specified by `rollback_to_deployment_id`. For backwards compatibility, this can be set to
 'plan_only' which is equivalent to 'deploy' mode with plan_only set to true.
- 
+ *
  */
 export type DeploymentCreateBodyMode =
   (typeof DeploymentCreateBodyMode)[keyof typeof DeploymentCreateBodyMode];

@@ -20,7 +20,6 @@ import type {
   N400BadRequestResponse,
   N404NotFoundResponse,
   N409ConflictResponse,
-  RemoteRunnerMessage,
 } from '../../../../../models/v2/dataplane';
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -28,7 +27,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 /**
  * This should only be used once you have confirmed that the underlying runner job has stopped, failed, or will
 never execute.
- 
+ *
  * @summary Emergency API for force failing a deployment.
  */
 export const internalForceFailDeployment = (
@@ -121,7 +120,7 @@ export const useInternalForceFailDeployment = <
 /**
  * This is a simple and efficient API. It returns only the project environments which are using this module.
 A more complex public api should be created to list each individual resource node usage.
- 
+ *
  * @summary Check whether a given module is in use in a resource graph.
  */
 export const internalCheckModuleUsage = (
@@ -208,96 +207,6 @@ export const useInternalCheckModuleUsage = <
   TContext
 > => {
   const mutationOptions = getInternalCheckModuleUsageMutationOptions(options);
-
-  return useMutation(mutationOptions, queryClient);
-};
-/**
- * Sends a message to a specific remote runner for processing.
- 
- * @summary Push a message to a remote runner
- */
-export const internalPushMessageToRemoteRunner = (
-  orgId: string,
-  runnerId: string,
-  remoteRunnerMessage: RemoteRunnerMessage,
-  options?: SecondParameter<typeof customInstance>,
-  signal?: AbortSignal,
-) => {
-  return customInstance<void>(
-    {
-      url: `/internal/orgs/${orgId}/remote-runners/${runnerId}/actions/push-message`,
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      data: remoteRunnerMessage,
-      signal,
-    },
-    options,
-  );
-};
-
-export const getInternalPushMessageToRemoteRunnerMutationOptions = <
-  TError = ErrorType<void>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof internalPushMessageToRemoteRunner>>,
-    TError,
-    { orgId: string; runnerId: string; data: RemoteRunnerMessage },
-    TContext
-  >;
-  request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof internalPushMessageToRemoteRunner>>,
-  TError,
-  { orgId: string; runnerId: string; data: RemoteRunnerMessage },
-  TContext
-> => {
-  const mutationKey = ['internalPushMessageToRemoteRunner'];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof internalPushMessageToRemoteRunner>>,
-    { orgId: string; runnerId: string; data: RemoteRunnerMessage }
-  > = (props) => {
-    const { orgId, runnerId, data } = props ?? {};
-
-    return internalPushMessageToRemoteRunner(orgId, runnerId, data, requestOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type InternalPushMessageToRemoteRunnerMutationResult = NonNullable<
-  Awaited<ReturnType<typeof internalPushMessageToRemoteRunner>>
->;
-export type InternalPushMessageToRemoteRunnerMutationBody = RemoteRunnerMessage;
-export type InternalPushMessageToRemoteRunnerMutationError = ErrorType<void>;
-
-/**
- * @summary Push a message to a remote runner
- */
-export const useInternalPushMessageToRemoteRunner = <TError = ErrorType<void>, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof internalPushMessageToRemoteRunner>>,
-      TError,
-      { orgId: string; runnerId: string; data: RemoteRunnerMessage },
-      TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof internalPushMessageToRemoteRunner>>,
-  TError,
-  { orgId: string; runnerId: string; data: RemoteRunnerMessage },
-  TContext
-> => {
-  const mutationOptions = getInternalPushMessageToRemoteRunnerMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };

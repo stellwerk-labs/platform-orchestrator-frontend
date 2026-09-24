@@ -13,7 +13,7 @@ export interface ResourcePermissionCheck {
   /**
    * The permission string.
    *
-   * @pattern ^[a-z][a-z0-9_]{1,62}[a-z0-9]$
+   * @pattern ^[a-z][a-z0-9_.-]{1,62}[a-z0-9]$
    */
   permission: string;
 }

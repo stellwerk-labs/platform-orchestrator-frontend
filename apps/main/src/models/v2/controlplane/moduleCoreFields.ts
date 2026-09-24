@@ -6,8 +6,10 @@ import type { ModuleCoProvisionManifest } from './moduleCoProvisionManifest';
 import type { ModuleCoreFieldsDependencies } from './moduleCoreFieldsDependencies';
 import type { ModuleCoreFieldsModuleInputs } from './moduleCoreFieldsModuleInputs';
 import type { ModuleCoreFieldsModuleParams } from './moduleCoreFieldsModuleParams';
+import type { ModuleOutputSchema } from './moduleOutputSchema';
 
 export interface ModuleCoreFields {
+  output_schema?: ModuleOutputSchema;
   /** The parameters supported by this module. The orchestrator enforces that any required parameters are
 provided and that they keys do not overlap with the 'module_inputs'.
    */

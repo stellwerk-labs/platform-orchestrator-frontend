@@ -18,7 +18,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 /**
  * Remote runners should poll this endpoint to receive pending messages.
- 
+ *
  * @summary Long-poll wait for pending messages for a remote runner
  */
 export const waitForRemoteRunnerMessages = (

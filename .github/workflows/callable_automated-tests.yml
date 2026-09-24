@@ -2,6 +2,10 @@ name: Automated tests
 
 on:
   workflow_call:
+    inputs:
+      candidate_sha:
+        required: false
+        type: string
 
 env:
   NODE_VERSION: 22
@@ -14,6 +18,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.candidate_sha || github.ref }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
@@ -61,6 +67,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.candidate_sha || github.ref }}
 
       - name: Setup kernel for react native, increase watchers
         run: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p

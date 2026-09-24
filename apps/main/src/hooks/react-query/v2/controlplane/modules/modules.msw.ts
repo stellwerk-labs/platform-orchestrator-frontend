@@ -7,13 +7,32 @@ import type { RequestHandlerOptions } from 'msw';
 import { http, HttpResponse } from 'msw';
 
 import type {
+  CoreModuleVersion,
+  CoreModuleVersionDetail,
+  CoreModuleVersionPage,
+  EnvironmentModuleVersionPin,
   Module,
+  ModuleCatalogueEntry,
   ModulePage,
-  ModuleVersion,
-  ModuleVersionPage,
+  ModuleVersionComparison,
+  ModuleVersionLifecycleEvent,
+  ModuleVersionLifecycleTransactionResult,
+  ModuleVersionPinBulkPreview,
+  ModuleVersionPinBulkResult,
+  ModuleVersionPinEvent,
+  ModuleVersionUsage,
   N400BadRequestResponse,
+  N403ForbiddenResponse,
   N404NotFoundResponse,
   N409ConflictResponse,
+  StableModuleVersionSuccessorResult,
+} from '../../../../../models/v2/controlplane';
+import {
+  ModuleCatalogueStatus,
+  ModuleVerificationStatus,
+  ModuleVersionPinBulkAction,
+  ModuleVersionPinStatus,
+  ModuleVersionSemanticStatus,
 } from '../../../../../models/v2/controlplane';
 
 export const getListModulesResponseMock = (
@@ -101,6 +120,7 @@ export const getCreateModuleResponseMock = (): Module => ({
     },
   },
   ...{
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_params: {
       [faker.string.alphanumeric(5)]: {
         type: faker.helpers.arrayElement([
@@ -182,6 +202,7 @@ export const getCreateModuleResponseMock201 = (): Module => ({
     },
   },
   ...{
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_params: {
       [faker.string.alphanumeric(5)]: {
         type: faker.helpers.arrayElement([
@@ -281,6 +302,7 @@ export const getGetModuleResponseMock = (): Module => ({
     },
   },
   ...{
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_params: {
       [faker.string.alphanumeric(5)]: {
         type: faker.helpers.arrayElement([
@@ -362,6 +384,7 @@ export const getGetModuleResponseMock200 = (): Module => ({
     },
   },
   ...{
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_params: {
       [faker.string.alphanumeric(5)]: {
         type: faker.helpers.arrayElement([
@@ -452,6 +475,7 @@ export const getUpdateModuleResponseMock = (): Module => ({
     },
   },
   ...{
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_params: {
       [faker.string.alphanumeric(5)]: {
         type: faker.helpers.arrayElement([
@@ -533,6 +557,7 @@ export const getUpdateModuleResponseMock200 = (): Module => ({
     },
   },
   ...{
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_params: {
       [faker.string.alphanumeric(5)]: {
         type: faker.helpers.arrayElement([
@@ -638,44 +663,396 @@ export const getDeleteModuleResponseMock409 = (
 });
 
 export const getListModuleVersionsResponseMock = (
-  overrideResponse: Partial<ModuleVersionPage> = {},
-): ModuleVersionPage => ({
+  overrideResponse: Partial<CoreModuleVersionPage> = {},
+): CoreModuleVersionPage => ({
   items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     ...{
-      version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
-      resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
-      module_source: faker.internet.url(),
-      provider_mapping: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      ...{
+        ...{
+          version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          module_source: faker.internet.url(),
+          provider_mapping: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          },
+          description: faker.helpers.arrayElement([
+            faker.string.alpha({ length: { min: 10, max: 20 } }),
+            undefined,
+          ]),
+        },
+        ...{ created_at: `${faker.date.past().toISOString().split('.')[0]}Z` },
       },
-      description: faker.helpers.arrayElement([
-        faker.string.alpha({ length: { min: 10, max: 20 } }),
-        undefined,
-      ]),
+      ...{
+        output_schema: faker.helpers.arrayElement([{}, undefined]),
+        module_params: {
+          [faker.string.alphanumeric(5)]: {
+            type: faker.helpers.arrayElement([
+              'string',
+              'number',
+              'bool',
+              'list',
+              'map',
+              'any',
+            ] as const),
+            is_optional: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+            description: faker.helpers.arrayElement([
+              faker.string.alpha({ length: { min: 10, max: 20 } }),
+              undefined,
+            ]),
+          },
+        },
+        module_inputs: {},
+        module_source_code: faker.helpers.arrayElement([
+          faker.string.alpha({ length: { min: 10, max: 20 } }),
+          undefined,
+        ]),
+        dependencies: {
+          [faker.string.alphanumeric(5)]: {
+            type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+            class: faker.helpers.arrayElement([
+              faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+              undefined,
+            ]),
+            id: faker.helpers.arrayElement([
+              faker.helpers.fromRegExp(
+                '^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$',
+              ),
+              undefined,
+            ]),
+            params: faker.helpers.arrayElement([{}, undefined]),
+          },
+        },
+        coprovisioned: Array.from(
+          { length: faker.number.int({ min: 1, max: 10 }) },
+          (_, i) => i + 1,
+        ).map(() => ({
+          type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+          class: faker.helpers.arrayElement([
+            faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+            undefined,
+          ]),
+          id: faker.helpers.arrayElement([
+            faker.helpers.fromRegExp('^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$'),
+            undefined,
+          ]),
+          params: faker.helpers.arrayElement([{}, undefined]),
+          is_dependent_on_current: faker.helpers.arrayElement([
+            faker.datatype.boolean(),
+            undefined,
+          ]),
+          copy_dependents_from_current: faker.helpers.arrayElement([
+            faker.datatype.boolean(),
+            undefined,
+          ]),
+        })),
+      },
     },
-    ...{ created_at: `${faker.date.past().toISOString().split('.')[0]}Z` },
+    ...{
+      version: {
+        org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        module_uuid: faker.string.uuid(),
+        module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        uuid: faker.string.uuid(),
+        semantic_version: faker.helpers.arrayElement([
+          faker.string.alpha({ length: { min: 10, max: 20 } }),
+          undefined,
+        ]),
+        opaque_version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        migration_generation: faker.helpers.arrayElement(['v0', 'v1', 'managed'] as const),
+        artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        verification_status: faker.helpers.arrayElement(Object.values(ModuleVerificationStatus)),
+        lifecycle_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+        source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        release_notes: faker.helpers.arrayElement([
+          faker.string.alpha({ length: { min: 10, max: 20 } }),
+          undefined,
+        ]),
+        resource_version: faker.number.int({ min: 1, max: undefined }),
+        published_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+        created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+      },
+      definition: {
+        ...{
+          ...{
+            version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            module_source: faker.internet.url(),
+            provider_mapping: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            },
+            description: faker.helpers.arrayElement([
+              faker.string.alpha({ length: { min: 10, max: 20 } }),
+              undefined,
+            ]),
+          },
+          ...{ created_at: `${faker.date.past().toISOString().split('.')[0]}Z` },
+        },
+        ...{
+          output_schema: faker.helpers.arrayElement([{}, undefined]),
+          module_params: {
+            [faker.string.alphanumeric(5)]: {
+              type: faker.helpers.arrayElement([
+                'string',
+                'number',
+                'bool',
+                'list',
+                'map',
+                'any',
+              ] as const),
+              is_optional: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+              description: faker.helpers.arrayElement([
+                faker.string.alpha({ length: { min: 10, max: 20 } }),
+                undefined,
+              ]),
+            },
+          },
+          module_inputs: {},
+          module_source_code: faker.helpers.arrayElement([
+            faker.string.alpha({ length: { min: 10, max: 20 } }),
+            undefined,
+          ]),
+          dependencies: {
+            [faker.string.alphanumeric(5)]: {
+              type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+              class: faker.helpers.arrayElement([
+                faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+                undefined,
+              ]),
+              id: faker.helpers.arrayElement([
+                faker.helpers.fromRegExp(
+                  '^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$',
+                ),
+                undefined,
+              ]),
+              params: faker.helpers.arrayElement([{}, undefined]),
+            },
+          },
+          coprovisioned: Array.from(
+            { length: faker.number.int({ min: 1, max: 10 }) },
+            (_, i) => i + 1,
+          ).map(() => ({
+            type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+            class: faker.helpers.arrayElement([
+              faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+              undefined,
+            ]),
+            id: faker.helpers.arrayElement([
+              faker.helpers.fromRegExp(
+                '^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$',
+              ),
+              undefined,
+            ]),
+            params: faker.helpers.arrayElement([{}, undefined]),
+            is_dependent_on_current: faker.helpers.arrayElement([
+              faker.datatype.boolean(),
+              undefined,
+            ]),
+            copy_dependents_from_current: faker.helpers.arrayElement([
+              faker.datatype.boolean(),
+              undefined,
+            ]),
+          })),
+        },
+      },
+    },
   })),
   next_page_token: undefined,
   ...overrideResponse,
 });
 
 export const getListModuleVersionsResponseMock200 = (
-  overrideResponse: Partial<ModuleVersionPage> = {},
-): ModuleVersionPage => ({
+  overrideResponse: Partial<CoreModuleVersionPage> = {},
+): CoreModuleVersionPage => ({
   items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     ...{
-      version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
-      resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
-      module_source: faker.internet.url(),
-      provider_mapping: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      ...{
+        ...{
+          version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          module_source: faker.internet.url(),
+          provider_mapping: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          },
+          description: faker.helpers.arrayElement([
+            faker.string.alpha({ length: { min: 10, max: 20 } }),
+            undefined,
+          ]),
+        },
+        ...{ created_at: `${faker.date.past().toISOString().split('.')[0]}Z` },
       },
-      description: faker.helpers.arrayElement([
-        faker.string.alpha({ length: { min: 10, max: 20 } }),
-        undefined,
-      ]),
+      ...{
+        output_schema: faker.helpers.arrayElement([{}, undefined]),
+        module_params: {
+          [faker.string.alphanumeric(5)]: {
+            type: faker.helpers.arrayElement([
+              'string',
+              'number',
+              'bool',
+              'list',
+              'map',
+              'any',
+            ] as const),
+            is_optional: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+            description: faker.helpers.arrayElement([
+              faker.string.alpha({ length: { min: 10, max: 20 } }),
+              undefined,
+            ]),
+          },
+        },
+        module_inputs: {},
+        module_source_code: faker.helpers.arrayElement([
+          faker.string.alpha({ length: { min: 10, max: 20 } }),
+          undefined,
+        ]),
+        dependencies: {
+          [faker.string.alphanumeric(5)]: {
+            type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+            class: faker.helpers.arrayElement([
+              faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+              undefined,
+            ]),
+            id: faker.helpers.arrayElement([
+              faker.helpers.fromRegExp(
+                '^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$',
+              ),
+              undefined,
+            ]),
+            params: faker.helpers.arrayElement([{}, undefined]),
+          },
+        },
+        coprovisioned: Array.from(
+          { length: faker.number.int({ min: 1, max: 10 }) },
+          (_, i) => i + 1,
+        ).map(() => ({
+          type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+          class: faker.helpers.arrayElement([
+            faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+            undefined,
+          ]),
+          id: faker.helpers.arrayElement([
+            faker.helpers.fromRegExp('^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$'),
+            undefined,
+          ]),
+          params: faker.helpers.arrayElement([{}, undefined]),
+          is_dependent_on_current: faker.helpers.arrayElement([
+            faker.datatype.boolean(),
+            undefined,
+          ]),
+          copy_dependents_from_current: faker.helpers.arrayElement([
+            faker.datatype.boolean(),
+            undefined,
+          ]),
+        })),
+      },
     },
-    ...{ created_at: `${faker.date.past().toISOString().split('.')[0]}Z` },
+    ...{
+      version: {
+        org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        module_uuid: faker.string.uuid(),
+        module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        uuid: faker.string.uuid(),
+        semantic_version: faker.helpers.arrayElement([
+          faker.string.alpha({ length: { min: 10, max: 20 } }),
+          undefined,
+        ]),
+        opaque_version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        migration_generation: faker.helpers.arrayElement(['v0', 'v1', 'managed'] as const),
+        artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        verification_status: faker.helpers.arrayElement(Object.values(ModuleVerificationStatus)),
+        lifecycle_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+        source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        release_notes: faker.helpers.arrayElement([
+          faker.string.alpha({ length: { min: 10, max: 20 } }),
+          undefined,
+        ]),
+        resource_version: faker.number.int({ min: 1, max: undefined }),
+        published_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+        created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+      },
+      definition: {
+        ...{
+          ...{
+            version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            module_source: faker.internet.url(),
+            provider_mapping: {
+              [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            },
+            description: faker.helpers.arrayElement([
+              faker.string.alpha({ length: { min: 10, max: 20 } }),
+              undefined,
+            ]),
+          },
+          ...{ created_at: `${faker.date.past().toISOString().split('.')[0]}Z` },
+        },
+        ...{
+          output_schema: faker.helpers.arrayElement([{}, undefined]),
+          module_params: {
+            [faker.string.alphanumeric(5)]: {
+              type: faker.helpers.arrayElement([
+                'string',
+                'number',
+                'bool',
+                'list',
+                'map',
+                'any',
+              ] as const),
+              is_optional: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+              description: faker.helpers.arrayElement([
+                faker.string.alpha({ length: { min: 10, max: 20 } }),
+                undefined,
+              ]),
+            },
+          },
+          module_inputs: {},
+          module_source_code: faker.helpers.arrayElement([
+            faker.string.alpha({ length: { min: 10, max: 20 } }),
+            undefined,
+          ]),
+          dependencies: {
+            [faker.string.alphanumeric(5)]: {
+              type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+              class: faker.helpers.arrayElement([
+                faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+                undefined,
+              ]),
+              id: faker.helpers.arrayElement([
+                faker.helpers.fromRegExp(
+                  '^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$',
+                ),
+                undefined,
+              ]),
+              params: faker.helpers.arrayElement([{}, undefined]),
+            },
+          },
+          coprovisioned: Array.from(
+            { length: faker.number.int({ min: 1, max: 10 }) },
+            (_, i) => i + 1,
+          ).map(() => ({
+            type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+            class: faker.helpers.arrayElement([
+              faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+              undefined,
+            ]),
+            id: faker.helpers.arrayElement([
+              faker.helpers.fromRegExp(
+                '^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$',
+              ),
+              undefined,
+            ]),
+            params: faker.helpers.arrayElement([{}, undefined]),
+            is_dependent_on_current: faker.helpers.arrayElement([
+              faker.datatype.boolean(),
+              undefined,
+            ]),
+            copy_dependents_from_current: faker.helpers.arrayElement([
+              faker.datatype.boolean(),
+              undefined,
+            ]),
+          })),
+        },
+      },
+    },
   })),
   next_page_token: undefined,
   ...overrideResponse,
@@ -690,47 +1067,155 @@ export const getListModuleVersionsResponseMock404 = (
   ...overrideResponse,
 });
 
-export const getGetModuleVersionResponseMock = (): ModuleVersion => ({
+export const getPublishModuleVersionResponseMock = (
+  overrideResponse: Partial<CoreModuleVersion> = {},
+): CoreModuleVersion => ({
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  uuid: faker.string.uuid(),
+  semantic_version: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  opaque_version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  migration_generation: faker.helpers.arrayElement(['v0', 'v1', 'managed'] as const),
+  artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  verification_status: faker.helpers.arrayElement(Object.values(ModuleVerificationStatus)),
+  lifecycle_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+  source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  release_notes: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  published_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  ...overrideResponse,
+});
+
+export const getPublishModuleVersionResponseMock201 = (
+  overrideResponse: Partial<CoreModuleVersion> = {},
+): CoreModuleVersion => ({
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  uuid: faker.string.uuid(),
+  semantic_version: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  opaque_version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  migration_generation: faker.helpers.arrayElement(['v0', 'v1', 'managed'] as const),
+  artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  verification_status: faker.helpers.arrayElement(Object.values(ModuleVerificationStatus)),
+  lifecycle_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+  source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  release_notes: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  published_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  ...overrideResponse,
+});
+
+export const getPublishModuleVersionResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPublishModuleVersionResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPublishModuleVersionResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPublishModuleVersionResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getGetModuleVersionResponseMock = (): CoreModuleVersionDetail => ({
   ...{
     ...{
-      version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
-      resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
-      module_source: faker.internet.url(),
-      provider_mapping: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
-      },
-      description: faker.helpers.arrayElement([
-        faker.string.alpha({ length: { min: 10, max: 20 } }),
-        undefined,
-      ]),
-    },
-    ...{ created_at: `${faker.date.past().toISOString().split('.')[0]}Z` },
-  },
-  ...{
-    module_params: {
-      [faker.string.alphanumeric(5)]: {
-        type: faker.helpers.arrayElement([
-          'string',
-          'number',
-          'bool',
-          'list',
-          'map',
-          'any',
-        ] as const),
-        is_optional: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+      ...{
+        version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        module_source: faker.internet.url(),
+        provider_mapping: {
+          [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        },
         description: faker.helpers.arrayElement([
           faker.string.alpha({ length: { min: 10, max: 20 } }),
           undefined,
         ]),
       },
+      ...{ created_at: `${faker.date.past().toISOString().split('.')[0]}Z` },
     },
-    module_inputs: {},
-    module_source_code: faker.helpers.arrayElement([
-      faker.string.alpha({ length: { min: 10, max: 20 } }),
-      undefined,
-    ]),
-    dependencies: {
-      [faker.string.alphanumeric(5)]: {
+    ...{
+      output_schema: faker.helpers.arrayElement([{}, undefined]),
+      module_params: {
+        [faker.string.alphanumeric(5)]: {
+          type: faker.helpers.arrayElement([
+            'string',
+            'number',
+            'bool',
+            'list',
+            'map',
+            'any',
+          ] as const),
+          is_optional: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+          description: faker.helpers.arrayElement([
+            faker.string.alpha({ length: { min: 10, max: 20 } }),
+            undefined,
+          ]),
+        },
+      },
+      module_inputs: {},
+      module_source_code: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 20 } }),
+        undefined,
+      ]),
+      dependencies: {
+        [faker.string.alphanumeric(5)]: {
+          type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+          class: faker.helpers.arrayElement([
+            faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+            undefined,
+          ]),
+          id: faker.helpers.arrayElement([
+            faker.helpers.fromRegExp('^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$'),
+            undefined,
+          ]),
+          params: faker.helpers.arrayElement([{}, undefined]),
+        },
+      },
+      coprovisioned: Array.from(
+        { length: faker.number.int({ min: 1, max: 10 }) },
+        (_, i) => i + 1,
+      ).map(() => ({
         type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
         class: faker.helpers.arrayElement([
           faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
@@ -741,72 +1226,181 @@ export const getGetModuleVersionResponseMock = (): ModuleVersion => ({
           undefined,
         ]),
         params: faker.helpers.arrayElement([{}, undefined]),
+        is_dependent_on_current: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+        copy_dependents_from_current: faker.helpers.arrayElement([
+          faker.datatype.boolean(),
+          undefined,
+        ]),
+      })),
+    },
+  },
+  ...{
+    version: {
+      org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      module_uuid: faker.string.uuid(),
+      module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      uuid: faker.string.uuid(),
+      semantic_version: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 20 } }),
+        undefined,
+      ]),
+      opaque_version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      migration_generation: faker.helpers.arrayElement(['v0', 'v1', 'managed'] as const),
+      artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      verification_status: faker.helpers.arrayElement(Object.values(ModuleVerificationStatus)),
+      lifecycle_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+      source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      release_notes: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 20 } }),
+        undefined,
+      ]),
+      resource_version: faker.number.int({ min: 1, max: undefined }),
+      published_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+      created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    },
+    definition: {
+      ...{
+        ...{
+          version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          module_source: faker.internet.url(),
+          provider_mapping: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          },
+          description: faker.helpers.arrayElement([
+            faker.string.alpha({ length: { min: 10, max: 20 } }),
+            undefined,
+          ]),
+        },
+        ...{ created_at: `${faker.date.past().toISOString().split('.')[0]}Z` },
+      },
+      ...{
+        output_schema: faker.helpers.arrayElement([{}, undefined]),
+        module_params: {
+          [faker.string.alphanumeric(5)]: {
+            type: faker.helpers.arrayElement([
+              'string',
+              'number',
+              'bool',
+              'list',
+              'map',
+              'any',
+            ] as const),
+            is_optional: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+            description: faker.helpers.arrayElement([
+              faker.string.alpha({ length: { min: 10, max: 20 } }),
+              undefined,
+            ]),
+          },
+        },
+        module_inputs: {},
+        module_source_code: faker.helpers.arrayElement([
+          faker.string.alpha({ length: { min: 10, max: 20 } }),
+          undefined,
+        ]),
+        dependencies: {
+          [faker.string.alphanumeric(5)]: {
+            type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+            class: faker.helpers.arrayElement([
+              faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+              undefined,
+            ]),
+            id: faker.helpers.arrayElement([
+              faker.helpers.fromRegExp(
+                '^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$',
+              ),
+              undefined,
+            ]),
+            params: faker.helpers.arrayElement([{}, undefined]),
+          },
+        },
+        coprovisioned: Array.from(
+          { length: faker.number.int({ min: 1, max: 10 }) },
+          (_, i) => i + 1,
+        ).map(() => ({
+          type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+          class: faker.helpers.arrayElement([
+            faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+            undefined,
+          ]),
+          id: faker.helpers.arrayElement([
+            faker.helpers.fromRegExp('^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$'),
+            undefined,
+          ]),
+          params: faker.helpers.arrayElement([{}, undefined]),
+          is_dependent_on_current: faker.helpers.arrayElement([
+            faker.datatype.boolean(),
+            undefined,
+          ]),
+          copy_dependents_from_current: faker.helpers.arrayElement([
+            faker.datatype.boolean(),
+            undefined,
+          ]),
+        })),
       },
     },
-    coprovisioned: Array.from(
-      { length: faker.number.int({ min: 1, max: 10 }) },
-      (_, i) => i + 1,
-    ).map(() => ({
-      type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
-      class: faker.helpers.arrayElement([
-        faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
-        undefined,
-      ]),
-      id: faker.helpers.arrayElement([
-        faker.helpers.fromRegExp('^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$'),
-        undefined,
-      ]),
-      params: faker.helpers.arrayElement([{}, undefined]),
-      is_dependent_on_current: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
-      copy_dependents_from_current: faker.helpers.arrayElement([
-        faker.datatype.boolean(),
-        undefined,
-      ]),
-    })),
   },
 });
 
-export const getGetModuleVersionResponseMock200 = (): ModuleVersion => ({
+export const getGetModuleVersionResponseMock200 = (): CoreModuleVersionDetail => ({
   ...{
     ...{
-      version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
-      resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
-      module_source: faker.internet.url(),
-      provider_mapping: {
-        [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
-      },
-      description: faker.helpers.arrayElement([
-        faker.string.alpha({ length: { min: 10, max: 20 } }),
-        undefined,
-      ]),
-    },
-    ...{ created_at: `${faker.date.past().toISOString().split('.')[0]}Z` },
-  },
-  ...{
-    module_params: {
-      [faker.string.alphanumeric(5)]: {
-        type: faker.helpers.arrayElement([
-          'string',
-          'number',
-          'bool',
-          'list',
-          'map',
-          'any',
-        ] as const),
-        is_optional: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+      ...{
+        version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        module_source: faker.internet.url(),
+        provider_mapping: {
+          [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        },
         description: faker.helpers.arrayElement([
           faker.string.alpha({ length: { min: 10, max: 20 } }),
           undefined,
         ]),
       },
+      ...{ created_at: `${faker.date.past().toISOString().split('.')[0]}Z` },
     },
-    module_inputs: {},
-    module_source_code: faker.helpers.arrayElement([
-      faker.string.alpha({ length: { min: 10, max: 20 } }),
-      undefined,
-    ]),
-    dependencies: {
-      [faker.string.alphanumeric(5)]: {
+    ...{
+      output_schema: faker.helpers.arrayElement([{}, undefined]),
+      module_params: {
+        [faker.string.alphanumeric(5)]: {
+          type: faker.helpers.arrayElement([
+            'string',
+            'number',
+            'bool',
+            'list',
+            'map',
+            'any',
+          ] as const),
+          is_optional: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+          description: faker.helpers.arrayElement([
+            faker.string.alpha({ length: { min: 10, max: 20 } }),
+            undefined,
+          ]),
+        },
+      },
+      module_inputs: {},
+      module_source_code: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 20 } }),
+        undefined,
+      ]),
+      dependencies: {
+        [faker.string.alphanumeric(5)]: {
+          type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+          class: faker.helpers.arrayElement([
+            faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+            undefined,
+          ]),
+          id: faker.helpers.arrayElement([
+            faker.helpers.fromRegExp('^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$'),
+            undefined,
+          ]),
+          params: faker.helpers.arrayElement([{}, undefined]),
+        },
+      },
+      coprovisioned: Array.from(
+        { length: faker.number.int({ min: 1, max: 10 }) },
+        (_, i) => i + 1,
+      ).map(() => ({
         type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
         class: faker.helpers.arrayElement([
           faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
@@ -817,34 +1411,2194 @@ export const getGetModuleVersionResponseMock200 = (): ModuleVersion => ({
           undefined,
         ]),
         params: faker.helpers.arrayElement([{}, undefined]),
+        is_dependent_on_current: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+        copy_dependents_from_current: faker.helpers.arrayElement([
+          faker.datatype.boolean(),
+          undefined,
+        ]),
+      })),
+    },
+  },
+  ...{
+    version: {
+      org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      module_uuid: faker.string.uuid(),
+      module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      uuid: faker.string.uuid(),
+      semantic_version: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 20 } }),
+        undefined,
+      ]),
+      opaque_version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      migration_generation: faker.helpers.arrayElement(['v0', 'v1', 'managed'] as const),
+      artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      verification_status: faker.helpers.arrayElement(Object.values(ModuleVerificationStatus)),
+      lifecycle_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+      source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      release_notes: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 20 } }),
+        undefined,
+      ]),
+      resource_version: faker.number.int({ min: 1, max: undefined }),
+      published_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+      created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    },
+    definition: {
+      ...{
+        ...{
+          version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          module_source: faker.internet.url(),
+          provider_mapping: {
+            [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          },
+          description: faker.helpers.arrayElement([
+            faker.string.alpha({ length: { min: 10, max: 20 } }),
+            undefined,
+          ]),
+        },
+        ...{ created_at: `${faker.date.past().toISOString().split('.')[0]}Z` },
+      },
+      ...{
+        output_schema: faker.helpers.arrayElement([{}, undefined]),
+        module_params: {
+          [faker.string.alphanumeric(5)]: {
+            type: faker.helpers.arrayElement([
+              'string',
+              'number',
+              'bool',
+              'list',
+              'map',
+              'any',
+            ] as const),
+            is_optional: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+            description: faker.helpers.arrayElement([
+              faker.string.alpha({ length: { min: 10, max: 20 } }),
+              undefined,
+            ]),
+          },
+        },
+        module_inputs: {},
+        module_source_code: faker.helpers.arrayElement([
+          faker.string.alpha({ length: { min: 10, max: 20 } }),
+          undefined,
+        ]),
+        dependencies: {
+          [faker.string.alphanumeric(5)]: {
+            type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+            class: faker.helpers.arrayElement([
+              faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+              undefined,
+            ]),
+            id: faker.helpers.arrayElement([
+              faker.helpers.fromRegExp(
+                '^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$',
+              ),
+              undefined,
+            ]),
+            params: faker.helpers.arrayElement([{}, undefined]),
+          },
+        },
+        coprovisioned: Array.from(
+          { length: faker.number.int({ min: 1, max: 10 }) },
+          (_, i) => i + 1,
+        ).map(() => ({
+          type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+          class: faker.helpers.arrayElement([
+            faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+            undefined,
+          ]),
+          id: faker.helpers.arrayElement([
+            faker.helpers.fromRegExp('^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$'),
+            undefined,
+          ]),
+          params: faker.helpers.arrayElement([{}, undefined]),
+          is_dependent_on_current: faker.helpers.arrayElement([
+            faker.datatype.boolean(),
+            undefined,
+          ]),
+          copy_dependents_from_current: faker.helpers.arrayElement([
+            faker.datatype.boolean(),
+            undefined,
+          ]),
+        })),
       },
     },
-    coprovisioned: Array.from(
-      { length: faker.number.int({ min: 1, max: 10 }) },
-      (_, i) => i + 1,
-    ).map(() => ({
-      type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
-      class: faker.helpers.arrayElement([
-        faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
-        undefined,
-      ]),
-      id: faker.helpers.arrayElement([
-        faker.helpers.fromRegExp('^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$'),
-        undefined,
-      ]),
-      params: faker.helpers.arrayElement([{}, undefined]),
-      is_dependent_on_current: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
-      copy_dependents_from_current: faker.helpers.arrayElement([
-        faker.datatype.boolean(),
-        undefined,
-      ]),
-    })),
   },
 });
 
 export const getGetModuleVersionResponseMock404 = (
   overrideResponse: Partial<N404NotFoundResponse> = {},
 ): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getGetModuleCatalogueEntryResponseMock = (
+  overrideResponse: Partial<ModuleCatalogueEntry> = {},
+): ModuleCatalogueEntry => ({
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  uuid: faker.string.uuid(),
+  slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  description: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  tags: {
+    [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  },
+  status: faker.helpers.arrayElement(Object.values(ModuleCatalogueStatus)),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  current_default_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  previous_default_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  managed_default_generation: faker.number.int({ min: 0, max: undefined }),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  archived_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  archive_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getGetModuleCatalogueEntryResponseMock200 = (
+  overrideResponse: Partial<ModuleCatalogueEntry> = {},
+): ModuleCatalogueEntry => ({
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  uuid: faker.string.uuid(),
+  slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  description: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  tags: {
+    [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  },
+  status: faker.helpers.arrayElement(Object.values(ModuleCatalogueStatus)),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  current_default_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  previous_default_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  managed_default_generation: faker.number.int({ min: 0, max: undefined }),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  archived_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  archive_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getGetModuleCatalogueEntryResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getGetModuleCatalogueEntryResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getUpdateModuleCatalogueEntryResponseMock = (
+  overrideResponse: Partial<ModuleCatalogueEntry> = {},
+): ModuleCatalogueEntry => ({
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  uuid: faker.string.uuid(),
+  slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  description: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  tags: {
+    [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  },
+  status: faker.helpers.arrayElement(Object.values(ModuleCatalogueStatus)),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  current_default_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  previous_default_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  managed_default_generation: faker.number.int({ min: 0, max: undefined }),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  archived_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  archive_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getUpdateModuleCatalogueEntryResponseMock200 = (
+  overrideResponse: Partial<ModuleCatalogueEntry> = {},
+): ModuleCatalogueEntry => ({
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  uuid: faker.string.uuid(),
+  slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  description: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  tags: {
+    [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  },
+  status: faker.helpers.arrayElement(Object.values(ModuleCatalogueStatus)),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  current_default_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  previous_default_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  managed_default_generation: faker.number.int({ min: 0, max: undefined }),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  archived_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  archive_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getUpdateModuleCatalogueEntryResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getUpdateModuleCatalogueEntryResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getUpdateModuleCatalogueEntryResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getUpdateModuleCatalogueEntryResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getListModuleCatalogueEntriesResponseMock = (): ModuleCatalogueEntry[] =>
+  Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    uuid: faker.string.uuid(),
+    slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    description: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    tags: {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    status: faker.helpers.arrayElement(Object.values(ModuleCatalogueStatus)),
+    resource_version: faker.number.int({ min: 1, max: undefined }),
+    current_default_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    previous_default_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    managed_default_generation: faker.number.int({ min: 0, max: undefined }),
+    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    archived_at: faker.helpers.arrayElement([
+      `${faker.date.past().toISOString().split('.')[0]}Z`,
+      undefined,
+    ]),
+    archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    archive_reason: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+  }));
+
+export const getListModuleCatalogueEntriesResponseMock200 = (): ModuleCatalogueEntry[] =>
+  Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    uuid: faker.string.uuid(),
+    slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    description: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    tags: {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    status: faker.helpers.arrayElement(Object.values(ModuleCatalogueStatus)),
+    resource_version: faker.number.int({ min: 1, max: undefined }),
+    current_default_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    previous_default_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    managed_default_generation: faker.number.int({ min: 0, max: undefined }),
+    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    archived_at: faker.helpers.arrayElement([
+      `${faker.date.past().toISOString().split('.')[0]}Z`,
+      undefined,
+    ]),
+    archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    archive_reason: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+  }));
+
+export const getListModuleCatalogueEntriesResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getCreateModuleCatalogueEntryResponseMock = (
+  overrideResponse: Partial<ModuleCatalogueEntry> = {},
+): ModuleCatalogueEntry => ({
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  uuid: faker.string.uuid(),
+  slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  description: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  tags: {
+    [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  },
+  status: faker.helpers.arrayElement(Object.values(ModuleCatalogueStatus)),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  current_default_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  previous_default_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  managed_default_generation: faker.number.int({ min: 0, max: undefined }),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  archived_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  archive_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getCreateModuleCatalogueEntryResponseMock201 = (
+  overrideResponse: Partial<ModuleCatalogueEntry> = {},
+): ModuleCatalogueEntry => ({
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  uuid: faker.string.uuid(),
+  slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  description: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  tags: {
+    [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  },
+  status: faker.helpers.arrayElement(Object.values(ModuleCatalogueStatus)),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  current_default_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  previous_default_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  managed_default_generation: faker.number.int({ min: 0, max: undefined }),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  archived_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  archive_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getCreateModuleCatalogueEntryResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getCreateModuleCatalogueEntryResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getCreateModuleCatalogueEntryResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getCreateModuleCatalogueEntryResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPublishStableModuleVersionSuccessorResponseMock = (
+  overrideResponse: Partial<StableModuleVersionSuccessorResult> = {},
+): StableModuleVersionSuccessorResult => ({
+  prerelease: {
+    org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_uuid: faker.string.uuid(),
+    module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    uuid: faker.string.uuid(),
+    semantic_version: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    opaque_version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    migration_generation: faker.helpers.arrayElement(['v0', 'v1', 'managed'] as const),
+    artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    verification_status: faker.helpers.arrayElement(Object.values(ModuleVerificationStatus)),
+    lifecycle_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+    source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    release_notes: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    resource_version: faker.number.int({ min: 1, max: undefined }),
+    published_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  },
+  stable: {
+    org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_uuid: faker.string.uuid(),
+    module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    uuid: faker.string.uuid(),
+    semantic_version: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    opaque_version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    migration_generation: faker.helpers.arrayElement(['v0', 'v1', 'managed'] as const),
+    artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    verification_status: faker.helpers.arrayElement(Object.values(ModuleVerificationStatus)),
+    lifecycle_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+    source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    release_notes: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    resource_version: faker.number.int({ min: 1, max: undefined }),
+    published_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  },
+  correlation_id: faker.string.uuid(),
+  ...overrideResponse,
+});
+
+export const getPublishStableModuleVersionSuccessorResponseMock201 = (
+  overrideResponse: Partial<StableModuleVersionSuccessorResult> = {},
+): StableModuleVersionSuccessorResult => ({
+  prerelease: {
+    org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_uuid: faker.string.uuid(),
+    module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    uuid: faker.string.uuid(),
+    semantic_version: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    opaque_version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    migration_generation: faker.helpers.arrayElement(['v0', 'v1', 'managed'] as const),
+    artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    verification_status: faker.helpers.arrayElement(Object.values(ModuleVerificationStatus)),
+    lifecycle_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+    source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    release_notes: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    resource_version: faker.number.int({ min: 1, max: undefined }),
+    published_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  },
+  stable: {
+    org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_uuid: faker.string.uuid(),
+    module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    uuid: faker.string.uuid(),
+    semantic_version: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    opaque_version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    migration_generation: faker.helpers.arrayElement(['v0', 'v1', 'managed'] as const),
+    artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    verification_status: faker.helpers.arrayElement(Object.values(ModuleVerificationStatus)),
+    lifecycle_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+    source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    release_notes: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    resource_version: faker.number.int({ min: 1, max: undefined }),
+    published_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  },
+  correlation_id: faker.string.uuid(),
+  ...overrideResponse,
+});
+
+export const getPublishStableModuleVersionSuccessorResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPublishStableModuleVersionSuccessorResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPublishStableModuleVersionSuccessorResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPublishStableModuleVersionSuccessorResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getCompareModuleVersionsResponseMock = (
+  overrideResponse: Partial<ModuleVersionComparison> = {},
+): ModuleVersionComparison => ({
+  from_version_uuid: faker.string.uuid(),
+  to_version_uuid: faker.string.uuid(),
+  before: {
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
+    module_source: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_source_code: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      null,
+    ]),
+    artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_inputs: {},
+    module_params: {
+      [faker.string.alphanumeric(5)]: {
+        type: faker.helpers.arrayElement([
+          'string',
+          'number',
+          'bool',
+          'list',
+          'map',
+          'any',
+        ] as const),
+        is_optional: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+        description: faker.helpers.arrayElement([
+          faker.string.alpha({ length: { min: 10, max: 20 } }),
+          undefined,
+        ]),
+      },
+    },
+    provider_mapping: {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    dependencies: {
+      [faker.string.alphanumeric(5)]: {
+        type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+        class: faker.helpers.arrayElement([
+          faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+          undefined,
+        ]),
+        id: faker.helpers.arrayElement([
+          faker.helpers.fromRegExp('^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$'),
+          undefined,
+        ]),
+        params: faker.helpers.arrayElement([{}, undefined]),
+      },
+    },
+    coprovisioned: Array.from(
+      { length: faker.number.int({ min: 1, max: 10 }) },
+      (_, i) => i + 1,
+    ).map(() => ({
+      type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+      class: faker.helpers.arrayElement([
+        faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+        undefined,
+      ]),
+      id: faker.helpers.arrayElement([
+        faker.helpers.fromRegExp('^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$'),
+        undefined,
+      ]),
+      params: faker.helpers.arrayElement([{}, undefined]),
+      is_dependent_on_current: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+      copy_dependents_from_current: faker.helpers.arrayElement([
+        faker.datatype.boolean(),
+        undefined,
+      ]),
+    })),
+  },
+  after: {
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
+    module_source: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_source_code: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      null,
+    ]),
+    artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_inputs: {},
+    module_params: {
+      [faker.string.alphanumeric(5)]: {
+        type: faker.helpers.arrayElement([
+          'string',
+          'number',
+          'bool',
+          'list',
+          'map',
+          'any',
+        ] as const),
+        is_optional: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+        description: faker.helpers.arrayElement([
+          faker.string.alpha({ length: { min: 10, max: 20 } }),
+          undefined,
+        ]),
+      },
+    },
+    provider_mapping: {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    dependencies: {
+      [faker.string.alphanumeric(5)]: {
+        type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+        class: faker.helpers.arrayElement([
+          faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+          undefined,
+        ]),
+        id: faker.helpers.arrayElement([
+          faker.helpers.fromRegExp('^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$'),
+          undefined,
+        ]),
+        params: faker.helpers.arrayElement([{}, undefined]),
+      },
+    },
+    coprovisioned: Array.from(
+      { length: faker.number.int({ min: 1, max: 10 }) },
+      (_, i) => i + 1,
+    ).map(() => ({
+      type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+      class: faker.helpers.arrayElement([
+        faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+        undefined,
+      ]),
+      id: faker.helpers.arrayElement([
+        faker.helpers.fromRegExp('^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$'),
+        undefined,
+      ]),
+      params: faker.helpers.arrayElement([{}, undefined]),
+      is_dependent_on_current: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+      copy_dependents_from_current: faker.helpers.arrayElement([
+        faker.datatype.boolean(),
+        undefined,
+      ]),
+    })),
+  },
+  module_source_changed: faker.datatype.boolean(),
+  module_source_code_changed: faker.datatype.boolean(),
+  artifact_digest_changed: faker.datatype.boolean(),
+  source_revision_changed: faker.datatype.boolean(),
+  resource_type_changed: faker.datatype.boolean(),
+  added_module_inputs: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+  removed_module_inputs: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+  changed_module_inputs: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+  added_module_params: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+  removed_module_params: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+  changed_module_params: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+  added_provider_mappings: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+  removed_provider_mappings: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+  changed_provider_mappings: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+  added_dependencies: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+  removed_dependencies: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+  changed_dependencies: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+  coprovisioning_changed: faker.datatype.boolean(),
+  output_schema_changed: faker.datatype.boolean(),
+  ...overrideResponse,
+});
+
+export const getCompareModuleVersionsResponseMock200 = (
+  overrideResponse: Partial<ModuleVersionComparison> = {},
+): ModuleVersionComparison => ({
+  from_version_uuid: faker.string.uuid(),
+  to_version_uuid: faker.string.uuid(),
+  before: {
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
+    module_source: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_source_code: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      null,
+    ]),
+    artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_inputs: {},
+    module_params: {
+      [faker.string.alphanumeric(5)]: {
+        type: faker.helpers.arrayElement([
+          'string',
+          'number',
+          'bool',
+          'list',
+          'map',
+          'any',
+        ] as const),
+        is_optional: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+        description: faker.helpers.arrayElement([
+          faker.string.alpha({ length: { min: 10, max: 20 } }),
+          undefined,
+        ]),
+      },
+    },
+    provider_mapping: {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    dependencies: {
+      [faker.string.alphanumeric(5)]: {
+        type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+        class: faker.helpers.arrayElement([
+          faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+          undefined,
+        ]),
+        id: faker.helpers.arrayElement([
+          faker.helpers.fromRegExp('^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$'),
+          undefined,
+        ]),
+        params: faker.helpers.arrayElement([{}, undefined]),
+      },
+    },
+    coprovisioned: Array.from(
+      { length: faker.number.int({ min: 1, max: 10 }) },
+      (_, i) => i + 1,
+    ).map(() => ({
+      type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+      class: faker.helpers.arrayElement([
+        faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+        undefined,
+      ]),
+      id: faker.helpers.arrayElement([
+        faker.helpers.fromRegExp('^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$'),
+        undefined,
+      ]),
+      params: faker.helpers.arrayElement([{}, undefined]),
+      is_dependent_on_current: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+      copy_dependents_from_current: faker.helpers.arrayElement([
+        faker.datatype.boolean(),
+        undefined,
+      ]),
+    })),
+  },
+  after: {
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
+    module_source: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_source_code: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      null,
+    ]),
+    artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_inputs: {},
+    module_params: {
+      [faker.string.alphanumeric(5)]: {
+        type: faker.helpers.arrayElement([
+          'string',
+          'number',
+          'bool',
+          'list',
+          'map',
+          'any',
+        ] as const),
+        is_optional: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+        description: faker.helpers.arrayElement([
+          faker.string.alpha({ length: { min: 10, max: 20 } }),
+          undefined,
+        ]),
+      },
+    },
+    provider_mapping: {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    dependencies: {
+      [faker.string.alphanumeric(5)]: {
+        type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+        class: faker.helpers.arrayElement([
+          faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+          undefined,
+        ]),
+        id: faker.helpers.arrayElement([
+          faker.helpers.fromRegExp('^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$'),
+          undefined,
+        ]),
+        params: faker.helpers.arrayElement([{}, undefined]),
+      },
+    },
+    coprovisioned: Array.from(
+      { length: faker.number.int({ min: 1, max: 10 }) },
+      (_, i) => i + 1,
+    ).map(() => ({
+      type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+      class: faker.helpers.arrayElement([
+        faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+        undefined,
+      ]),
+      id: faker.helpers.arrayElement([
+        faker.helpers.fromRegExp('^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$'),
+        undefined,
+      ]),
+      params: faker.helpers.arrayElement([{}, undefined]),
+      is_dependent_on_current: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+      copy_dependents_from_current: faker.helpers.arrayElement([
+        faker.datatype.boolean(),
+        undefined,
+      ]),
+    })),
+  },
+  module_source_changed: faker.datatype.boolean(),
+  module_source_code_changed: faker.datatype.boolean(),
+  artifact_digest_changed: faker.datatype.boolean(),
+  source_revision_changed: faker.datatype.boolean(),
+  resource_type_changed: faker.datatype.boolean(),
+  added_module_inputs: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+  removed_module_inputs: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+  changed_module_inputs: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+  added_module_params: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+  removed_module_params: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+  changed_module_params: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+  added_provider_mappings: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+  removed_provider_mappings: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+  changed_provider_mappings: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+  added_dependencies: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+  removed_dependencies: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+  changed_dependencies: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+  coprovisioning_changed: faker.datatype.boolean(),
+  output_schema_changed: faker.datatype.boolean(),
+  ...overrideResponse,
+});
+
+export const getCompareModuleVersionsResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getCompareModuleVersionsResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getGetModuleVersionUsageResponseMock = (
+  overrideResponse: Partial<ModuleVersionUsage> = {},
+): ModuleVersionUsage => ({
+  module_uuid: faker.string.uuid(),
+  version_uuid: faker.string.uuid(),
+  semantic_version: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  active_environment_count: faker.number.int({ min: 0, max: undefined }),
+  by_project: {
+    [faker.string.alphanumeric(5)]: faker.number.int({ min: 0, max: undefined }),
+  },
+  by_environment_type: {
+    [faker.string.alphanumeric(5)]: faker.number.int({ min: 0, max: undefined }),
+  },
+  environments: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+    () => ({
+      project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      environment_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      environment_uuid: faker.string.uuid(),
+      environment_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      deployment_id: faker.string.uuid(),
+      observed_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    }),
+  ),
+  unknown_environments: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.uuid()),
+  observed_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  active_pins: faker.number.int({ min: 0, max: undefined }),
+  override_pending_pins: faker.number.int({ min: 0, max: undefined }),
+  historical_pins: faker.number.int({ min: 0, max: undefined }),
+  ...overrideResponse,
+});
+
+export const getGetModuleVersionUsageResponseMock200 = (
+  overrideResponse: Partial<ModuleVersionUsage> = {},
+): ModuleVersionUsage => ({
+  module_uuid: faker.string.uuid(),
+  version_uuid: faker.string.uuid(),
+  semantic_version: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  active_environment_count: faker.number.int({ min: 0, max: undefined }),
+  by_project: {
+    [faker.string.alphanumeric(5)]: faker.number.int({ min: 0, max: undefined }),
+  },
+  by_environment_type: {
+    [faker.string.alphanumeric(5)]: faker.number.int({ min: 0, max: undefined }),
+  },
+  environments: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+    () => ({
+      project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      environment_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      environment_uuid: faker.string.uuid(),
+      environment_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      deployment_id: faker.string.uuid(),
+      observed_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    }),
+  ),
+  unknown_environments: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => faker.string.uuid()),
+  observed_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  active_pins: faker.number.int({ min: 0, max: undefined }),
+  override_pending_pins: faker.number.int({ min: 0, max: undefined }),
+  historical_pins: faker.number.int({ min: 0, max: undefined }),
+  ...overrideResponse,
+});
+
+export const getGetModuleVersionUsageResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getGetModuleVersionUsageResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getTransactModuleVersionLifecyclesResponseMock = (
+  overrideResponse: Partial<ModuleVersionLifecycleTransactionResult> = {},
+): ModuleVersionLifecycleTransactionResult => ({
+  correlation_id: faker.string.uuid(),
+  versions: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+    () => ({
+      org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      module_uuid: faker.string.uuid(),
+      module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      uuid: faker.string.uuid(),
+      semantic_version: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 20 } }),
+        undefined,
+      ]),
+      opaque_version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      migration_generation: faker.helpers.arrayElement(['v0', 'v1', 'managed'] as const),
+      artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      verification_status: faker.helpers.arrayElement(Object.values(ModuleVerificationStatus)),
+      lifecycle_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+      source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      release_notes: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 20 } }),
+        undefined,
+      ]),
+      resource_version: faker.number.int({ min: 1, max: undefined }),
+      published_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+      created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    }),
+  ),
+  ...overrideResponse,
+});
+
+export const getTransactModuleVersionLifecyclesResponseMock200 = (
+  overrideResponse: Partial<ModuleVersionLifecycleTransactionResult> = {},
+): ModuleVersionLifecycleTransactionResult => ({
+  correlation_id: faker.string.uuid(),
+  versions: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+    () => ({
+      org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      module_uuid: faker.string.uuid(),
+      module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      uuid: faker.string.uuid(),
+      semantic_version: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 20 } }),
+        undefined,
+      ]),
+      opaque_version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      migration_generation: faker.helpers.arrayElement(['v0', 'v1', 'managed'] as const),
+      artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      verification_status: faker.helpers.arrayElement(Object.values(ModuleVerificationStatus)),
+      lifecycle_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+      source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      release_notes: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 20 } }),
+        undefined,
+      ]),
+      resource_version: faker.number.int({ min: 1, max: undefined }),
+      published_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+      created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    }),
+  ),
+  ...overrideResponse,
+});
+
+export const getTransactModuleVersionLifecyclesResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getTransactModuleVersionLifecyclesResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getTransactModuleVersionLifecyclesResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getTransactModuleVersionLifecyclesResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getChangeModuleCatalogueStatusResponseMock = (
+  overrideResponse: Partial<ModuleCatalogueEntry> = {},
+): ModuleCatalogueEntry => ({
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  uuid: faker.string.uuid(),
+  slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  description: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  tags: {
+    [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  },
+  status: faker.helpers.arrayElement(Object.values(ModuleCatalogueStatus)),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  current_default_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  previous_default_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  managed_default_generation: faker.number.int({ min: 0, max: undefined }),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  archived_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  archive_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getChangeModuleCatalogueStatusResponseMock200 = (
+  overrideResponse: Partial<ModuleCatalogueEntry> = {},
+): ModuleCatalogueEntry => ({
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  uuid: faker.string.uuid(),
+  slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  description: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  resource_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  tags: {
+    [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  },
+  status: faker.helpers.arrayElement(Object.values(ModuleCatalogueStatus)),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  current_default_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  previous_default_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  managed_default_generation: faker.number.int({ min: 0, max: undefined }),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  archived_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  archived_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  archive_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getChangeModuleCatalogueStatusResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getChangeModuleCatalogueStatusResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getChangeModuleCatalogueStatusResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getChangeModuleCatalogueStatusResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getTransitionModuleVersionResponseMock = (
+  overrideResponse: Partial<CoreModuleVersion> = {},
+): CoreModuleVersion => ({
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  uuid: faker.string.uuid(),
+  semantic_version: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  opaque_version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  migration_generation: faker.helpers.arrayElement(['v0', 'v1', 'managed'] as const),
+  artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  verification_status: faker.helpers.arrayElement(Object.values(ModuleVerificationStatus)),
+  lifecycle_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+  source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  release_notes: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  published_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  ...overrideResponse,
+});
+
+export const getTransitionModuleVersionResponseMock200 = (
+  overrideResponse: Partial<CoreModuleVersion> = {},
+): CoreModuleVersion => ({
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  uuid: faker.string.uuid(),
+  semantic_version: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  opaque_version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  migration_generation: faker.helpers.arrayElement(['v0', 'v1', 'managed'] as const),
+  artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  verification_status: faker.helpers.arrayElement(Object.values(ModuleVerificationStatus)),
+  lifecycle_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+  source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  release_notes: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  published_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  ...overrideResponse,
+});
+
+export const getTransitionModuleVersionResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getTransitionModuleVersionResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getTransitionModuleVersionResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getTransitionModuleVersionResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getListModuleVersionLifecycleEventsResponseMock = (): ModuleVersionLifecycleEvent[] =>
+  Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    sequence: faker.number.int({ min: undefined, max: undefined }),
+    id: faker.string.uuid(),
+    module_uuid: faker.string.uuid(),
+    version_uuid: faker.string.uuid(),
+    from_status: faker.helpers.arrayElement([
+      faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+      undefined,
+    ]),
+    to_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+    version_resource_version: faker.number.int({ min: undefined, max: undefined }),
+    actor: faker.string.uuid(),
+    reason: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    correlation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    payload: {},
+    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  }));
+
+export const getListModuleVersionLifecycleEventsResponseMock200 =
+  (): ModuleVersionLifecycleEvent[] =>
+    Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+      sequence: faker.number.int({ min: undefined, max: undefined }),
+      id: faker.string.uuid(),
+      module_uuid: faker.string.uuid(),
+      version_uuid: faker.string.uuid(),
+      from_status: faker.helpers.arrayElement([
+        faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+        undefined,
+      ]),
+      to_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+      version_resource_version: faker.number.int({ min: undefined, max: undefined }),
+      actor: faker.string.uuid(),
+      reason: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 20 } }),
+        undefined,
+      ]),
+      correlation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+      payload: {},
+      created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    }));
+
+export const getListModuleVersionLifecycleEventsResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getListModuleVersionLifecycleEventsResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getListEnvironmentModuleVersionPinsResponseMock = (): EnvironmentModuleVersionPin[] =>
+  Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    id: faker.string.uuid(),
+    org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    project_uuid: faker.string.uuid(),
+    project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    environment_uuid: faker.string.uuid(),
+    environment_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_uuid: faker.string.uuid(),
+    version_uuid: faker.string.uuid(),
+    status: faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+    resource_version: faker.number.int({ min: 1, max: undefined }),
+    activation_event_id: faker.string.uuid(),
+    bulk_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    override_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    override_target_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    override_actor: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    override_reason: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    override_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    created_by: faker.string.uuid(),
+    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    removed_at: faker.helpers.arrayElement([
+      `${faker.date.past().toISOString().split('.')[0]}Z`,
+      undefined,
+    ]),
+  }));
+
+export const getListEnvironmentModuleVersionPinsResponseMock200 =
+  (): EnvironmentModuleVersionPin[] =>
+    Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+      id: faker.string.uuid(),
+      org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      project_uuid: faker.string.uuid(),
+      project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      environment_uuid: faker.string.uuid(),
+      environment_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      module_uuid: faker.string.uuid(),
+      version_uuid: faker.string.uuid(),
+      status: faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+      resource_version: faker.number.int({ min: 1, max: undefined }),
+      activation_event_id: faker.string.uuid(),
+      bulk_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+      override_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+      override_target_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+      override_actor: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+      override_reason: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 20 } }),
+        undefined,
+      ]),
+      override_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+      created_by: faker.string.uuid(),
+      created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+      updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+      removed_at: faker.helpers.arrayElement([
+        `${faker.date.past().toISOString().split('.')[0]}Z`,
+        undefined,
+      ]),
+    }));
+
+export const getListEnvironmentModuleVersionPinsResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getCreateEnvironmentModuleVersionPinResponseMock = (
+  overrideResponse: Partial<EnvironmentModuleVersionPin> = {},
+): EnvironmentModuleVersionPin => ({
+  id: faker.string.uuid(),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  project_uuid: faker.string.uuid(),
+  project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  environment_uuid: faker.string.uuid(),
+  environment_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  version_uuid: faker.string.uuid(),
+  status: faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  activation_event_id: faker.string.uuid(),
+  bulk_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_target_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_actor: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  override_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_by: faker.string.uuid(),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  removed_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getCreateEnvironmentModuleVersionPinResponseMock201 = (
+  overrideResponse: Partial<EnvironmentModuleVersionPin> = {},
+): EnvironmentModuleVersionPin => ({
+  id: faker.string.uuid(),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  project_uuid: faker.string.uuid(),
+  project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  environment_uuid: faker.string.uuid(),
+  environment_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  version_uuid: faker.string.uuid(),
+  status: faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  activation_event_id: faker.string.uuid(),
+  bulk_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_target_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_actor: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  override_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_by: faker.string.uuid(),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  removed_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getCreateEnvironmentModuleVersionPinResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getCreateEnvironmentModuleVersionPinResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getCreateEnvironmentModuleVersionPinResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getCreateEnvironmentModuleVersionPinResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getTransitionEnvironmentModuleVersionPinResponseMock = (
+  overrideResponse: Partial<EnvironmentModuleVersionPin> = {},
+): EnvironmentModuleVersionPin => ({
+  id: faker.string.uuid(),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  project_uuid: faker.string.uuid(),
+  project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  environment_uuid: faker.string.uuid(),
+  environment_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  version_uuid: faker.string.uuid(),
+  status: faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  activation_event_id: faker.string.uuid(),
+  bulk_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_target_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_actor: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  override_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_by: faker.string.uuid(),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  removed_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getTransitionEnvironmentModuleVersionPinResponseMock200 = (
+  overrideResponse: Partial<EnvironmentModuleVersionPin> = {},
+): EnvironmentModuleVersionPin => ({
+  id: faker.string.uuid(),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  project_uuid: faker.string.uuid(),
+  project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  environment_uuid: faker.string.uuid(),
+  environment_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  version_uuid: faker.string.uuid(),
+  status: faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  activation_event_id: faker.string.uuid(),
+  bulk_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_target_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_actor: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  override_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_by: faker.string.uuid(),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  removed_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getTransitionEnvironmentModuleVersionPinResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getTransitionEnvironmentModuleVersionPinResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getTransitionEnvironmentModuleVersionPinResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getTransitionEnvironmentModuleVersionPinResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getGetEnvironmentModuleVersionPinResponseMock = (
+  overrideResponse: Partial<EnvironmentModuleVersionPin> = {},
+): EnvironmentModuleVersionPin => ({
+  id: faker.string.uuid(),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  project_uuid: faker.string.uuid(),
+  project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  environment_uuid: faker.string.uuid(),
+  environment_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  version_uuid: faker.string.uuid(),
+  status: faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  activation_event_id: faker.string.uuid(),
+  bulk_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_target_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_actor: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  override_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_by: faker.string.uuid(),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  removed_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getGetEnvironmentModuleVersionPinResponseMock200 = (
+  overrideResponse: Partial<EnvironmentModuleVersionPin> = {},
+): EnvironmentModuleVersionPin => ({
+  id: faker.string.uuid(),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  project_uuid: faker.string.uuid(),
+  project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  environment_uuid: faker.string.uuid(),
+  environment_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  version_uuid: faker.string.uuid(),
+  status: faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+  resource_version: faker.number.int({ min: 1, max: undefined }),
+  activation_event_id: faker.string.uuid(),
+  bulk_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_target_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_actor: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  override_reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  override_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_by: faker.string.uuid(),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  removed_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getGetEnvironmentModuleVersionPinResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getGetEnvironmentModuleVersionPinResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getListEnvironmentModuleVersionPinEventsResponseMock = (): ModuleVersionPinEvent[] =>
+  Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    sequence: faker.number.int({ min: undefined, max: undefined }),
+    id: faker.string.uuid(),
+    pin_id: faker.string.uuid(),
+    revision: faker.number.int({ min: 1, max: undefined }),
+    event_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    from_status: faker.helpers.arrayElement([
+      faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+      undefined,
+    ]),
+    to_status: faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+    activation_event_id: faker.string.uuid(),
+    actor: faker.string.uuid(),
+    actor_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    reason: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    note: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    bulk_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  }));
+
+export const getListEnvironmentModuleVersionPinEventsResponseMock200 =
+  (): ModuleVersionPinEvent[] =>
+    Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+      sequence: faker.number.int({ min: undefined, max: undefined }),
+      id: faker.string.uuid(),
+      pin_id: faker.string.uuid(),
+      revision: faker.number.int({ min: 1, max: undefined }),
+      event_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      from_status: faker.helpers.arrayElement([
+        faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+        undefined,
+      ]),
+      to_status: faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+      activation_event_id: faker.string.uuid(),
+      actor: faker.string.uuid(),
+      actor_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      reason: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 20 } }),
+        undefined,
+      ]),
+      note: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 20 } }),
+        undefined,
+      ]),
+      operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+      deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+      bulk_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+      created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    }));
+
+export const getListEnvironmentModuleVersionPinEventsResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getListEnvironmentModuleVersionPinEventsResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getAppendEnvironmentModuleVersionPinNoteResponseMock = (
+  overrideResponse: Partial<ModuleVersionPinEvent> = {},
+): ModuleVersionPinEvent => ({
+  sequence: faker.number.int({ min: undefined, max: undefined }),
+  id: faker.string.uuid(),
+  pin_id: faker.string.uuid(),
+  revision: faker.number.int({ min: 1, max: undefined }),
+  event_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  from_status: faker.helpers.arrayElement([
+    faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+    undefined,
+  ]),
+  to_status: faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+  activation_event_id: faker.string.uuid(),
+  actor: faker.string.uuid(),
+  actor_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  note: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  bulk_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  ...overrideResponse,
+});
+
+export const getAppendEnvironmentModuleVersionPinNoteResponseMock201 = (
+  overrideResponse: Partial<ModuleVersionPinEvent> = {},
+): ModuleVersionPinEvent => ({
+  sequence: faker.number.int({ min: undefined, max: undefined }),
+  id: faker.string.uuid(),
+  pin_id: faker.string.uuid(),
+  revision: faker.number.int({ min: 1, max: undefined }),
+  event_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  from_status: faker.helpers.arrayElement([
+    faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+    undefined,
+  ]),
+  to_status: faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+  activation_event_id: faker.string.uuid(),
+  actor: faker.string.uuid(),
+  actor_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  note: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  bulk_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  ...overrideResponse,
+});
+
+export const getAppendEnvironmentModuleVersionPinNoteResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getAppendEnvironmentModuleVersionPinNoteResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getAppendEnvironmentModuleVersionPinNoteResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getAppendEnvironmentModuleVersionPinNoteResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPreviewEnvironmentModuleVersionPinBulkOperationResponseMock = (
+  overrideResponse: Partial<ModuleVersionPinBulkPreview> = {},
+): ModuleVersionPinBulkPreview => ({
+  operation_id: faker.string.uuid(),
+  fingerprint: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  action: faker.helpers.arrayElement(Object.values(ModuleVersionPinBulkAction)),
+  module_uuid: faker.string.uuid(),
+  eligible: faker.datatype.boolean(),
+  items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    environment_uuid: faker.string.uuid(),
+    project_uuid: faker.string.uuid(),
+    environment_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    environment_type: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    production: faker.datatype.boolean(),
+    eligible: faker.datatype.boolean(),
+    version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    pin_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    pin_resource_version: faker.helpers.arrayElement([
+      faker.number.int({ min: undefined, max: undefined }),
+      undefined,
+    ]),
+    idempotent_match: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    problem: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+  })),
+  ...overrideResponse,
+});
+
+export const getPreviewEnvironmentModuleVersionPinBulkOperationResponseMock200 = (
+  overrideResponse: Partial<ModuleVersionPinBulkPreview> = {},
+): ModuleVersionPinBulkPreview => ({
+  operation_id: faker.string.uuid(),
+  fingerprint: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  action: faker.helpers.arrayElement(Object.values(ModuleVersionPinBulkAction)),
+  module_uuid: faker.string.uuid(),
+  eligible: faker.datatype.boolean(),
+  items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    environment_uuid: faker.string.uuid(),
+    project_uuid: faker.string.uuid(),
+    environment_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    environment_type: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    production: faker.datatype.boolean(),
+    eligible: faker.datatype.boolean(),
+    version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    pin_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    pin_resource_version: faker.helpers.arrayElement([
+      faker.number.int({ min: undefined, max: undefined }),
+      undefined,
+    ]),
+    idempotent_match: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    problem: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+  })),
+  ...overrideResponse,
+});
+
+export const getPreviewEnvironmentModuleVersionPinBulkOperationResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPreviewEnvironmentModuleVersionPinBulkOperationResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPreviewEnvironmentModuleVersionPinBulkOperationResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPreviewEnvironmentModuleVersionPinBulkOperationResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getExecuteEnvironmentModuleVersionPinBulkOperationResponseMock = (
+  overrideResponse: Partial<ModuleVersionPinBulkResult> = {},
+): ModuleVersionPinBulkResult => ({
+  operation_id: faker.string.uuid(),
+  action: faker.helpers.arrayElement(Object.values(ModuleVersionPinBulkAction)),
+  pins: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    id: faker.string.uuid(),
+    org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    project_uuid: faker.string.uuid(),
+    project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    environment_uuid: faker.string.uuid(),
+    environment_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_uuid: faker.string.uuid(),
+    version_uuid: faker.string.uuid(),
+    status: faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+    resource_version: faker.number.int({ min: 1, max: undefined }),
+    activation_event_id: faker.string.uuid(),
+    bulk_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    override_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    override_target_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    override_actor: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    override_reason: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    override_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    created_by: faker.string.uuid(),
+    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    removed_at: faker.helpers.arrayElement([
+      `${faker.date.past().toISOString().split('.')[0]}Z`,
+      undefined,
+    ]),
+  })),
+  ...overrideResponse,
+});
+
+export const getExecuteEnvironmentModuleVersionPinBulkOperationResponseMock200 = (
+  overrideResponse: Partial<ModuleVersionPinBulkResult> = {},
+): ModuleVersionPinBulkResult => ({
+  operation_id: faker.string.uuid(),
+  action: faker.helpers.arrayElement(Object.values(ModuleVersionPinBulkAction)),
+  pins: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    id: faker.string.uuid(),
+    org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    project_uuid: faker.string.uuid(),
+    project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    environment_uuid: faker.string.uuid(),
+    environment_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_uuid: faker.string.uuid(),
+    version_uuid: faker.string.uuid(),
+    status: faker.helpers.arrayElement(Object.values(ModuleVersionPinStatus)),
+    resource_version: faker.number.int({ min: 1, max: undefined }),
+    activation_event_id: faker.string.uuid(),
+    bulk_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    override_operation_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    override_target_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    override_actor: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    override_reason: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    override_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    created_by: faker.string.uuid(),
+    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    removed_at: faker.helpers.arrayElement([
+      `${faker.date.past().toISOString().split('.')[0]}Z`,
+      undefined,
+    ]),
+  })),
+  ...overrideResponse,
+});
+
+export const getExecuteEnvironmentModuleVersionPinBulkOperationResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getExecuteEnvironmentModuleVersionPinBulkOperationResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getExecuteEnvironmentModuleVersionPinBulkOperationResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getExecuteEnvironmentModuleVersionPinBulkOperationResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
   error: faker.string.alpha({ length: { min: 10, max: 20 } }),
   message: faker.string.alpha({ length: { min: 10, max: 20 } }),
   details: faker.helpers.arrayElement([{}, undefined]),
@@ -1315,10 +4069,10 @@ export const getDeleteModuleMockHandler409 = (
 
 export const getListModuleVersionsMockHandler = (
   overrideResponse?:
-    | ModuleVersionPage
+    | CoreModuleVersionPage
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<ModuleVersionPage> | ModuleVersionPage),
+      ) => Promise<CoreModuleVersionPage> | CoreModuleVersionPage),
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
@@ -1341,10 +4095,10 @@ export const getListModuleVersionsMockHandler = (
 
 export const getListModuleVersionsMockHandler200 = (
   overrideResponse?:
-    | ModuleVersionPage
+    | CoreModuleVersionPage
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<ModuleVersionPage> | ModuleVersionPage),
+      ) => Promise<CoreModuleVersionPage> | CoreModuleVersionPage),
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
@@ -1391,12 +4145,168 @@ export const getListModuleVersionsMockHandler404 = (
   );
 };
 
+export const getPublishModuleVersionMockHandler = (
+  overrideResponse?:
+    | CoreModuleVersion
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<CoreModuleVersion> | CoreModuleVersion),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getPublishModuleVersionResponseMock(),
+        ),
+        { status: 201, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishModuleVersionMockHandler201 = (
+  overrideResponse?:
+    | CoreModuleVersion
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<CoreModuleVersion> | CoreModuleVersion),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getPublishModuleVersionResponseMock201(),
+        ),
+        { status: 201, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishModuleVersionMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getPublishModuleVersionResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishModuleVersionMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getPublishModuleVersionResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishModuleVersionMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getPublishModuleVersionResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishModuleVersionMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getPublishModuleVersionResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
 export const getGetModuleVersionMockHandler = (
   overrideResponse?:
-    | ModuleVersion
+    | CoreModuleVersionDetail
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<ModuleVersion> | ModuleVersion),
+      ) => Promise<CoreModuleVersionDetail> | CoreModuleVersionDetail),
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
@@ -1419,10 +4329,10 @@ export const getGetModuleVersionMockHandler = (
 
 export const getGetModuleVersionMockHandler200 = (
   overrideResponse?:
-    | ModuleVersion
+    | CoreModuleVersionDetail
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<ModuleVersion> | ModuleVersion),
+      ) => Promise<CoreModuleVersionDetail> | CoreModuleVersionDetail),
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
@@ -1468,6 +4378,2506 @@ export const getGetModuleVersionMockHandler404 = (
     options,
   );
 };
+
+export const getGetModuleCatalogueEntryMockHandler = (
+  overrideResponse?:
+    | ModuleCatalogueEntry
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ModuleCatalogueEntry> | ModuleCatalogueEntry),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/catalogue',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getGetModuleCatalogueEntryResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleCatalogueEntryMockHandler200 = (
+  overrideResponse?:
+    | ModuleCatalogueEntry
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ModuleCatalogueEntry> | ModuleCatalogueEntry),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/catalogue',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getGetModuleCatalogueEntryResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleCatalogueEntryMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/catalogue',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getGetModuleCatalogueEntryResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleCatalogueEntryMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/catalogue',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getGetModuleCatalogueEntryResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpdateModuleCatalogueEntryMockHandler = (
+  overrideResponse?:
+    | ModuleCatalogueEntry
+    | ((
+        info: Parameters<Parameters<typeof http.patch>[1]>[0],
+      ) => Promise<ModuleCatalogueEntry> | ModuleCatalogueEntry),
+  options?: RequestHandlerOptions,
+) => {
+  return http.patch(
+    'http://example.com/orgs/:orgId/modules/:moduleId/catalogue',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getUpdateModuleCatalogueEntryResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpdateModuleCatalogueEntryMockHandler200 = (
+  overrideResponse?:
+    | ModuleCatalogueEntry
+    | ((
+        info: Parameters<Parameters<typeof http.patch>[1]>[0],
+      ) => Promise<ModuleCatalogueEntry> | ModuleCatalogueEntry),
+  options?: RequestHandlerOptions,
+) => {
+  return http.patch(
+    'http://example.com/orgs/:orgId/modules/:moduleId/catalogue',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getUpdateModuleCatalogueEntryResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpdateModuleCatalogueEntryMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.patch>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.patch(
+    'http://example.com/orgs/:orgId/modules/:moduleId/catalogue',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getUpdateModuleCatalogueEntryResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpdateModuleCatalogueEntryMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.patch>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.patch(
+    'http://example.com/orgs/:orgId/modules/:moduleId/catalogue',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getUpdateModuleCatalogueEntryResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpdateModuleCatalogueEntryMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.patch>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.patch(
+    'http://example.com/orgs/:orgId/modules/:moduleId/catalogue',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getUpdateModuleCatalogueEntryResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpdateModuleCatalogueEntryMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.patch>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.patch(
+    'http://example.com/orgs/:orgId/modules/:moduleId/catalogue',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getUpdateModuleCatalogueEntryResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListModuleCatalogueEntriesMockHandler = (
+  overrideResponse?:
+    | ModuleCatalogueEntry[]
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ModuleCatalogueEntry[]> | ModuleCatalogueEntry[]),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/module-catalogue',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListModuleCatalogueEntriesResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListModuleCatalogueEntriesMockHandler200 = (
+  overrideResponse?:
+    | ModuleCatalogueEntry[]
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ModuleCatalogueEntry[]> | ModuleCatalogueEntry[]),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/module-catalogue',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListModuleCatalogueEntriesResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListModuleCatalogueEntriesMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/module-catalogue',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListModuleCatalogueEntriesResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateModuleCatalogueEntryMockHandler = (
+  overrideResponse?:
+    | ModuleCatalogueEntry
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ModuleCatalogueEntry> | ModuleCatalogueEntry),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-catalogue',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCreateModuleCatalogueEntryResponseMock(),
+        ),
+        { status: 201, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateModuleCatalogueEntryMockHandler201 = (
+  overrideResponse?:
+    | ModuleCatalogueEntry
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ModuleCatalogueEntry> | ModuleCatalogueEntry),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-catalogue',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCreateModuleCatalogueEntryResponseMock201(),
+        ),
+        { status: 201, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateModuleCatalogueEntryMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-catalogue',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCreateModuleCatalogueEntryResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateModuleCatalogueEntryMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-catalogue',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCreateModuleCatalogueEntryResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateModuleCatalogueEntryMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-catalogue',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCreateModuleCatalogueEntryResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateModuleCatalogueEntryMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-catalogue',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCreateModuleCatalogueEntryResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishStableModuleVersionSuccessorMockHandler = (
+  overrideResponse?:
+    | StableModuleVersionSuccessorResult
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<StableModuleVersionSuccessorResult> | StableModuleVersionSuccessorResult),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/stable-successor',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getPublishStableModuleVersionSuccessorResponseMock(),
+        ),
+        { status: 201, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishStableModuleVersionSuccessorMockHandler201 = (
+  overrideResponse?:
+    | StableModuleVersionSuccessorResult
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<StableModuleVersionSuccessorResult> | StableModuleVersionSuccessorResult),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/stable-successor',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getPublishStableModuleVersionSuccessorResponseMock201(),
+        ),
+        { status: 201, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishStableModuleVersionSuccessorMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/stable-successor',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getPublishStableModuleVersionSuccessorResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishStableModuleVersionSuccessorMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/stable-successor',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getPublishStableModuleVersionSuccessorResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishStableModuleVersionSuccessorMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/stable-successor',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getPublishStableModuleVersionSuccessorResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishStableModuleVersionSuccessorMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/stable-successor',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getPublishStableModuleVersionSuccessorResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCompareModuleVersionsMockHandler = (
+  overrideResponse?:
+    | ModuleVersionComparison
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ModuleVersionComparison> | ModuleVersionComparison),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/compare/:otherModuleVersionId',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCompareModuleVersionsResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCompareModuleVersionsMockHandler200 = (
+  overrideResponse?:
+    | ModuleVersionComparison
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ModuleVersionComparison> | ModuleVersionComparison),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/compare/:otherModuleVersionId',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCompareModuleVersionsResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCompareModuleVersionsMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/compare/:otherModuleVersionId',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCompareModuleVersionsResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCompareModuleVersionsMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/compare/:otherModuleVersionId',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCompareModuleVersionsResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleVersionUsageMockHandler = (
+  overrideResponse?:
+    | ModuleVersionUsage
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ModuleVersionUsage> | ModuleVersionUsage),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/usage',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getGetModuleVersionUsageResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleVersionUsageMockHandler200 = (
+  overrideResponse?:
+    | ModuleVersionUsage
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ModuleVersionUsage> | ModuleVersionUsage),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/usage',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getGetModuleVersionUsageResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleVersionUsageMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/usage',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getGetModuleVersionUsageResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleVersionUsageMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/usage',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getGetModuleVersionUsageResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getTransactModuleVersionLifecyclesMockHandler = (
+  overrideResponse?:
+    | ModuleVersionLifecycleTransactionResult
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) =>
+        | Promise<ModuleVersionLifecycleTransactionResult>
+        | ModuleVersionLifecycleTransactionResult),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-lifecycle-transactions',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getTransactModuleVersionLifecyclesResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getTransactModuleVersionLifecyclesMockHandler200 = (
+  overrideResponse?:
+    | ModuleVersionLifecycleTransactionResult
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) =>
+        | Promise<ModuleVersionLifecycleTransactionResult>
+        | ModuleVersionLifecycleTransactionResult),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-lifecycle-transactions',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getTransactModuleVersionLifecyclesResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getTransactModuleVersionLifecyclesMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-lifecycle-transactions',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getTransactModuleVersionLifecyclesResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getTransactModuleVersionLifecyclesMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-lifecycle-transactions',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getTransactModuleVersionLifecyclesResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getTransactModuleVersionLifecyclesMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-lifecycle-transactions',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getTransactModuleVersionLifecyclesResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getTransactModuleVersionLifecyclesMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-lifecycle-transactions',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getTransactModuleVersionLifecyclesResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getChangeModuleCatalogueStatusMockHandler = (
+  overrideResponse?:
+    | ModuleCatalogueEntry
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ModuleCatalogueEntry> | ModuleCatalogueEntry),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/catalogue/actions/:catalogueAction',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getChangeModuleCatalogueStatusResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getChangeModuleCatalogueStatusMockHandler200 = (
+  overrideResponse?:
+    | ModuleCatalogueEntry
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ModuleCatalogueEntry> | ModuleCatalogueEntry),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/catalogue/actions/:catalogueAction',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getChangeModuleCatalogueStatusResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getChangeModuleCatalogueStatusMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/catalogue/actions/:catalogueAction',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getChangeModuleCatalogueStatusResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getChangeModuleCatalogueStatusMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/catalogue/actions/:catalogueAction',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getChangeModuleCatalogueStatusResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getChangeModuleCatalogueStatusMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/catalogue/actions/:catalogueAction',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getChangeModuleCatalogueStatusResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getChangeModuleCatalogueStatusMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/catalogue/actions/:catalogueAction',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getChangeModuleCatalogueStatusResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getTransitionModuleVersionMockHandler = (
+  overrideResponse?:
+    | CoreModuleVersion
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<CoreModuleVersion> | CoreModuleVersion),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/actions/:lifecycleAction',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getTransitionModuleVersionResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getTransitionModuleVersionMockHandler200 = (
+  overrideResponse?:
+    | CoreModuleVersion
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<CoreModuleVersion> | CoreModuleVersion),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/actions/:lifecycleAction',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getTransitionModuleVersionResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getTransitionModuleVersionMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/actions/:lifecycleAction',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getTransitionModuleVersionResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getTransitionModuleVersionMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/actions/:lifecycleAction',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getTransitionModuleVersionResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getTransitionModuleVersionMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/actions/:lifecycleAction',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getTransitionModuleVersionResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getTransitionModuleVersionMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/actions/:lifecycleAction',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getTransitionModuleVersionResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListModuleVersionLifecycleEventsMockHandler = (
+  overrideResponse?:
+    | ModuleVersionLifecycleEvent[]
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ModuleVersionLifecycleEvent[]> | ModuleVersionLifecycleEvent[]),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/events',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListModuleVersionLifecycleEventsResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListModuleVersionLifecycleEventsMockHandler200 = (
+  overrideResponse?:
+    | ModuleVersionLifecycleEvent[]
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ModuleVersionLifecycleEvent[]> | ModuleVersionLifecycleEvent[]),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/events',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListModuleVersionLifecycleEventsResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListModuleVersionLifecycleEventsMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/events',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListModuleVersionLifecycleEventsResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListModuleVersionLifecycleEventsMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/events',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListModuleVersionLifecycleEventsResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListEnvironmentModuleVersionPinsMockHandler = (
+  overrideResponse?:
+    | EnvironmentModuleVersionPin[]
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<EnvironmentModuleVersionPin[]> | EnvironmentModuleVersionPin[]),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/module-version-pins',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListEnvironmentModuleVersionPinsResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListEnvironmentModuleVersionPinsMockHandler200 = (
+  overrideResponse?:
+    | EnvironmentModuleVersionPin[]
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<EnvironmentModuleVersionPin[]> | EnvironmentModuleVersionPin[]),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/module-version-pins',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListEnvironmentModuleVersionPinsResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListEnvironmentModuleVersionPinsMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/module-version-pins',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListEnvironmentModuleVersionPinsResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateEnvironmentModuleVersionPinMockHandler = (
+  overrideResponse?:
+    | EnvironmentModuleVersionPin
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<EnvironmentModuleVersionPin> | EnvironmentModuleVersionPin),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCreateEnvironmentModuleVersionPinResponseMock(),
+        ),
+        { status: 201, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateEnvironmentModuleVersionPinMockHandler201 = (
+  overrideResponse?:
+    | EnvironmentModuleVersionPin
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<EnvironmentModuleVersionPin> | EnvironmentModuleVersionPin),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCreateEnvironmentModuleVersionPinResponseMock201(),
+        ),
+        { status: 201, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateEnvironmentModuleVersionPinMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCreateEnvironmentModuleVersionPinResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateEnvironmentModuleVersionPinMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCreateEnvironmentModuleVersionPinResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateEnvironmentModuleVersionPinMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCreateEnvironmentModuleVersionPinResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateEnvironmentModuleVersionPinMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCreateEnvironmentModuleVersionPinResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getTransitionEnvironmentModuleVersionPinMockHandler = (
+  overrideResponse?:
+    | EnvironmentModuleVersionPin
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<EnvironmentModuleVersionPin> | EnvironmentModuleVersionPin),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins/:pinId/actions/:pinAction',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getTransitionEnvironmentModuleVersionPinResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getTransitionEnvironmentModuleVersionPinMockHandler200 = (
+  overrideResponse?:
+    | EnvironmentModuleVersionPin
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<EnvironmentModuleVersionPin> | EnvironmentModuleVersionPin),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins/:pinId/actions/:pinAction',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getTransitionEnvironmentModuleVersionPinResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getTransitionEnvironmentModuleVersionPinMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins/:pinId/actions/:pinAction',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getTransitionEnvironmentModuleVersionPinResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getTransitionEnvironmentModuleVersionPinMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins/:pinId/actions/:pinAction',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getTransitionEnvironmentModuleVersionPinResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getTransitionEnvironmentModuleVersionPinMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins/:pinId/actions/:pinAction',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getTransitionEnvironmentModuleVersionPinResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getTransitionEnvironmentModuleVersionPinMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins/:pinId/actions/:pinAction',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getTransitionEnvironmentModuleVersionPinResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetEnvironmentModuleVersionPinMockHandler = (
+  overrideResponse?:
+    | EnvironmentModuleVersionPin
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<EnvironmentModuleVersionPin> | EnvironmentModuleVersionPin),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/module-version-pins/:pinId',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getGetEnvironmentModuleVersionPinResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetEnvironmentModuleVersionPinMockHandler200 = (
+  overrideResponse?:
+    | EnvironmentModuleVersionPin
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<EnvironmentModuleVersionPin> | EnvironmentModuleVersionPin),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/module-version-pins/:pinId',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getGetEnvironmentModuleVersionPinResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetEnvironmentModuleVersionPinMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/module-version-pins/:pinId',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getGetEnvironmentModuleVersionPinResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetEnvironmentModuleVersionPinMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/module-version-pins/:pinId',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getGetEnvironmentModuleVersionPinResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListEnvironmentModuleVersionPinEventsMockHandler = (
+  overrideResponse?:
+    | ModuleVersionPinEvent[]
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ModuleVersionPinEvent[]> | ModuleVersionPinEvent[]),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/module-version-pins/:pinId/events',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListEnvironmentModuleVersionPinEventsResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListEnvironmentModuleVersionPinEventsMockHandler200 = (
+  overrideResponse?:
+    | ModuleVersionPinEvent[]
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ModuleVersionPinEvent[]> | ModuleVersionPinEvent[]),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/module-version-pins/:pinId/events',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListEnvironmentModuleVersionPinEventsResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListEnvironmentModuleVersionPinEventsMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/module-version-pins/:pinId/events',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListEnvironmentModuleVersionPinEventsResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListEnvironmentModuleVersionPinEventsMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/module-version-pins/:pinId/events',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListEnvironmentModuleVersionPinEventsResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getAppendEnvironmentModuleVersionPinNoteMockHandler = (
+  overrideResponse?:
+    | ModuleVersionPinEvent
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ModuleVersionPinEvent> | ModuleVersionPinEvent),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins/:pinId/notes',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getAppendEnvironmentModuleVersionPinNoteResponseMock(),
+        ),
+        { status: 201, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getAppendEnvironmentModuleVersionPinNoteMockHandler201 = (
+  overrideResponse?:
+    | ModuleVersionPinEvent
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ModuleVersionPinEvent> | ModuleVersionPinEvent),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins/:pinId/notes',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getAppendEnvironmentModuleVersionPinNoteResponseMock201(),
+        ),
+        { status: 201, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getAppendEnvironmentModuleVersionPinNoteMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins/:pinId/notes',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getAppendEnvironmentModuleVersionPinNoteResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getAppendEnvironmentModuleVersionPinNoteMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins/:pinId/notes',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getAppendEnvironmentModuleVersionPinNoteResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getAppendEnvironmentModuleVersionPinNoteMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins/:pinId/notes',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getAppendEnvironmentModuleVersionPinNoteResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getAppendEnvironmentModuleVersionPinNoteMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins/:pinId/notes',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getAppendEnvironmentModuleVersionPinNoteResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getPreviewEnvironmentModuleVersionPinBulkOperationMockHandler = (
+  overrideResponse?:
+    | ModuleVersionPinBulkPreview
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ModuleVersionPinBulkPreview> | ModuleVersionPinBulkPreview),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins/bulk-preview',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getPreviewEnvironmentModuleVersionPinBulkOperationResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getPreviewEnvironmentModuleVersionPinBulkOperationMockHandler200 = (
+  overrideResponse?:
+    | ModuleVersionPinBulkPreview
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ModuleVersionPinBulkPreview> | ModuleVersionPinBulkPreview),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins/bulk-preview',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getPreviewEnvironmentModuleVersionPinBulkOperationResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getPreviewEnvironmentModuleVersionPinBulkOperationMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins/bulk-preview',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getPreviewEnvironmentModuleVersionPinBulkOperationResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getPreviewEnvironmentModuleVersionPinBulkOperationMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins/bulk-preview',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getPreviewEnvironmentModuleVersionPinBulkOperationResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getPreviewEnvironmentModuleVersionPinBulkOperationMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins/bulk-preview',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getPreviewEnvironmentModuleVersionPinBulkOperationResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getPreviewEnvironmentModuleVersionPinBulkOperationMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins/bulk-preview',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getPreviewEnvironmentModuleVersionPinBulkOperationResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getExecuteEnvironmentModuleVersionPinBulkOperationMockHandler = (
+  overrideResponse?:
+    | ModuleVersionPinBulkResult
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ModuleVersionPinBulkResult> | ModuleVersionPinBulkResult),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins/bulk',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getExecuteEnvironmentModuleVersionPinBulkOperationResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getExecuteEnvironmentModuleVersionPinBulkOperationMockHandler200 = (
+  overrideResponse?:
+    | ModuleVersionPinBulkResult
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ModuleVersionPinBulkResult> | ModuleVersionPinBulkResult),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins/bulk',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getExecuteEnvironmentModuleVersionPinBulkOperationResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getExecuteEnvironmentModuleVersionPinBulkOperationMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins/bulk',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getExecuteEnvironmentModuleVersionPinBulkOperationResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getExecuteEnvironmentModuleVersionPinBulkOperationMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins/bulk',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getExecuteEnvironmentModuleVersionPinBulkOperationResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getExecuteEnvironmentModuleVersionPinBulkOperationMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins/bulk',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getExecuteEnvironmentModuleVersionPinBulkOperationResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getExecuteEnvironmentModuleVersionPinBulkOperationMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-version-pins/bulk',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getExecuteEnvironmentModuleVersionPinBulkOperationResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
 export const getModulesMock = () => [
   getListModulesMockHandler(),
   getCreateModuleMockHandler(),
@@ -1475,5 +6885,25 @@ export const getModulesMock = () => [
   getUpdateModuleMockHandler(),
   getDeleteModuleMockHandler(),
   getListModuleVersionsMockHandler(),
+  getPublishModuleVersionMockHandler(),
   getGetModuleVersionMockHandler(),
+  getGetModuleCatalogueEntryMockHandler(),
+  getUpdateModuleCatalogueEntryMockHandler(),
+  getListModuleCatalogueEntriesMockHandler(),
+  getCreateModuleCatalogueEntryMockHandler(),
+  getPublishStableModuleVersionSuccessorMockHandler(),
+  getCompareModuleVersionsMockHandler(),
+  getGetModuleVersionUsageMockHandler(),
+  getTransactModuleVersionLifecyclesMockHandler(),
+  getChangeModuleCatalogueStatusMockHandler(),
+  getTransitionModuleVersionMockHandler(),
+  getListModuleVersionLifecycleEventsMockHandler(),
+  getListEnvironmentModuleVersionPinsMockHandler(),
+  getCreateEnvironmentModuleVersionPinMockHandler(),
+  getTransitionEnvironmentModuleVersionPinMockHandler(),
+  getGetEnvironmentModuleVersionPinMockHandler(),
+  getListEnvironmentModuleVersionPinEventsMockHandler(),
+  getAppendEnvironmentModuleVersionPinNoteMockHandler(),
+  getPreviewEnvironmentModuleVersionPinBulkOperationMockHandler(),
+  getExecuteEnvironmentModuleVersionPinBulkOperationMockHandler(),
 ];

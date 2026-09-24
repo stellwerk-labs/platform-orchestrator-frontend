@@ -36,7 +36,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 /**
  * Returns a list of metadata keys for the specified organization. Each key is represented as a JSON object
 containing the key name, type, and other attributes.
- 
+ *
  * @summary List metadata keys for an organization
  */
 export const listMetadataKeys = (
@@ -168,7 +168,7 @@ export function useListMetadataKeys<
 /**
  * Creates a new metadata key for the specified organization. The request body should contain the key name,
 type, and other attributes.
- 
+ *
  * @summary Create a new metadata key for an organization
  */
 export const createMetadataKey = (
@@ -263,7 +263,7 @@ export const useCreateMetadataKey = <
 /**
  * Returns the details of a specific metadata key for the specified organization. The response includes
 the key name, type, and other attributes.
- 
+ *
  * @summary Get a metadata key for an organization
  */
 export const getMetadataKey = (
@@ -397,7 +397,7 @@ export function useGetMetadataKey<
 
 /**
  * Deletes a specific metadata key for the specified organization. The request body should contain the key name.
- 
+ *
  * @summary Delete a metadata key for an organization
  */
 export const deleteMetadataKey = (
@@ -480,7 +480,7 @@ export const useDeleteMetadataKey = <TError = ErrorType<N404NotFoundResponse>, T
 /**
  * Updates a specific metadata key for the specified organization. The request body should contain the updated
 attributes of the metadata key.
- 
+ *
  * @summary Update a metadata key for an organization
  */
 export const updateMetadataKey = (

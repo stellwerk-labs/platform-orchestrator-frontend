@@ -13,20 +13,13 @@ export const customInstance = <T>(
   config: AxiosRequestConfig,
   options?: AxiosRequestConfig,
 ): Promise<T> => {
-  const isLocal = windowEnv.BASE_URL.includes('localhost');
   const source = Axios.CancelToken.source();
-
-  const headers: Record<string, string> = {};
-
-  if (isLocal) {
-    headers.From = 'x';
-  }
 
   const promise = AXIOS_INSTANCE({
     ...config,
     ...options,
-    headers,
-    withCredentials: !isLocal,
+    headers: Axios.mergeConfig(config, options ?? {}).headers,
+    withCredentials: true,
     cancelToken: source.token,
   }).then(({ data }) => data);
 

@@ -56,7 +56,7 @@ export const getListServiceUsersQueryKey = (orgId?: string, params?: ListService
 
 export const getListServiceUsersQueryOptions = <
   TData = Awaited<ReturnType<typeof listServiceUsers>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<N400BadRequestResponse>,
 >(
   orgId: string,
   params?: ListServiceUsersParams,
@@ -80,11 +80,11 @@ export const getListServiceUsersQueryOptions = <
 };
 
 export type ListServiceUsersQueryResult = NonNullable<Awaited<ReturnType<typeof listServiceUsers>>>;
-export type ListServiceUsersQueryError = ErrorType<unknown>;
+export type ListServiceUsersQueryError = ErrorType<N400BadRequestResponse>;
 
 export function useListServiceUsers<
   TData = Awaited<ReturnType<typeof listServiceUsers>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<N400BadRequestResponse>,
 >(
   orgId: string,
   params: undefined | ListServiceUsersParams,
@@ -104,7 +104,7 @@ export function useListServiceUsers<
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useListServiceUsers<
   TData = Awaited<ReturnType<typeof listServiceUsers>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<N400BadRequestResponse>,
 >(
   orgId: string,
   params?: ListServiceUsersParams,
@@ -124,7 +124,7 @@ export function useListServiceUsers<
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useListServiceUsers<
   TData = Awaited<ReturnType<typeof listServiceUsers>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<N400BadRequestResponse>,
 >(
   orgId: string,
   params?: ListServiceUsersParams,
@@ -143,7 +143,7 @@ export function useListServiceUsers<
  */
 export function useListServiceUsers<
   TData = Awaited<ReturnType<typeof listServiceUsers>>,
-  TError = ErrorType<unknown>,
+  TError = ErrorType<N400BadRequestResponse>,
 >(
   orgId: string,
   params?: ListServiceUsersParams,
