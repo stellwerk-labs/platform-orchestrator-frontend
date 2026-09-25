@@ -142,8 +142,27 @@ jobs:
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate_sha || github.ref }}
 
-      - name: Test candidate publication contract
-        run: python3 scripts/candidate-release_test.py
+      - name: Test publication contracts
+        run: |
+          python3 scripts/candidate-release_test.py
+          python3 scripts/stable-release-preflight_test.py
+
+      - name: Checkout the exact semantic-release action
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: stellwerk-labs/semantic-release-action
+          ref: b1269e93b486873118eef1646bfcd46a9d23d3a3
+          path: .release-tools
+          persist-credentials: false
+
+      - name: Test version assignment without credentials or network
+        run: |
+          set -euo pipefail
+          docker build -t frontend-semantic-release-contract .release-tools
+          docker run --rm --network none \
+            --mount "type=bind,source=$PWD,target=/checkout,readonly" \
+            --entrypoint sh frontend-semantic-release-contract \
+            /checkout/scripts/test-release-versioning.sh
 
       - name: Setup pnpm
         uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
@@ -218,12 +237,33 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
+          persist-credentials: false
 
-      - name: Create semantic release
+      - name: Assign stable version and tag
         id: release
         uses: stellwerk-labs/semantic-release-action@b1269e93b486873118eef1646bfcd46a9d23d3a3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Validate stable source, notes, and unused destinations
+        if: steps.release.outputs.version != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.release.outputs.version }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          python3 scripts/stable-release-preflight.py "$RELEASE_TAG" "$SOURCE_SHA"
+
+      - name: Reserve stable draft with reviewed notes
+        if: steps.release.outputs.version != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          gh release create "$RELEASE_TAG" --verify-tag --draft --latest=false \
+            --title "$RELEASE_TAG" --notes-file "docs/releases/$RELEASE_TAG.md"
 
       - name: Login to GitHub Container Registry
         if: steps.release.outputs.version != ''
@@ -241,15 +281,26 @@ jobs:
         if: steps.release.outputs.version != ''
         uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.0.0
 
+      - name: Set up QEMU
+        if: steps.release.outputs.version != ''
+        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.0.0
+
+      - name: Set up Docker Buildx
+        if: steps.release.outputs.version != ''
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.0.0
+
       - name: Build and push image
         if: steps.release.outputs.version != ''
         id: image
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.0.0
         with:
+          context: .
           file: ./apps/main/Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
           tags: ghcr.io/stellwerk-labs/${{ github.event.repository.name }}:${{ steps.release.outputs.version }}
+          sbom: true
+          provenance: mode=max
           labels: |
             org.opencontainers.image.version=${{ steps.release.outputs.version }}
             org.opencontainers.image.revision=${{ github.sha }}
@@ -260,5 +311,14 @@ jobs:
           IMAGE_DIGEST: ${{ steps.image.outputs.digest }}
         run: |
           set -euo pipefail
-          test -n "$IMAGE_DIGEST"
+          [[ "$IMAGE_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]
           docker buildx imagetools inspect "ghcr.io/stellwerk-labs/platform-orchestrator-frontend@${IMAGE_DIGEST}"
+
+      - name: Publish verified stable release
+        if: steps.release.outputs.version != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          gh release edit "$RELEASE_TAG" --draft=false --latest
