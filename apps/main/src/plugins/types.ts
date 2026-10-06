@@ -52,6 +52,17 @@ export interface PluginOperationDescriptor {
   mutating: boolean;
 }
 
+// Display-only projection from Core discovery, never a client authorization token.
+export interface PluginFeatureAccess {
+  state: string;
+  trust_class: '' | 'development' | 'production';
+  forward: boolean;
+  read: boolean;
+  safety: boolean;
+  expires_at?: string;
+  grace_until?: string;
+}
+
 export interface PluginDescriptor {
   id: string;
   display_name: string;
@@ -60,6 +71,7 @@ export interface PluginDescriptor {
   mode: PluginUiMode;
   ui?: PluginUiDescriptor;
   operations: PluginOperationDescriptor[];
+  entitlement?: { features: Record<string, PluginFeatureAccess> };
 }
 
 export interface PluginDiscoveryResponse {

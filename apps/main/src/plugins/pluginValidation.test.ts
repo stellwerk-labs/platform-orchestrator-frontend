@@ -36,6 +36,44 @@ const plugin: PluginDescriptor = {
 const session: PluginBridgeSession = { nonce: 'session-nonce', orgId: 'org-one', plugin };
 
 describe('plugin registration validation', () => {
+  it('accepts bounded server entitlement projections and rejects malformed claims', () => {
+    const feature = {
+      state: 'valid',
+      trust_class: 'development',
+      forward: true,
+      read: true,
+      safety: true,
+      expires_at: '2026-10-02T12:00:00Z',
+    };
+    const descriptor = { ...plugin, entitlement: { features: { example: feature } } };
+    expect(isPluginDescriptor(descriptor)).toBe(true);
+    expect(isPluginDescriptor({ ...plugin, entitlement: { features: {} } })).toBe(true);
+    for (const badFeature of [
+      { ...feature, trust_class: 'trusted-by-plugin' },
+      { ...feature, forward: 'true' },
+      { ...feature, read: undefined },
+      { ...feature, safety: undefined },
+      { ...feature, expires_at: 'not-a-date' },
+    ]) {
+      expect(
+        isPluginDescriptor({ ...plugin, entitlement: { features: { example: badFeature } } }),
+      ).toBe(false);
+    }
+    expect(
+      isPluginDescriptor({ ...plugin, entitlement: { features: { 'core.admin': feature } } }),
+    ).toBe(false);
+    expect(
+      isPluginDescriptor({
+        ...plugin,
+        entitlement: {
+          features: Object.fromEntries(
+            Array.from({ length: 65 }, (_, i) => [`feature-${i}`, feature]),
+          ),
+        },
+      }),
+    ).toBe(false);
+  });
+
   it('accepts a canonical different-origin HTTPS frame', () => {
     expect(validatePluginFrameUrl(plugin.ui!, 'https://console.example.com').toString()).toBe(
       'https://rollouts.plugins.example.com/embed',

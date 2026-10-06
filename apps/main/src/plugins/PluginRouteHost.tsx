@@ -3,6 +3,7 @@ import { useLocation, useParams } from 'react-router';
 
 import { ErrorPage } from '@src/components/shared/ErrorPage/ErrorPage';
 
+import { PluginAvailabilityNotice } from './PluginAvailabilityNotice';
 import { useListPlugins } from './pluginDiscovery';
 import { PluginFrame } from './PluginFrame';
 import {
@@ -38,7 +39,12 @@ export const PluginRouteHost = () => {
 
   try {
     validatePluginFrameUrl(plugin.ui!, window.location.origin, import.meta.env.DEV);
-    return <PluginFrame orgId={orgId} plugin={plugin} />;
+    return (
+      <>
+        <PluginAvailabilityNotice plugin={plugin} />
+        <PluginFrame key={`${orgId}:${plugin.id}`} orgId={orgId} plugin={plugin} />
+      </>
+    );
   } catch (error) {
     return (
       <Alert

@@ -5,6 +5,14 @@ The Console discovers organization-scoped UI contributions from
 `route_prefix` in a sandboxed, different-origin iframe. The host protocol is UI
 SDK version `1` at contract level `v1alpha`, supported for first-party plugins.
 
+Discovery refreshes every 30 seconds while the Console is visible. Core's
+non-secret entitlement projection supplies development-licence warnings and
+restricted-access notices in the host, outside the plugin frame. The Console
+does not calculate expiry, verify signatures or grant access. Every operation
+still goes through current server authorization; renewing a licence never
+restarts paused work. Generic display contracts live in `types.ts` alongside
+the existing host protocol, not in plugin-specific domain code.
+
 ## Trust boundary
 
 The child never receives the Console access token. After an exact

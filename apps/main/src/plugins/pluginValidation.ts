@@ -38,6 +38,28 @@ const isOperationDescriptor = (value: unknown) =>
   ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].includes(String(value.method)) &&
   typeof value.mutating === 'boolean';
 
+const isEntitlementProjection = (value: unknown) => {
+  if (!isRecord(value) || !isRecord(value.features)) return false;
+  const features = Object.entries(value.features);
+  return (
+    features.length <= 64 &&
+    features.every(
+      ([feature, access]) =>
+        /^[a-z][a-z0-9-]{0,62}$/.test(feature) &&
+        isRecord(access) &&
+        typeof access.state === 'string' &&
+        ['', 'development', 'production'].includes(String(access.trust_class)) &&
+        typeof access.forward === 'boolean' &&
+        typeof access.read === 'boolean' &&
+        typeof access.safety === 'boolean' &&
+        [access.expires_at, access.grace_until].every(
+          (date) =>
+            date === undefined || (typeof date === 'string' && Number.isFinite(Date.parse(date))),
+        ),
+    )
+  );
+};
+
 export const isPluginContextualActionDescriptor = (
   value: unknown,
   pluginOperationIds: ReadonlySet<string>,
@@ -145,7 +167,8 @@ export const isPluginDescriptor = (value: unknown): value is PluginDescriptor =>
       'unavailable',
     ].includes(String(value.state)) ||
     !['full', 'read_only', 'safety_only', 'hidden'].includes(String(value.mode)) ||
-    !Array.isArray(value.operations)
+    !Array.isArray(value.operations) ||
+    (value.entitlement !== undefined && !isEntitlementProjection(value.entitlement))
   ) {
     return false;
   }

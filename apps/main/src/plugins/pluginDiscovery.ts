@@ -23,4 +23,5 @@ export const useListPlugins = (orgId: string) =>
     queryFn: ({ signal }) => listPlugins(orgId, undefined, signal),
     enabled: orgId.length > 0,
     staleTime: 30_000,
+    refetchInterval: 30_000,
   });
