@@ -15,6 +15,7 @@ import type {
   ModuleVersionComparison,
 } from '@src/models/v2/controlplane';
 import type { ResourcePermissionCheck } from '@src/models/v2/iam';
+import { getListPluginsQueryKey } from '@src/plugins/pluginDiscovery';
 import { MockProviders } from '@src/testing-utils/MockProviders';
 
 import {
@@ -59,6 +60,7 @@ const createModuleVersionsClient = () => {
     status: 'active',
     previous_default_version_uuid: 'previous',
   });
+  client.setQueryData(getListPluginsQueryKey('atlas'), { items: [] });
   return client;
 };
 

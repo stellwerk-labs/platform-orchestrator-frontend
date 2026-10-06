@@ -1,6 +1,7 @@
 import {
   type PluginBridgeRequestMessage,
   type PluginBridgeSession,
+  type PluginContextualActionDescriptor,
   type PluginDescriptor,
   type PluginInvocationRequest,
   type PluginOperationRequestMessage,
@@ -12,6 +13,9 @@ import {
 const pluginIdPattern = /^[a-z0-9]+(?:[.-][a-z0-9]+)+$/;
 const operationIdPattern = /^[A-Za-z][A-Za-z0-9._-]*$/;
 const routePrefixPattern = /^[a-z0-9](?:[a-z0-9/-]*[a-z0-9])?$/;
+const contextualQueryKeyPattern = /^[a-z][a-z0-9_]{0,62}$/;
+const moduleVersionContextValues = new Set(['$module_id', '$semantic_version', '$version_uuid']);
+const moduleVersionLifecycleStatuses = new Set(['proposed', 'default', 'deprecated', 'defective']);
 const reservedHostOperation = (operationId: string) =>
   operationId.startsWith('core.') || operationId.startsWith('iam.');
 
@@ -33,6 +37,46 @@ const isOperationDescriptor = (value: unknown) =>
   operationIdPattern.test(value.id) &&
   ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].includes(String(value.method)) &&
   typeof value.mutating === 'boolean';
+
+export const isPluginContextualActionDescriptor = (
+  value: unknown,
+  pluginOperationIds: ReadonlySet<string>,
+): value is PluginContextualActionDescriptor => {
+  if (
+    !isRecord(value) ||
+    value.resource_type !== 'module_version' ||
+    typeof value.id !== 'string' ||
+    !operationIdPattern.test(value.id) ||
+    typeof value.label !== 'string' ||
+    value.label.trim().length === 0 ||
+    value.label.length > 100 ||
+    typeof value.required_operation_id !== 'string' ||
+    !pluginOperationIds.has(value.required_operation_id) ||
+    !isRecord(value.route) ||
+    typeof value.route.path !== 'string' ||
+    normalizePluginRoutePrefix(value.route.path) !== value.route.path ||
+    !isValidPluginRoutePrefix(value.route.path) ||
+    !isRecord(value.when) ||
+    !Array.isArray(value.when.lifecycle_status) ||
+    value.when.lifecycle_status.length === 0 ||
+    !value.when.lifecycle_status.every(
+      (status) => typeof status === 'string' && moduleVersionLifecycleStatuses.has(status),
+    ) ||
+    new Set(value.when.lifecycle_status).size !== value.when.lifecycle_status.length ||
+    typeof value.when.semantic_version_required !== 'boolean' ||
+    (value.primary !== undefined && typeof value.primary !== 'boolean')
+  ) {
+    return false;
+  }
+  if (value.route.query === undefined) return true;
+  if (!isRecord(value.route.query)) return false;
+  return Object.entries(value.route.query).every(
+    ([key, contextValue]) =>
+      contextualQueryKeyPattern.test(key) &&
+      typeof contextValue === 'string' &&
+      moduleVersionContextValues.has(contextValue),
+  );
+};
 
 export const bridgeOperationDescriptors = (plugin: PluginDescriptor) => [
   ...plugin.operations,
@@ -114,7 +158,8 @@ export const isPluginDescriptor = (value: unknown): value is PluginDescriptor =>
       typeof ui.entrypoint !== 'string' ||
       typeof ui.route_prefix !== 'string' ||
       typeof ui.navigation_label !== 'string' ||
-      (ui.core_operations !== undefined && !Array.isArray(ui.core_operations))
+      (ui.core_operations !== undefined && !Array.isArray(ui.core_operations)) ||
+      (ui.contextual_actions !== undefined && !Array.isArray(ui.contextual_actions))
     ) {
       return false;
     }
@@ -136,7 +181,16 @@ export const isPluginDescriptor = (value: unknown): value is PluginDescriptor =>
     return false;
   }
   const operationIds = [...value.operations, ...coreOperations].map(({ id }) => id);
-  return new Set(operationIds).size === operationIds.length;
+  if (new Set(operationIds).size !== operationIds.length) return false;
+  const pluginOperationIds = new Set(value.operations.map(({ id }) => id));
+  const contextualActions = isRecord(value.ui) ? (value.ui.contextual_actions ?? []) : [];
+  return (
+    Array.isArray(contextualActions) &&
+    contextualActions.every((action) =>
+      isPluginContextualActionDescriptor(action, pluginOperationIds),
+    ) &&
+    new Set(contextualActions.map(({ id }) => id)).size === contextualActions.length
+  );
 };
 
 export const findPluginForOrgPath = (plugins: PluginDescriptor[], orgPath: string) => {

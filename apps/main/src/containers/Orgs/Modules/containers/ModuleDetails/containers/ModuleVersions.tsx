@@ -44,6 +44,8 @@ import type {
   ModuleVersionComparison,
   ModuleVersionPublishBody,
 } from '@src/models/v2/controlplane';
+import { useListPlugins } from '@src/plugins/pluginDiscovery';
+import { isPluginDescriptor } from '@src/plugins/pluginValidation';
 import { DATE_FORMATS_TYPES, formatDate } from '@src/utilities/datetime/datetime';
 
 import { moduleVersionExtensionActions } from '../../../extensions/moduleVersionActions';
@@ -537,6 +539,8 @@ export const ModuleVersions = () => {
   const publishIdempotencyKey = useRef(crypto.randomUUID());
   const stableIdempotencyKey = useRef(crypto.randomUUID());
   const catalogue = useGetModuleCatalogueEntry(orgId, moduleId);
+  const pluginDiscovery = useListPlugins(orgId);
+  const plugins = (pluginDiscovery.data?.items ?? []).filter(isPluginDescriptor);
   const permissionResource = `organization:${orgId}`;
   const permissions = useRBACPermissions(
     [RBACPermission.MODULE_VERSION_PUBLISH, ...Object.values(moduleVersionActionPermission)].map(
@@ -689,7 +693,12 @@ export const ModuleVersions = () => {
               Publish stable successor
             </Button>
           )}
-          {moduleVersionExtensionActions({ orgId, moduleId, version }).map((action) => (
+          {moduleVersionExtensionActions(
+            { orgId, moduleId, version },
+            plugins,
+            window.location.origin,
+            import.meta.env.DEV,
+          ).map((action) => (
             <Button
               key={action.id}
               size={'small'}

@@ -47,12 +47,29 @@ The host retries its HELLO message for at most five seconds with the same fresh
 nonce. This closes the iframe-load/listener-registration race without accepting a
 stale READY or creating more than one channel.
 
+## Contextual actions
+
+A plugin can contribute a declarative Module Version action through
+`ui.contextual_actions`. The host accepts only `resource_type: module_version`, a
+plugin-relative path, and query values selected from `$module_id`,
+`$semantic_version`, or `$version_uuid`. It resolves the path beneath the
+descriptor's registered `route_prefix`; descriptors cannot supply an origin,
+absolute route, arbitrary URL, or literal query value.
+
+The contribution names a `required_operation_id` from the plugin-owned operation
+registry. It is visible only while that operation is advertised, the plugin is
+available in `full` mode, the iframe descriptor remains valid, and the declared
+Module Version lifecycle and semantic-version conditions match. The link does not
+invoke the operation. It opens the plugin UI, whose eventual operation request is
+still checked by the normal bridge and server authorization path.
+
 ## Local verification
 
 ```sh
 pnpm --filter main-app check-typescript
 pnpm --filter main-app exec vitest run \
   src/plugins/pluginValidation.test.ts \
+  src/plugins/contextualActions.test.ts \
   src/plugins/pluginInvocation.test.ts --silent
 pnpm exec eslint --max-warnings=0 apps/main/src/plugins
 ```

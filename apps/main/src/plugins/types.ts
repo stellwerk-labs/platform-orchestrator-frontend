@@ -10,6 +10,32 @@ export type PluginAvailabilityState =
 
 export type PluginUiMode = 'full' | 'read_only' | 'safety_only' | 'hidden';
 
+export type PluginModuleVersionLifecycleStatus =
+  | 'proposed'
+  | 'default'
+  | 'deprecated'
+  | 'defective';
+
+export type PluginModuleVersionContextValue = '$module_id' | '$semantic_version' | '$version_uuid';
+
+export interface PluginModuleVersionContextualActionDescriptor {
+  id: string;
+  resource_type: 'module_version';
+  label: string;
+  required_operation_id: string;
+  route: {
+    path: string;
+    query?: Record<string, PluginModuleVersionContextValue>;
+  };
+  when: {
+    lifecycle_status: PluginModuleVersionLifecycleStatus[];
+    semantic_version_required: boolean;
+  };
+  primary?: boolean;
+}
+
+export type PluginContextualActionDescriptor = PluginModuleVersionContextualActionDescriptor;
+
 export interface PluginUiDescriptor {
   sdk_version: typeof pluginUiSdkVersion;
   origin: string;
@@ -17,6 +43,7 @@ export interface PluginUiDescriptor {
   route_prefix: string;
   navigation_label: string;
   core_operations?: PluginOperationDescriptor[];
+  contextual_actions?: PluginContextualActionDescriptor[];
 }
 
 export interface PluginOperationDescriptor {
