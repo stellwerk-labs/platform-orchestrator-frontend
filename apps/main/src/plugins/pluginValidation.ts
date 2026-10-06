@@ -1,0 +1,241 @@
+import {
+  type PluginBridgeRequestMessage,
+  type PluginBridgeSession,
+  type PluginDescriptor,
+  type PluginInvocationRequest,
+  type PluginOperationRequestMessage,
+  type PluginReadyMessage,
+  type PluginUiDescriptor,
+  pluginUiSdkVersion,
+} from './types';
+
+const pluginIdPattern = /^[a-z0-9]+(?:[.-][a-z0-9]+)+$/;
+const operationIdPattern = /^[A-Za-z][A-Za-z0-9._-]*$/;
+const routePrefixPattern = /^[a-z0-9](?:[a-z0-9/-]*[a-z0-9])?$/;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const isStringRecord = (value: unknown): value is Record<string, string> =>
+  isRecord(value) && Object.values(value).every((item) => typeof item === 'string');
+
+const isStringArrayRecord = (value: unknown): value is Record<string, string[]> =>
+  isRecord(value) &&
+  Object.values(value).every(
+    (item) => Array.isArray(item) && item.every((entry) => typeof entry === 'string'),
+  );
+
+export const normalizePluginRoutePrefix = (routePrefix: string) =>
+  routePrefix.replace(/^\/+|\/+$/g, '');
+
+export const isValidPluginRoutePrefix = (routePrefix: string) => {
+  const normalized = normalizePluginRoutePrefix(routePrefix);
+  return normalized.length > 0 && routePrefixPattern.test(normalized) && !normalized.includes('//');
+};
+
+export const validatePluginFrameUrl = (
+  ui: PluginUiDescriptor,
+  hostOrigin: string,
+  allowInsecureLocalhost = false,
+) => {
+  if (ui.sdk_version !== pluginUiSdkVersion || !isValidPluginRoutePrefix(ui.route_prefix)) {
+    throw new Error('The plugin UI descriptor is incompatible.');
+  }
+
+  const declaredOrigin = new URL(ui.origin);
+  if (declaredOrigin.origin !== ui.origin || declaredOrigin.username || declaredOrigin.password) {
+    throw new Error(
+      'The plugin UI origin must be a canonical origin without credentials or a path.',
+    );
+  }
+  const consoleOrigin = new URL(hostOrigin);
+  if (declaredOrigin.hostname === consoleOrigin.hostname) {
+    throw new Error('Plugin UI pages must use a different hostname from the Console.');
+  }
+  const insecureLocalhost =
+    allowInsecureLocalhost &&
+    declaredOrigin.protocol === 'http:' &&
+    ['localhost', '127.0.0.1', '[::1]'].includes(declaredOrigin.hostname);
+  if (declaredOrigin.protocol !== 'https:' && !insecureLocalhost) {
+    throw new Error('Plugin UI origins must use HTTPS.');
+  }
+
+  const frameUrl = new URL(ui.entrypoint, `${declaredOrigin.origin}/`);
+  if (
+    frameUrl.origin !== declaredOrigin.origin ||
+    frameUrl.username ||
+    frameUrl.password ||
+    frameUrl.hash
+  ) {
+    throw new Error('The plugin UI entrypoint must stay on its registered origin.');
+  }
+  return frameUrl;
+};
+
+export const isPluginDescriptor = (value: unknown): value is PluginDescriptor => {
+  if (!isRecord(value)) return false;
+  if (
+    typeof value.id !== 'string' ||
+    !pluginIdPattern.test(value.id) ||
+    typeof value.display_name !== 'string' ||
+    ![
+      'available',
+      'not_installed',
+      'not_enabled',
+      'not_entitled',
+      'incompatible',
+      'unavailable',
+    ].includes(String(value.state)) ||
+    !['full', 'read_only', 'safety_only', 'hidden'].includes(String(value.mode)) ||
+    !Array.isArray(value.operations)
+  ) {
+    return false;
+  }
+  if (value.mode !== 'hidden') {
+    const ui = value.ui;
+    if (
+      !isRecord(ui) ||
+      ui.sdk_version !== pluginUiSdkVersion ||
+      typeof ui.origin !== 'string' ||
+      typeof ui.entrypoint !== 'string' ||
+      typeof ui.route_prefix !== 'string' ||
+      typeof ui.navigation_label !== 'string'
+    ) {
+      return false;
+    }
+  }
+  return value.operations.every(
+    (operation) =>
+      isRecord(operation) &&
+      typeof operation.id === 'string' &&
+      operationIdPattern.test(operation.id) &&
+      ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].includes(String(operation.method)) &&
+      typeof operation.mutating === 'boolean',
+  );
+};
+
+export const findPluginForOrgPath = (plugins: PluginDescriptor[], orgPath: string) => {
+  const normalizedPath = orgPath.replace(/^\/+|\/+$/g, '');
+  return plugins
+    .filter(({ mode, ui }) => mode !== 'hidden' && ui)
+    .filter(({ ui }) => {
+      const prefix = normalizePluginRoutePrefix(ui!.route_prefix);
+      return normalizedPath === prefix || normalizedPath.startsWith(`${prefix}/`);
+    })
+    .sort(
+      (left, right) =>
+        normalizePluginRoutePrefix(right.ui!.route_prefix).length -
+        normalizePluginRoutePrefix(left.ui!.route_prefix).length,
+    )[0];
+};
+
+export const isExpectedPluginReadyEvent = (
+  event: Pick<MessageEvent, 'source' | 'origin' | 'data'>,
+  expectedSource: Window,
+  expectedOrigin: string,
+  expectedNonce: string,
+): event is MessageEvent<PluginReadyMessage> => {
+  if (event.source !== expectedSource || event.origin !== expectedOrigin || !isRecord(event.data)) {
+    return false;
+  }
+  return (
+    event.data.type === 'stellwerk.plugin.ready' &&
+    event.data.sdk_version === pluginUiSdkVersion &&
+    event.data.nonce === expectedNonce
+  );
+};
+
+type ValidationResult =
+  | { ok: true; message: PluginBridgeRequestMessage; invocation?: PluginInvocationRequest }
+  | { ok: false; requestId?: string; error: string };
+
+const immutableJsonValue = (value: unknown) => {
+  if (value === undefined) return undefined;
+  return JSON.parse(JSON.stringify(value)) as unknown;
+};
+
+export const validatePluginBridgeRequest = (
+  value: unknown,
+  session: PluginBridgeSession,
+): ValidationResult => {
+  if (!isRecord(value)) return { ok: false, error: 'Malformed plugin bridge message.' };
+  const requestId = typeof value.request_id === 'string' ? value.request_id : undefined;
+  if (value.sdk_version !== pluginUiSdkVersion || value.nonce !== session.nonce) {
+    return { ok: false, requestId, error: 'Stale or incompatible plugin bridge session.' };
+  }
+
+  if (
+    value.type === 'stellwerk.plugin.navigate' ||
+    value.type === 'stellwerk.plugin.navigate-core'
+  ) {
+    if (
+      typeof value.route !== 'string' ||
+      !value.route.startsWith('/') ||
+      value.route.startsWith('//')
+    ) {
+      return { ok: false, error: 'Plugin navigation must use an absolute same-origin route.' };
+    }
+    return { ok: true, message: value as unknown as PluginBridgeRequestMessage };
+  }
+
+  if (value.type !== 'stellwerk.plugin.operation.request') {
+    return { ok: false, requestId, error: 'Unknown plugin bridge message.' };
+  }
+  if (
+    typeof value.request_id !== 'string' ||
+    value.request_id.length === 0 ||
+    value.org_id !== session.orgId ||
+    typeof value.operation_id !== 'string'
+  ) {
+    return { ok: false, requestId, error: 'Malformed or cross-organization operation request.' };
+  }
+
+  const operation = session.plugin.operations.find(({ id }) => id === value.operation_id);
+  if (!operation) {
+    return { ok: false, requestId, error: 'The requested operation is not registered.' };
+  }
+  if (value.path_parameters !== undefined && !isStringRecord(value.path_parameters)) {
+    return { ok: false, requestId, error: 'Operation path parameters must be strings.' };
+  }
+  if (value.query !== undefined && !isStringArrayRecord(value.query)) {
+    return { ok: false, requestId, error: 'Operation query parameters must be string arrays.' };
+  }
+  if (
+    operation.mutating &&
+    (typeof value.idempotency_key !== 'string' || value.idempotency_key.length === 0)
+  ) {
+    return { ok: false, requestId, error: 'Mutating operations require an Idempotency Key.' };
+  }
+
+  let body: unknown;
+  try {
+    body = immutableJsonValue(value.body);
+  } catch {
+    return { ok: false, requestId, error: 'Operation bodies must be JSON serializable.' };
+  }
+  const message = value as unknown as PluginOperationRequestMessage;
+  return {
+    ok: true,
+    message,
+    invocation: {
+      operation_id: message.operation_id,
+      path_parameters: message.path_parameters,
+      query: message.query,
+      body,
+      idempotency_key: message.idempotency_key,
+    },
+  };
+};
+
+export const pluginHostRoute = (orgId: string, routePrefix: string, childRoute = '/') => {
+  const prefix = normalizePluginRoutePrefix(routePrefix);
+  const route = new URL(childRoute, 'https://plugin.invalid');
+  const suffix = route.pathname === '/' ? '' : route.pathname;
+  return `/orgs/${encodeURIComponent(orgId)}/${prefix}${suffix}${route.search}`;
+};
+
+export const coreOrgRoute = (orgId: string, childRoute: string) => {
+  const route = new URL(childRoute, 'https://console.invalid');
+  const suffix = route.pathname === '/' ? '' : route.pathname;
+  return `/orgs/${encodeURIComponent(orgId)}${suffix}${route.search}${route.hash}`;
+};

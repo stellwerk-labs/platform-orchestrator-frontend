@@ -22,6 +22,7 @@ import { Link, useLocation, useParams } from 'react-router';
 import { windowEnv } from '@src/config/environment';
 import { MatchParams } from '@src/config/routing';
 import { useGetCurrentUser } from '@src/hooks/react-query/v2/iam/user/user';
+import { PluginNavigationItems } from '@src/plugins/PluginNavigationItems';
 import { getNavigationMenuMinimized } from '@src/utilities/local-storage';
 import {
   generateEnvironmentTypesUrl,
@@ -95,6 +96,8 @@ const NavigationBar = () => {
                 Modules
               </Link>
             </Menu.Item>
+
+            {orgId && <PluginNavigationItems orgId={orgId} onKeyDown={handleMenuItemKeyDown} />}
 
             <Menu.Item
               key={'resource-types'}
