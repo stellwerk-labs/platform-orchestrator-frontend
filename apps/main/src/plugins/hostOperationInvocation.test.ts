@@ -17,6 +17,94 @@ afterEach(() => {
 });
 
 describe('allowlisted host operations', () => {
+  it('reads exact Module Version usage with independent Core session authorization', async () => {
+    AXIOS_INSTANCE.defaults.adapter = async (config) => {
+      expect(config.url).toBe('/orgs/example-org/modules/redis/versions/1.2.0%2Bbuild.1/usage');
+      expect(config.method).toBe('get');
+      expect(config.withCredentials).toBe(true);
+      return {
+        config,
+        data: { active_environment_count: 3 },
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+      };
+    };
+    await expect(
+      invokeBridgeOperation(
+        'example-org',
+        'example.audit',
+        descriptor('core.getModuleVersionUsage', 'GET'),
+        {
+          operation_id: 'core.getModuleVersionUsage',
+          path_parameters: { moduleId: 'redis', moduleVersionId: '1.2.0+build.1' },
+        },
+      ),
+    ).resolves.toEqual({ status: 200, body: { active_environment_count: 3 } });
+  });
+
+  it('rejects usage scope overrides, paths and unexpected payloads before transport', async () => {
+    const transport = vi.fn();
+    AXIOS_INSTANCE.defaults.adapter = transport;
+    const invalidPaths: Record<string, string>[] = [
+      { moduleId: 'redis', moduleVersionId: '1.2.0', orgId: 'another-org' },
+      { moduleId: '../redis', moduleVersionId: '1.2.0' },
+      { moduleId: 'redis', moduleVersionId: '1.2.0?other=true' },
+      { moduleId: 'redis', moduleVersionId: '%2f..' },
+      { moduleId: 'redis' },
+    ];
+    for (const pathParameters of invalidPaths) {
+      await expect(
+        invokeBridgeOperation(
+          'example-org',
+          'example.audit',
+          descriptor('core.getModuleVersionUsage', 'GET'),
+          {
+            operation_id: 'core.getModuleVersionUsage',
+            path_parameters: pathParameters,
+          },
+        ),
+      ).rejects.toThrow(/Module and Version identifier/);
+    }
+    for (const extra of [
+      { query: { org: ['foreign'] } },
+      { body: {} },
+      { idempotency_key: 'unexpected' },
+    ]) {
+      await expect(
+        invokeBridgeOperation(
+          'example-org',
+          'example.audit',
+          descriptor('core.getModuleVersionUsage', 'GET'),
+          {
+            operation_id: 'core.getModuleVersionUsage',
+            path_parameters: { moduleId: 'redis', moduleVersionId: '1.2.0' },
+            ...extra,
+          },
+        ),
+      ).rejects.toThrow(/does not accept/);
+    }
+    expect(transport).not.toHaveBeenCalled();
+  });
+
+  it('preserves Core usage denial rather than inventing zero adoption', async () => {
+    const denial = new Error('Module read forbidden');
+    AXIOS_INSTANCE.defaults.adapter = async () => {
+      throw denial;
+    };
+    await expect(
+      invokeBridgeOperation(
+        'example-org',
+        'example.audit',
+        descriptor('core.getModuleVersionUsage', 'GET'),
+        {
+          operation_id: 'core.getModuleVersionUsage',
+          path_parameters: { moduleId: 'redis', moduleVersionId: '1.2.0' },
+        },
+      ),
+    ).rejects.toBe(denial);
+  });
+
   it('executes an advertised Core read through the Console session', async () => {
     AXIOS_INSTANCE.defaults.adapter = async (config) => {
       expect(config.url).toBe('/orgs/example-org/projects');

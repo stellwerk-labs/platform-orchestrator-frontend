@@ -2,6 +2,7 @@ import { customInstance } from '@src/custom-instance';
 import { listEnvironmentsInOrg } from '@src/hooks/react-query/v2/controlplane/environment/environment';
 import {
   getEnvironmentModuleVersionPin,
+  getModuleVersionUsage,
   listEnvironmentModuleVersionPinEvents,
   listModules,
   transitionEnvironmentModuleVersionPin,
@@ -296,6 +297,30 @@ const hostOperations: Record<string, HostOperationDefinition> = {
         url: `/orgs/${encodeURIComponent(orgId)}/module-versions/proposed`,
         method: 'GET',
       });
+    },
+  },
+  'core.getModuleVersionUsage': {
+    method: 'GET',
+    mutating: false,
+    invoke: (orgId, _pluginId, request) => {
+      assertNoValues(request, ['query', 'body', 'idempotency_key']);
+      const values = request.path_parameters ?? {};
+      const names = Object.keys(values).sort();
+      const identifier = /^[a-zA-Z0-9][a-zA-Z0-9.+_-]{0,254}$/;
+      if (
+        names.length !== 2 ||
+        names[0] !== 'moduleId' ||
+        names[1] !== 'moduleVersionId' ||
+        !identifier.test(values.moduleId ?? '') ||
+        !identifier.test(values.moduleVersionId ?? '')
+      ) {
+        throw new Error('Module usage requires exactly one Module and Version identifier.');
+      }
+      return getModuleVersionUsage(
+        encodeURIComponent(orgId),
+        encodeURIComponent(values.moduleId!),
+        encodeURIComponent(values.moduleVersionId!),
+      );
     },
   },
   'iam.checkPermissions': {

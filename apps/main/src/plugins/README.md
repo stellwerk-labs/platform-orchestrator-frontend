@@ -51,6 +51,14 @@ through bounded, short-lived, organization-scoped Core inventory. The Pin mutati
 `core.discardEnvironmentModuleVersionPin`; the dispatcher hardcodes `discard`,
 requires idempotency, and never exposes generic Pin actions.
 
+`core.getModuleVersionUsage` is a read-only dependency for plugins that need
+current Module adoption. It accepts exactly `moduleId` and `moduleVersionId`
+identifiers, encodes them as path segments, and uses the existing generated Core
+client under the active Console organization. It accepts no query, body or
+organization override. Advertising this operation does not grant Module read
+permission: Core still authorizes the current user independently. Read failures
+remain failures, not empty usage results.
+
 Protected Deployment logs and outputs use two additional closed operations,
 `core.getPluginDeploymentLogs` and `core.getPluginDeploymentOutputs`. The child
 supplies only immutable Project, Environment, and Deployment UUIDs. The host
