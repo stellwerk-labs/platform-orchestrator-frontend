@@ -21,7 +21,22 @@ import type {
 interface HostOperationDefinition {
   method: PluginOperationDescriptor['method'];
   mutating: boolean;
-  invoke: (orgId: string, pluginId: string, request: PluginInvocationRequest) => Promise<unknown>;
+  invoke: (
+    orgId: string,
+    pluginId: string,
+    request: PluginInvocationRequest,
+    effects?: HostOperationEffects,
+  ) => Promise<unknown>;
+}
+
+export interface PluginDeploymentMaterial {
+  kind: 'logs' | 'outputs';
+  deploymentId: string;
+  content: string;
+}
+
+export interface HostOperationEffects {
+  presentPluginDeploymentMaterial: (material: PluginDeploymentMaterial) => void;
 }
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -36,6 +51,7 @@ const membershipCache = new Map<
 const membershipCacheMilliseconds = 30_000;
 const maximumMembershipPages = 100;
 const maximumMembershipResources = 10_000;
+const maximumDeploymentMaterialBytes = 16 * 1024 * 1024;
 
 const assertNoValues = (
   request: PluginInvocationRequest,
@@ -200,6 +216,60 @@ const reasonedCommand = (body: unknown): ModuleReasonedCommand => {
   return { reason, expected_resource_version: expectedResourceVersion };
 };
 
+const materialPath = (request: PluginInvocationRequest) => {
+  assertNoValues(request, ['query', 'body', 'idempotency_key']);
+  const values = request.path_parameters ?? {};
+  const names = Object.keys(values).sort();
+  if (
+    names.length !== 3 ||
+    names[0] !== 'deploymentId' ||
+    names[1] !== 'environmentUuid' ||
+    names[2] !== 'projectUuid' ||
+    !uuidPattern.test(values.projectUuid ?? '') ||
+    !uuidPattern.test(values.environmentUuid ?? '') ||
+    !uuidPattern.test(values.deploymentId ?? '')
+  ) {
+    throw new Error(
+      'Deployment material requires exact project, Environment, and Deployment UUIDs.',
+    );
+  }
+  return {
+    projectUuid: values.projectUuid!,
+    environmentUuid: values.environmentUuid!,
+    deploymentId: values.deploymentId!,
+  };
+};
+
+const pluginDeploymentMaterial =
+  (kind: PluginDeploymentMaterial['kind']) =>
+  async (
+    orgId: string,
+    pluginId: string,
+    request: PluginInvocationRequest,
+    effects?: HostOperationEffects,
+  ) => {
+    if (!effects) throw new Error('The host material presenter is unavailable.');
+    const { projectUuid, environmentUuid, deploymentId } = materialPath(request);
+    let content: string;
+    try {
+      content = await customInstance<string>({
+        url: `/orgs/${encodeURIComponent(orgId)}/plugins/${encodeURIComponent(pluginId)}/projects/${projectUuid}/envs/${environmentUuid}/deployments/${deploymentId}/${kind}`,
+        method: 'GET',
+        responseType: 'text',
+      });
+    } catch {
+      throw new Error(`Deployment ${kind} are unavailable or access was denied.`);
+    }
+    if (typeof content !== 'string') {
+      throw new Error('Core returned malformed Deployment material.');
+    }
+    if (new TextEncoder().encode(content).byteLength > maximumDeploymentMaterialBytes) {
+      throw new Error('Core returned oversized Deployment material.');
+    }
+    effects.presentPluginDeploymentMaterial({ kind, deploymentId, content });
+    return null;
+  };
+
 const hostOperations: Record<string, HostOperationDefinition> = {
   'core.listProjects': {
     method: 'GET',
@@ -267,6 +337,16 @@ const hostOperations: Record<string, HostOperationDefinition> = {
       );
     },
   },
+  'core.getPluginDeploymentLogs': {
+    method: 'GET',
+    mutating: false,
+    invoke: pluginDeploymentMaterial('logs'),
+  },
+  'core.getPluginDeploymentOutputs': {
+    method: 'GET',
+    mutating: false,
+    invoke: pluginDeploymentMaterial('outputs'),
+  },
 };
 
 const reservedHostOperation = (operationId: string) =>
@@ -277,6 +357,7 @@ export const invokeBridgeOperation = async (
   pluginId: string,
   descriptor: PluginOperationDescriptor,
   request: PluginInvocationRequest,
+  effects?: HostOperationEffects,
 ): Promise<PluginInvocationResponse> => {
   const hostOperation = hostOperations[request.operation_id];
   if (!hostOperation) {
@@ -294,5 +375,6 @@ export const invokeBridgeOperation = async (
   ) {
     throw new Error('The advertised host operation descriptor is incompatible.');
   }
-  return { status: 200, body: await hostOperation.invoke(orgId, pluginId, request) };
+  const body = await hostOperation.invoke(orgId, pluginId, request, effects);
+  return body === null ? { status: 204, body: null } : { status: 200, body };
 };

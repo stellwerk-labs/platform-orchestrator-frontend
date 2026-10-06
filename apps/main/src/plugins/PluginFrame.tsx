@@ -1,10 +1,10 @@
-import { Alert, Card } from 'antd';
+import { Alert, Card, Modal, Typography } from 'antd';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 
 import { useUserPreferencesStore } from '@src/hooks/zustand/useUserPreferencesStore';
 
-import { invokeBridgeOperation } from './hostOperationInvocation';
+import { invokeBridgeOperation, type PluginDeploymentMaterial } from './hostOperationInvocation';
 import {
   bridgeOperationDescriptors,
   coreOrgRoute,
@@ -38,6 +38,7 @@ export const PluginFrame = ({ orgId, plugin }: PluginFrameProps) => {
   const navigate = useNavigate();
   const theme = useUserPreferencesStore(({ theme: currentTheme }) => currentTheme);
   const [bridgeFailure, setBridgeFailure] = useState<string>();
+  const [visibleLogs, setVisibleLogs] = useState<PluginDeploymentMaterial>();
   const descriptorRevision = useMemo(
     () =>
       JSON.stringify([plugin.state, plugin.mode, plugin.operations, plugin.ui?.core_operations]),
@@ -62,6 +63,22 @@ export const PluginFrame = ({ orgId, plugin }: PluginFrameProps) => {
   childRouteRef.current = childRoute;
   pluginRef.current = plugin;
   themeRef.current = theme;
+
+  const presentPluginDeploymentMaterial = useCallback((material: PluginDeploymentMaterial) => {
+    if (material.kind === 'logs') {
+      setVisibleLogs(material);
+      return;
+    }
+    const url = URL.createObjectURL(new Blob([material.content], { type: 'text/plain' }));
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `deployment-${material.deploymentId}-outputs.txt`;
+    anchor.hidden = true;
+    document.body.append(anchor);
+    anchor.click();
+    anchor.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
+  }, []);
 
   useEffect(() => {
     portRef.current?.postMessage({
@@ -133,7 +150,9 @@ export const PluginFrame = ({ orgId, plugin }: PluginFrameProps) => {
           );
           return;
         }
-        void invokeBridgeOperation(orgId, activePlugin.id, operation, validated.invocation)
+        void invokeBridgeOperation(orgId, activePlugin.id, operation, validated.invocation, {
+          presentPluginDeploymentMaterial,
+        })
           .then((response) => {
             channel.port1.postMessage({
               type: 'stellwerk.host.operation.response',
@@ -175,7 +194,7 @@ export const PluginFrame = ({ orgId, plugin }: PluginFrameProps) => {
       portRef.current?.close();
       portRef.current = undefined;
     };
-  }, [frameUrl.origin, navigate, orgId, plugin.id]);
+  }, [frameUrl.origin, navigate, orgId, plugin.id, presentPluginDeploymentMaterial]);
 
   const startHandshake = useCallback(() => {
     const frameWindow = iframeRef.current?.contentWindow;
@@ -235,15 +254,30 @@ export const PluginFrame = ({ orgId, plugin }: PluginFrameProps) => {
   if (!plugin.ui) return <Card loading />;
 
   return (
-    <iframe
-      ref={iframeRef}
-      title={plugin.display_name}
-      src={frameUrl.toString()}
-      sandbox={'allow-scripts allow-forms allow-downloads allow-same-origin'}
-      referrerPolicy={'no-referrer'}
-      onLoad={startHandshake}
-      onError={() => setBridgeFailure('The registered plugin UI could not be loaded.')}
-      style={{ width: '100%', minHeight: 'calc(100vh - 160px)', border: 0 }}
-    />
+    <>
+      <iframe
+        ref={iframeRef}
+        title={plugin.display_name}
+        src={frameUrl.toString()}
+        sandbox={'allow-scripts allow-forms allow-downloads allow-same-origin'}
+        referrerPolicy={'no-referrer'}
+        onLoad={startHandshake}
+        onError={() => setBridgeFailure('The registered plugin UI could not be loaded.')}
+        style={{ width: '100%', minHeight: 'calc(100vh - 160px)', border: 0 }}
+      />
+      <Modal
+        open={Boolean(visibleLogs)}
+        title={`Deployment ${visibleLogs?.deploymentId ?? ''} logs`}
+        footer={null}
+        width={'min(960px, 90vw)'}
+        onCancel={() => setVisibleLogs(undefined)}
+        destroyOnHidden>
+        <Typography.Paragraph>
+          <pre style={{ maxHeight: '65vh', overflow: 'auto', whiteSpace: 'pre-wrap' }}>
+            {visibleLogs?.content}
+          </pre>
+        </Typography.Paragraph>
+      </Modal>
+    </>
   );
 };

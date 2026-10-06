@@ -43,6 +43,16 @@ through bounded, short-lived, organization-scoped Core inventory. The Pin mutati
 `core.discardEnvironmentModuleVersionPin`; the dispatcher hardcodes `discard`,
 requires idempotency, and never exposes generic Pin actions.
 
+Protected Deployment logs and outputs use two additional closed operations,
+`core.getPluginDeploymentLogs` and `core.getPluginDeploymentOutputs`. The child
+supplies only immutable Project, Environment, and Deployment UUIDs. The host
+calls the fixed user-authenticated Core material route for the current
+organization and plugin; Core verifies the immutable receipt relationship and
+current ordinary access, including after Environment deletion. Logs render in a Console-owned modal;
+outputs download from a short-lived host-only blob URL. The child receives only
+a `204` completion or an error, never plaintext, a key, a bearer credential, or
+a blob URL. Material over 16 MiB fails closed in the host as well as Core.
+
 The host retries its HELLO message for at most five seconds with the same fresh
 nonce. This closes the iframe-load/listener-registration race without accepting a
 stale READY or creating more than one channel.
