@@ -160,6 +160,15 @@ describe('MembershipDetails', () => {
       getListEnvironmentsInOrgMockHandler({
         items: [],
       }),
+      getGetCurrentUserMockHandler({
+        id: mockParams.userId,
+        display_name: 'John Doe',
+        primary_email_address: 'john.doe@example.com',
+        created_at: '2024-01-01T09:00:00Z',
+        login_providers: ['email'],
+        organization_memberships: [{ id: 'test-org' }],
+        dismissed_prompts: [],
+      }),
     );
   });
 
