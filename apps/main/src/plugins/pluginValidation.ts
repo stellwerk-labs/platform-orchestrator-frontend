@@ -305,9 +305,12 @@ export const validatePluginBridgeRequest = (
     return { ok: false, requestId, error: 'Operation query parameters must be string arrays.' };
   }
   if (
-    operation.mutating &&
+    value.idempotency_key !== undefined &&
     (typeof value.idempotency_key !== 'string' || value.idempotency_key.length === 0)
   ) {
+    return { ok: false, requestId, error: 'An Idempotency Key must be a non-empty string.' };
+  }
+  if (operation.mutating && value.idempotency_key === undefined) {
     return { ok: false, requestId, error: 'Mutating operations require an Idempotency Key.' };
   }
 

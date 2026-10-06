@@ -212,6 +212,32 @@ describe('plugin bridge validation', () => {
     });
   });
 
+  it('rejects malformed Idempotency Keys before forwarding any operation', () => {
+    const read = {
+      type: 'stellwerk.plugin.operation.request',
+      sdk_version: '1',
+      nonce: session.nonce,
+      request_id: 'request-three',
+      org_id: session.orgId,
+      operation_id: 'listProgressiveRollouts',
+    };
+    expect(validatePluginBridgeRequest(read, session)).toMatchObject({ ok: true });
+    for (const idempotencyKey of ['', 42, null, { key: 'value' }, ['key']]) {
+      for (const operationId of ['listProgressiveRollouts', 'commandProgressiveRollout']) {
+        expect(
+          validatePluginBridgeRequest(
+            { ...read, operation_id: operationId, idempotency_key: idempotencyKey },
+            session,
+          ),
+        ).toMatchObject({
+          ok: false,
+          requestId: 'request-three',
+          error: expect.stringContaining('Idempotency Key'),
+        });
+      }
+    }
+  });
+
   it('forwards only the registered envelope and snapshots its JSON body', () => {
     const body = { command: 'pause', nested: { reason: 'operator request' } };
     const result = validatePluginBridgeRequest(
