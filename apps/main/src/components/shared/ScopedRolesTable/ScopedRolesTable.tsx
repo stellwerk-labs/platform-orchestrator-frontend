@@ -157,7 +157,10 @@ export const ScopedRolesTable = ({
       </Flex>
 
       <Table
-        rowKey={(_record, index) => index!}
+        rowKey={(record) =>
+          record.id ??
+          [record.projectUuid, record.environment?.uuid ?? 'all', record.role.id].join(':')
+        }
         columns={columns}
         dataSource={tableData}
         tableLayout={'fixed'}
