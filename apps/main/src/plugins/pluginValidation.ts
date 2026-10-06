@@ -12,6 +12,8 @@ import {
 const pluginIdPattern = /^[a-z0-9]+(?:[.-][a-z0-9]+)+$/;
 const operationIdPattern = /^[A-Za-z][A-Za-z0-9._-]*$/;
 const routePrefixPattern = /^[a-z0-9](?:[a-z0-9/-]*[a-z0-9])?$/;
+const reservedHostOperation = (operationId: string) =>
+  operationId.startsWith('core.') || operationId.startsWith('iam.');
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -24,6 +26,18 @@ const isStringArrayRecord = (value: unknown): value is Record<string, string[]> 
   Object.values(value).every(
     (item) => Array.isArray(item) && item.every((entry) => typeof entry === 'string'),
   );
+
+const isOperationDescriptor = (value: unknown) =>
+  isRecord(value) &&
+  typeof value.id === 'string' &&
+  operationIdPattern.test(value.id) &&
+  ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].includes(String(value.method)) &&
+  typeof value.mutating === 'boolean';
+
+export const bridgeOperationDescriptors = (plugin: PluginDescriptor) => [
+  ...plugin.operations,
+  ...(plugin.ui?.core_operations ?? []),
+];
 
 export const normalizePluginRoutePrefix = (routePrefix: string) =>
   routePrefix.replace(/^\/+|\/+$/g, '');
@@ -99,19 +113,30 @@ export const isPluginDescriptor = (value: unknown): value is PluginDescriptor =>
       typeof ui.origin !== 'string' ||
       typeof ui.entrypoint !== 'string' ||
       typeof ui.route_prefix !== 'string' ||
-      typeof ui.navigation_label !== 'string'
+      typeof ui.navigation_label !== 'string' ||
+      (ui.core_operations !== undefined && !Array.isArray(ui.core_operations))
     ) {
       return false;
     }
   }
-  return value.operations.every(
-    (operation) =>
-      isRecord(operation) &&
-      typeof operation.id === 'string' &&
-      operationIdPattern.test(operation.id) &&
-      ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].includes(String(operation.method)) &&
-      typeof operation.mutating === 'boolean',
-  );
+  if (
+    !value.operations.every(
+      (operation) => isOperationDescriptor(operation) && !reservedHostOperation(operation.id),
+    )
+  ) {
+    return false;
+  }
+  const coreOperations = isRecord(value.ui) ? (value.ui.core_operations ?? []) : [];
+  if (
+    !Array.isArray(coreOperations) ||
+    !coreOperations.every(
+      (operation) => isOperationDescriptor(operation) && reservedHostOperation(operation.id),
+    )
+  ) {
+    return false;
+  }
+  const operationIds = [...value.operations, ...coreOperations].map(({ id }) => id);
+  return new Set(operationIds).size === operationIds.length;
 };
 
 export const findPluginForOrgPath = (plugins: PluginDescriptor[], orgPath: string) => {
@@ -190,7 +215,9 @@ export const validatePluginBridgeRequest = (
     return { ok: false, requestId, error: 'Malformed or cross-organization operation request.' };
   }
 
-  const operation = session.plugin.operations.find(({ id }) => id === value.operation_id);
+  const operation = bridgeOperationDescriptors(session.plugin).find(
+    ({ id }) => id === value.operation_id,
+  );
   if (!operation) {
     return { ok: false, requestId, error: 'The requested operation is not registered.' };
   }

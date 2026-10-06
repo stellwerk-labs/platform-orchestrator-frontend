@@ -22,6 +22,10 @@ const plugin: PluginDescriptor = {
     entrypoint: '/embed',
     route_prefix: 'rollouts',
     navigation_label: 'Rollouts',
+    core_operations: [
+      { id: 'core.listProjects', method: 'GET', mutating: false },
+      { id: 'iam.checkPermissions', method: 'POST', mutating: false },
+    ],
   },
   operations: [
     { id: 'listProgressiveRollouts', method: 'GET', mutating: false },
@@ -59,6 +63,36 @@ describe('plugin registration validation', () => {
       ),
     ).toThrow(/registered origin/);
     expect(isPluginDescriptor({ ...plugin, ui: { ...plugin.ui, sdk_version: '2' } })).toBe(false);
+  });
+
+  it('separates host operations from plugin operations and rejects collisions', () => {
+    expect(
+      isPluginDescriptor({
+        ...plugin,
+        operations: [{ id: 'core.listProjects', method: 'GET', mutating: false }],
+      }),
+    ).toBe(false);
+    expect(
+      isPluginDescriptor({
+        ...plugin,
+        ui: {
+          ...plugin.ui!,
+          core_operations: [{ id: 'listProgressiveRollouts', method: 'GET', mutating: false }],
+        },
+      }),
+    ).toBe(false);
+    expect(
+      isPluginDescriptor({
+        ...plugin,
+        ui: {
+          ...plugin.ui!,
+          core_operations: [
+            { id: 'core.listProjects', method: 'GET', mutating: false },
+            { id: 'core.listProjects', method: 'GET', mutating: false },
+          ],
+        },
+      }),
+    ).toBe(false);
   });
 
   it('matches the longest visible registered route and ignores hidden plugins', () => {

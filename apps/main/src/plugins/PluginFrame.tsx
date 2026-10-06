@@ -4,8 +4,9 @@ import { useLocation, useNavigate } from 'react-router';
 
 import { useUserPreferencesStore } from '@src/hooks/zustand/useUserPreferencesStore';
 
-import { invokePluginOperation } from './pluginInvocation';
+import { invokeBridgeOperation } from './hostOperationInvocation';
 import {
+  bridgeOperationDescriptors,
   coreOrgRoute,
   isExpectedPluginReadyEvent,
   normalizePluginRoutePrefix,
@@ -38,8 +39,9 @@ export const PluginFrame = ({ orgId, plugin }: PluginFrameProps) => {
   const theme = useUserPreferencesStore(({ theme: currentTheme }) => currentTheme);
   const [bridgeFailure, setBridgeFailure] = useState<string>();
   const descriptorRevision = useMemo(
-    () => JSON.stringify([plugin.state, plugin.mode, plugin.operations]),
-    [plugin.mode, plugin.operations, plugin.state],
+    () =>
+      JSON.stringify([plugin.state, plugin.mode, plugin.operations, plugin.ui?.core_operations]),
+    [plugin.mode, plugin.operations, plugin.state, plugin.ui?.core_operations],
   );
   const frameUrl = useMemo(() => {
     if (!plugin.ui) throw new Error('The plugin has no registered UI contribution.');
@@ -92,6 +94,7 @@ export const PluginFrame = ({ orgId, plugin }: PluginFrameProps) => {
 
       const channel = new MessageChannel();
       const currentPlugin = pluginRef.current;
+      const currentOperations = bridgeOperationDescriptors(currentPlugin);
       clearInterval(handshakeTimerRef.current);
       handshakeTimerRef.current = undefined;
       portRef.current = channel.port1;
@@ -121,7 +124,16 @@ export const PluginFrame = ({ orgId, plugin }: PluginFrameProps) => {
           );
           return;
         }
-        void invokePluginOperation(orgId, activePlugin.id, validated.invocation)
+        const operation = bridgeOperationDescriptors(activePlugin).find(
+          ({ id }) => id === validated.invocation?.operation_id,
+        );
+        if (!operation) {
+          channel.port1.postMessage(
+            bridgeError(requestId, nonceRef.current, 'The operation request is not registered.'),
+          );
+          return;
+        }
+        void invokeBridgeOperation(orgId, activePlugin.id, operation, validated.invocation)
           .then((response) => {
             channel.port1.postMessage({
               type: 'stellwerk.host.operation.response',
@@ -149,7 +161,7 @@ export const PluginFrame = ({ orgId, plugin }: PluginFrameProps) => {
           route: childRouteRef.current,
           theme: themeRef.current,
           locale: document.documentElement.lang || navigator.language,
-          operations: currentPlugin.operations,
+          operations: currentOperations,
         },
         frameUrl.origin,
         [channel.port2],

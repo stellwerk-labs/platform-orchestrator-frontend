@@ -16,6 +16,7 @@ export interface PluginUiDescriptor {
   entrypoint: string;
   route_prefix: string;
   navigation_label: string;
+  core_operations?: PluginOperationDescriptor[];
 }
 
 export interface PluginOperationDescriptor {
