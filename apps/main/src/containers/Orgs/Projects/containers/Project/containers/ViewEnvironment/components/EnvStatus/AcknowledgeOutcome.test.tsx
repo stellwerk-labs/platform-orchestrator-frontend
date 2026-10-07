@@ -6,7 +6,7 @@ import {
   getAcknowledgeDeploymentOutcomeMockHandler,
   getAcknowledgeDeploymentOutcomeMockHandler409,
 } from '@src/hooks/react-query/v2/controlplane/environment/environment.msw';
-import { DeploymentSummary } from '@src/models/v2/dataplane';
+import { DeploymentSummary, EnvironmentFence } from '@src/models/v2/dataplane';
 import { ResourcePermissionCheck } from '@src/models/v2/iam';
 import { MockProviders } from '@src/testing-utils/MockProviders';
 import { server } from '@src/testing-utils/mswServer';
@@ -31,6 +31,14 @@ const failedHead: DeploymentSummary = {
   metrics: { num_workloads: 0, num_resource_nodes: 0 },
 };
 
+const fence: EnvironmentFence = {
+  code: 'outcome_unreconciled',
+  deployment_id: deploymentId,
+  since: '2026-10-07T08:00:00Z',
+  remedy: 'acknowledge-outcome',
+  remedy_available_at: '2026-10-07T09:00:00Z',
+};
+
 const permissionChecks: ResourcePermissionCheck[] = [];
 
 const grant = (...permissions: string[]) =>
@@ -42,10 +50,14 @@ const grant = (...permissions: string[]) =>
     ),
   );
 
-const renderAction = (deployment = failedHead) =>
+const renderAction = (environmentFence: EnvironmentFence = fence) =>
   render(
     <MockProviders>
-      <AcknowledgeOutcome deployment={deployment} environmentUuid={environmentUuid} />
+      <AcknowledgeOutcome
+        deployment={failedHead}
+        fence={environmentFence}
+        environmentUuid={environmentUuid}
+      />
     </MockProviders>,
   );
 
@@ -75,13 +87,30 @@ describe('AcknowledgeOutcome', () => {
     expect(screen.queryByRole('button', { name: 'Acknowledge outcome' })).not.toBeInTheDocument();
   });
 
-  it('is not offered for an Environment head that did not fail', async () => {
+  it('shows when the action becomes available instead of the action before that time', async () => {
     grant('deployment.outcome.acknowledge');
-    renderAction({ ...failedHead, status: 'succeeded' });
+    renderAction({ ...fence, remedy_available_at: '2999-01-01T12:30:00Z' });
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
-    expect(permissionChecks).toHaveLength(0);
+    expect(await screen.findByText(/Acknowledging becomes available at/)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Acknowledge outcome' })).not.toBeInTheDocument();
+  });
+
+  it('turns the waiting state into the action once the dispatch window ends', async () => {
+    grant('deployment.outcome.acknowledge');
+    renderAction({ ...fence, remedy_available_at: new Date(Date.now() + 1000).toISOString() });
+
+    expect(await screen.findByText(/Acknowledging becomes available at/)).toBeInTheDocument();
+    expect(
+      await screen.findByRole('button', { name: 'Acknowledge outcome' }, { timeout: 3000 }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Acknowledging becomes available at/)).not.toBeInTheDocument();
+  });
+
+  it('is offered at once when the fence carries no dispatch window', async () => {
+    grant('deployment.outcome.acknowledge');
+    renderAction({ ...fence, remedy_available_at: undefined });
+
+    expect(await screen.findByRole('button', { name: 'Acknowledge outcome' })).toBeInTheDocument();
   });
 
   it('requires a reason and sends it trimmed for the exact Deployment', async () => {

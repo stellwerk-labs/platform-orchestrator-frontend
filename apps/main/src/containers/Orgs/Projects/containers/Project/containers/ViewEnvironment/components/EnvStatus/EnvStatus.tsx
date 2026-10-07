@@ -9,7 +9,7 @@ import { useListLastDeployments } from '@src/hooks/react-query/v2/dataplane/depl
 
 import { DeploymentQueue } from '../DeploymentQueue/DeploymentQueue';
 import { ResourceGraph } from '../ResourceGraph/ResourceGraph';
-import { AcknowledgeOutcome } from './AcknowledgeOutcome';
+import { OutcomeFence } from './OutcomeFence';
 
 export const EnvStatus = () => {
   const { orgId, projectId, envId } = useParams<keyof MatchParams>() as MatchParams;
@@ -33,15 +33,19 @@ export const EnvStatus = () => {
   return (
     <Flex vertical gap={'middle'}>
       {deployment ? (
-        <DeploymentCard
-          deploy={deployment}
-          isActiveDeployment
-          extra={<AcknowledgeOutcome deployment={deployment} environmentUuid={environment?.uuid} />}
-        />
+        <DeploymentCard deploy={deployment} isActiveDeployment />
       ) : (
         <Empty
           description={deploysTranslations.NO_DEPLOYS_TO_THIS_ENVIRONMENT}
           styles={{ image: { display: 'none' } }}
+        />
+      )}
+
+      {deployment?.environment_fence && (
+        <OutcomeFence
+          deployment={deployment}
+          fence={deployment.environment_fence}
+          environmentUuid={environment?.uuid}
         />
       )}
 

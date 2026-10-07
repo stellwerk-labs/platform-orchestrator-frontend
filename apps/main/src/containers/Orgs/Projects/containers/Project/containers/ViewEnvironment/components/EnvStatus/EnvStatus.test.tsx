@@ -11,7 +11,7 @@ import {
 } from '@src/hooks/react-query/v2/dataplane/deployment/deployment.msw';
 import { getListOrgMembershipsMockHandler } from '@src/hooks/react-query/v2/iam/membership/membership.msw';
 import { getListServiceUsersMockHandler } from '@src/hooks/react-query/v2/iam/service-user/service-user.msw';
-import { DeploymentSummary } from '@src/models/v2/dataplane';
+import { DeploymentSummary, EnvironmentFence } from '@src/models/v2/dataplane';
 import { ResourcePermissionCheck } from '@src/models/v2/iam';
 import { MockProviders } from '@src/testing-utils/MockProviders';
 import { server } from '@src/testing-utils/mswServer';
@@ -37,6 +37,16 @@ const failedHead: DeploymentSummary = {
   status_message: 'Runner dispatch timed out',
   metrics: { num_workloads: 0, num_resource_nodes: 0 },
 };
+
+const fence: EnvironmentFence = {
+  code: 'outcome_unreconciled',
+  deployment_id: failedHead.id,
+  since: '2026-10-07T08:00:00Z',
+  remedy: 'acknowledge-outcome',
+  remedy_available_at: '2026-10-07T09:00:00Z',
+};
+
+const fencedHead: DeploymentSummary = { ...failedHead, environment_fence: fence };
 
 const checked: ResourcePermissionCheck[] = [];
 
@@ -69,8 +79,8 @@ describe('EnvStatus', () => {
     );
   });
 
-  it('offers queue and outcome actions against the Environment UUID next to a failed head', async () => {
-    server.use(getListLastDeploymentsMockHandler({ items: [failedHead] }));
+  it('offers queue and outcome actions against the Environment UUID next to a fenced head', async () => {
+    server.use(getListLastDeploymentsMockHandler({ items: [fencedHead] }));
     renderStatus();
 
     expect(await screen.findByText('Last deployment')).toBeInTheDocument();
@@ -85,6 +95,62 @@ describe('EnvStatus', () => {
         ]),
       ),
     );
+  });
+
+  it('explains the fence and shows when acknowledging becomes available', async () => {
+    server.use(
+      getListLastDeploymentsMockHandler({
+        items: [
+          {
+            ...failedHead,
+            environment_fence: { ...fence, remedy_available_at: '2999-01-01T12:30:00Z' },
+          },
+        ],
+      }),
+    );
+    renderStatus();
+
+    expect(await screen.findByText(/outcome_unreconciled/)).toBeInTheDocument();
+    expect(
+      screen.getByText(new RegExp(`Deployment ${failedHead.id} failed on`)),
+    ).toBeInTheDocument();
+    expect(await screen.findByText(/Acknowledging becomes available at/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Acknowledge outcome' })).not.toBeInTheDocument();
+  });
+
+  it('offers no outcome action on a failed head without a fence', async () => {
+    server.use(getListLastDeploymentsMockHandler({ items: [failedHead] }));
+    renderStatus();
+
+    expect(await screen.findByText('Last deployment')).toBeInTheDocument();
+    expect(await screen.findByText('No deployment requests are waiting.')).toBeInTheDocument();
+    expect(screen.queryByText(/outcome_unreconciled/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Acknowledge outcome' })).not.toBeInTheDocument();
+    expect(checked).not.toContainEqual({
+      resource: `env:${environmentUuid}`,
+      permission: 'deployment.outcome.acknowledge',
+    });
+  });
+
+  it('hides the outcome action from users without the permission', async () => {
+    server.use(
+      getListLastDeploymentsMockHandler({ items: [fencedHead] }),
+      answerPermissionChecks(
+        ({ permission }) => permission !== 'deployment.outcome.acknowledge',
+        checked,
+      ),
+    );
+    renderStatus();
+
+    expect(await screen.findByText(/outcome_unreconciled/)).toBeInTheDocument();
+    await waitFor(() =>
+      expect(checked).toContainEqual({
+        resource: `env:${environmentUuid}`,
+        permission: 'deployment.outcome.acknowledge',
+      }),
+    );
+    expect(screen.queryByRole('button', { name: 'Acknowledge outcome' })).not.toBeInTheDocument();
+    expect(screen.queryByText(/Acknowledging becomes available at/)).not.toBeInTheDocument();
   });
 
   it('shows the queue before the first Deployment exists', async () => {
