@@ -1,4 +1,5 @@
 import { Card, Flex } from 'antd';
+import { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
@@ -12,15 +13,16 @@ import { DeploymentStatus } from './DeploymentStatus';
 interface DeploymentCardProps {
   deploy: DeploymentSummary;
   isActiveDeployment?: boolean;
+  extra?: ReactNode;
 }
 
-export const DeploymentCard = ({ deploy, isActiveDeployment }: DeploymentCardProps) => {
+export const DeploymentCard = ({ deploy, isActiveDeployment, extra }: DeploymentCardProps) => {
   // i18n
   const { t } = useTranslation('viewEnvironment');
   const translations = t('DEPLOYS').DEPLOYMENT_CARD;
 
   return (
-    <Card title={isActiveDeployment ? 'Last deployment' : undefined}>
+    <Card title={isActiveDeployment ? 'Last deployment' : undefined} extra={extra}>
       <Flex gap={'middle'} wrap={'wrap'}>
         {deploy.status && (
           <DataEntry
