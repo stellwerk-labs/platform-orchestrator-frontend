@@ -32,6 +32,7 @@ export enum RBACPermission {
   MODULE_VERSION_UNPIN = 'module.version.unpin',
   MODULE_VERSION_PIN_DEFECTIVE = 'module.version.pin-defective',
   RESOURCE_TYPE_WRITE = 'resource_type_write',
+  DEPLOYMENT_WRITE = 'deployment_write',
 }
 
 export const permissionAllowed = (
