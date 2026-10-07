@@ -19,6 +19,8 @@ export * from './coreModuleVersionMigrationGeneration';
 export * from './coreModuleVersionPage';
 export * from './deleteEnvironmentParams';
 export * from './deleteProjectParams';
+export * from './deploymentOutcomeAcknowledgement';
+export * from './deploymentOutcomeAcknowledgementBody';
 export * from './dryRunQueryParamParameter';
 export * from './environment';
 export * from './environmentCreateBody';

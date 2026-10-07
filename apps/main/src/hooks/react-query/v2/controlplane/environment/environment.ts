@@ -22,6 +22,8 @@ import type { ErrorType } from '../../../../../custom-instance';
 import { customInstance } from '../../../../../custom-instance';
 import type {
   DeleteEnvironmentParams,
+  DeploymentOutcomeAcknowledgement,
+  DeploymentOutcomeAcknowledgementBody,
   Environment,
   EnvironmentCreateBody,
   EnvironmentDeletionImpact,
@@ -1414,6 +1416,151 @@ export const useUpdateRunnerInAnEnvironment = <
   TContext
 > => {
   const mutationOptions = getUpdateRunnerInAnEnvironmentMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+/**
+ * Records, exactly once and attributed to the acting user, that an operator has confirmed the Runner attempt
+of this failed plugin-dispatched Deployment of the Environment can no longer change it. The Data Plane
+accepts only the current Environment head without Runner stop evidence after its Runner dispatch window
+closed; the acknowledgement then lets the next Deployment of the Environment proceed. It does not change
+the Deployment's status or history. Requires the `deployment.outcome.acknowledge` permission on the
+Environment, with the organization as fallback. Organization tokens and the system user are rejected
+because the actor is the audit record. Repeating the identical request returns the stored acknowledgement
+with status 200; a different request for the same Deployment returns 409.
+ *
+ * @summary Acknowledge the unknown Runner outcome of a failed plugin-dispatched Deployment.
+ */
+export const acknowledgeDeploymentOutcome = (
+  orgId: string,
+  projectId: string,
+  envId: string,
+  deploymentId: string,
+  deploymentOutcomeAcknowledgementBody: DeploymentOutcomeAcknowledgementBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<DeploymentOutcomeAcknowledgement | DeploymentOutcomeAcknowledgement>(
+    {
+      url: `/orgs/${orgId}/projects/${projectId}/envs/${envId}/deployments/${deploymentId}/actions/acknowledge-outcome`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: deploymentOutcomeAcknowledgementBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getAcknowledgeDeploymentOutcomeMutationOptions = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof acknowledgeDeploymentOutcome>>,
+    TError,
+    {
+      orgId: string;
+      projectId: string;
+      envId: string;
+      deploymentId: string;
+      data: DeploymentOutcomeAcknowledgementBody;
+    },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof acknowledgeDeploymentOutcome>>,
+  TError,
+  {
+    orgId: string;
+    projectId: string;
+    envId: string;
+    deploymentId: string;
+    data: DeploymentOutcomeAcknowledgementBody;
+  },
+  TContext
+> => {
+  const mutationKey = ['acknowledgeDeploymentOutcome'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof acknowledgeDeploymentOutcome>>,
+    {
+      orgId: string;
+      projectId: string;
+      envId: string;
+      deploymentId: string;
+      data: DeploymentOutcomeAcknowledgementBody;
+    }
+  > = (props) => {
+    const { orgId, projectId, envId, deploymentId, data } = props ?? {};
+
+    return acknowledgeDeploymentOutcome(
+      orgId,
+      projectId,
+      envId,
+      deploymentId,
+      data,
+      requestOptions,
+    );
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AcknowledgeDeploymentOutcomeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof acknowledgeDeploymentOutcome>>
+>;
+export type AcknowledgeDeploymentOutcomeMutationBody = DeploymentOutcomeAcknowledgementBody;
+export type AcknowledgeDeploymentOutcomeMutationError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+/**
+ * @summary Acknowledge the unknown Runner outcome of a failed plugin-dispatched Deployment.
+ */
+export const useAcknowledgeDeploymentOutcome = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof acknowledgeDeploymentOutcome>>,
+      TError,
+      {
+        orgId: string;
+        projectId: string;
+        envId: string;
+        deploymentId: string;
+        data: DeploymentOutcomeAcknowledgementBody;
+      },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof acknowledgeDeploymentOutcome>>,
+  TError,
+  {
+    orgId: string;
+    projectId: string;
+    envId: string;
+    deploymentId: string;
+    data: DeploymentOutcomeAcknowledgementBody;
+  },
+  TContext
+> => {
+  const mutationOptions = getAcknowledgeDeploymentOutcomeMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };

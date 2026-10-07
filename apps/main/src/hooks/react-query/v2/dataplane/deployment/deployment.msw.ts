@@ -12,12 +12,15 @@ import type {
   DeploymentDryRun,
   DeploymentEncryptedOutputs,
   DeploymentPage,
+  DeploymentQueueItem,
+  DeploymentQueueItemPage,
   Error,
   N400BadRequestResponse,
   N404NotFoundResponse,
   N409ConflictResponse,
   ResourceNodesPage,
 } from '../../../../../models/v2/dataplane';
+import { DeploymentQueueItemState } from '../../../../../models/v2/dataplane';
 
 export const getListDeploymentsResponseMock = (
   overrideResponse: Partial<DeploymentPage> = {},
@@ -143,6 +146,12 @@ export const getCreateDeploymentResponseMock201 = () =>
     diff: { changes: [], num_added: 0, num_changed: 0, num_removed: 0 },
   }))();
 
+export const getCreateDeploymentResponseMock202 = () =>
+  (() => ({
+    runner_id: 'mock-runner',
+    diff: { changes: [], num_added: 0, num_changed: 0, num_removed: 0 },
+  }))();
+
 export const getCreateDeploymentResponseMock400 = () =>
   (() => ({
     runner_id: 'mock-runner',
@@ -154,6 +163,641 @@ export const getCreateDeploymentResponseMock409 = () =>
     runner_id: 'mock-runner',
     diff: { changes: [], num_added: 0, num_changed: 0, num_removed: 0 },
   }))();
+
+export const getListDeploymentQueueItemsResponseMock = (
+  overrideResponse: Partial<DeploymentQueueItemPage> = {},
+): DeploymentQueueItemPage => ({
+  items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    id: faker.string.uuid(),
+    org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    env_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    mode: faker.helpers.arrayElement(['deploy', 'rollback'] as const),
+    state: faker.helpers.arrayElement(Object.values(DeploymentQueueItemState)),
+    position: faker.number.int({ min: undefined, max: undefined }),
+    rollback_to_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    expected_base_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    created_by: faker.string.uuid(),
+    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    expires_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    attempts: faker.number.int({ min: undefined, max: undefined }),
+    last_error: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    reason_code: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    reason_message: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    settled_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    settled_at: faker.helpers.arrayElement([
+      `${faker.date.past().toISOString().split('.')[0]}Z`,
+      undefined,
+    ]),
+    deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    manifest: faker.helpers.arrayElement([
+      {
+        workloads: {
+          [faker.string.alphanumeric(5)]: {
+            resources: faker.helpers.arrayElement([
+              {
+                [faker.string.alphanumeric(5)]: {
+                  type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+                  class: faker.helpers.arrayElement([
+                    faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+                    undefined,
+                  ]),
+                  id: faker.helpers.arrayElement([
+                    faker.helpers.fromRegExp(
+                      '^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$',
+                    ),
+                    undefined,
+                  ]),
+                  params: faker.helpers.arrayElement([{}, undefined]),
+                },
+              },
+              undefined,
+            ]),
+            outputs: faker.helpers.arrayElement([
+              {
+                [faker.string.alphanumeric(5)]: faker.string.alpha({
+                  length: { min: 10, max: 20 },
+                }),
+              },
+              undefined,
+            ]),
+            variables: faker.helpers.arrayElement([
+              {
+                [faker.string.alphanumeric(5)]: faker.string.alpha({
+                  length: { min: 10, max: 20 },
+                }),
+              },
+              undefined,
+            ]),
+          },
+        },
+        shared: faker.helpers.arrayElement([
+          {
+            [faker.string.alphanumeric(5)]: {
+              type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+              class: faker.helpers.arrayElement([
+                faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+                undefined,
+              ]),
+              id: faker.helpers.arrayElement([
+                faker.helpers.fromRegExp(
+                  '^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$',
+                ),
+                undefined,
+              ]),
+              params: faker.helpers.arrayElement([{}, undefined]),
+            },
+          },
+          undefined,
+        ]),
+      },
+      undefined,
+    ]),
+  })),
+  next_page_token: undefined,
+  ...overrideResponse,
+});
+
+export const getListDeploymentQueueItemsResponseMock200 = (
+  overrideResponse: Partial<DeploymentQueueItemPage> = {},
+): DeploymentQueueItemPage => ({
+  items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    id: faker.string.uuid(),
+    org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    env_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    mode: faker.helpers.arrayElement(['deploy', 'rollback'] as const),
+    state: faker.helpers.arrayElement(Object.values(DeploymentQueueItemState)),
+    position: faker.number.int({ min: undefined, max: undefined }),
+    rollback_to_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    expected_base_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    created_by: faker.string.uuid(),
+    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    expires_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    attempts: faker.number.int({ min: undefined, max: undefined }),
+    last_error: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    reason_code: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    reason_message: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    settled_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    settled_at: faker.helpers.arrayElement([
+      `${faker.date.past().toISOString().split('.')[0]}Z`,
+      undefined,
+    ]),
+    deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    manifest: faker.helpers.arrayElement([
+      {
+        workloads: {
+          [faker.string.alphanumeric(5)]: {
+            resources: faker.helpers.arrayElement([
+              {
+                [faker.string.alphanumeric(5)]: {
+                  type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+                  class: faker.helpers.arrayElement([
+                    faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+                    undefined,
+                  ]),
+                  id: faker.helpers.arrayElement([
+                    faker.helpers.fromRegExp(
+                      '^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$',
+                    ),
+                    undefined,
+                  ]),
+                  params: faker.helpers.arrayElement([{}, undefined]),
+                },
+              },
+              undefined,
+            ]),
+            outputs: faker.helpers.arrayElement([
+              {
+                [faker.string.alphanumeric(5)]: faker.string.alpha({
+                  length: { min: 10, max: 20 },
+                }),
+              },
+              undefined,
+            ]),
+            variables: faker.helpers.arrayElement([
+              {
+                [faker.string.alphanumeric(5)]: faker.string.alpha({
+                  length: { min: 10, max: 20 },
+                }),
+              },
+              undefined,
+            ]),
+          },
+        },
+        shared: faker.helpers.arrayElement([
+          {
+            [faker.string.alphanumeric(5)]: {
+              type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+              class: faker.helpers.arrayElement([
+                faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+                undefined,
+              ]),
+              id: faker.helpers.arrayElement([
+                faker.helpers.fromRegExp(
+                  '^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$',
+                ),
+                undefined,
+              ]),
+              params: faker.helpers.arrayElement([{}, undefined]),
+            },
+          },
+          undefined,
+        ]),
+      },
+      undefined,
+    ]),
+  })),
+  next_page_token: undefined,
+  ...overrideResponse,
+});
+
+export const getListDeploymentQueueItemsResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getGetDeploymentQueueItemResponseMock = (
+  overrideResponse: Partial<DeploymentQueueItem> = {},
+): DeploymentQueueItem => ({
+  id: faker.string.uuid(),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  env_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  mode: faker.helpers.arrayElement(['deploy', 'rollback'] as const),
+  state: faker.helpers.arrayElement(Object.values(DeploymentQueueItemState)),
+  position: faker.number.int({ min: undefined, max: undefined }),
+  rollback_to_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  expected_base_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_by: faker.string.uuid(),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  expires_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  attempts: faker.number.int({ min: undefined, max: undefined }),
+  last_error: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  reason_code: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  reason_message: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  settled_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  settled_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  manifest: faker.helpers.arrayElement([
+    {
+      workloads: {
+        [faker.string.alphanumeric(5)]: {
+          resources: faker.helpers.arrayElement([
+            {
+              [faker.string.alphanumeric(5)]: {
+                type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+                class: faker.helpers.arrayElement([
+                  faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+                  undefined,
+                ]),
+                id: faker.helpers.arrayElement([
+                  faker.helpers.fromRegExp(
+                    '^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$',
+                  ),
+                  undefined,
+                ]),
+                params: faker.helpers.arrayElement([{}, undefined]),
+              },
+            },
+            undefined,
+          ]),
+          outputs: faker.helpers.arrayElement([
+            {
+              [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            },
+            undefined,
+          ]),
+          variables: faker.helpers.arrayElement([
+            {
+              [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            },
+            undefined,
+          ]),
+        },
+      },
+      shared: faker.helpers.arrayElement([
+        {
+          [faker.string.alphanumeric(5)]: {
+            type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+            class: faker.helpers.arrayElement([
+              faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+              undefined,
+            ]),
+            id: faker.helpers.arrayElement([
+              faker.helpers.fromRegExp(
+                '^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$',
+              ),
+              undefined,
+            ]),
+            params: faker.helpers.arrayElement([{}, undefined]),
+          },
+        },
+        undefined,
+      ]),
+    },
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getGetDeploymentQueueItemResponseMock200 = (
+  overrideResponse: Partial<DeploymentQueueItem> = {},
+): DeploymentQueueItem => ({
+  id: faker.string.uuid(),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  env_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  mode: faker.helpers.arrayElement(['deploy', 'rollback'] as const),
+  state: faker.helpers.arrayElement(Object.values(DeploymentQueueItemState)),
+  position: faker.number.int({ min: undefined, max: undefined }),
+  rollback_to_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  expected_base_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_by: faker.string.uuid(),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  expires_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  attempts: faker.number.int({ min: undefined, max: undefined }),
+  last_error: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  reason_code: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  reason_message: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  settled_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  settled_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  manifest: faker.helpers.arrayElement([
+    {
+      workloads: {
+        [faker.string.alphanumeric(5)]: {
+          resources: faker.helpers.arrayElement([
+            {
+              [faker.string.alphanumeric(5)]: {
+                type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+                class: faker.helpers.arrayElement([
+                  faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+                  undefined,
+                ]),
+                id: faker.helpers.arrayElement([
+                  faker.helpers.fromRegExp(
+                    '^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$',
+                  ),
+                  undefined,
+                ]),
+                params: faker.helpers.arrayElement([{}, undefined]),
+              },
+            },
+            undefined,
+          ]),
+          outputs: faker.helpers.arrayElement([
+            {
+              [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            },
+            undefined,
+          ]),
+          variables: faker.helpers.arrayElement([
+            {
+              [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            },
+            undefined,
+          ]),
+        },
+      },
+      shared: faker.helpers.arrayElement([
+        {
+          [faker.string.alphanumeric(5)]: {
+            type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+            class: faker.helpers.arrayElement([
+              faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+              undefined,
+            ]),
+            id: faker.helpers.arrayElement([
+              faker.helpers.fromRegExp(
+                '^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$',
+              ),
+              undefined,
+            ]),
+            params: faker.helpers.arrayElement([{}, undefined]),
+          },
+        },
+        undefined,
+      ]),
+    },
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getGetDeploymentQueueItemResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getCancelDeploymentQueueItemResponseMock = (
+  overrideResponse: Partial<DeploymentQueueItem> = {},
+): DeploymentQueueItem => ({
+  id: faker.string.uuid(),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  env_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  mode: faker.helpers.arrayElement(['deploy', 'rollback'] as const),
+  state: faker.helpers.arrayElement(Object.values(DeploymentQueueItemState)),
+  position: faker.number.int({ min: undefined, max: undefined }),
+  rollback_to_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  expected_base_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_by: faker.string.uuid(),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  expires_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  attempts: faker.number.int({ min: undefined, max: undefined }),
+  last_error: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  reason_code: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  reason_message: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  settled_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  settled_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  manifest: faker.helpers.arrayElement([
+    {
+      workloads: {
+        [faker.string.alphanumeric(5)]: {
+          resources: faker.helpers.arrayElement([
+            {
+              [faker.string.alphanumeric(5)]: {
+                type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+                class: faker.helpers.arrayElement([
+                  faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+                  undefined,
+                ]),
+                id: faker.helpers.arrayElement([
+                  faker.helpers.fromRegExp(
+                    '^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$',
+                  ),
+                  undefined,
+                ]),
+                params: faker.helpers.arrayElement([{}, undefined]),
+              },
+            },
+            undefined,
+          ]),
+          outputs: faker.helpers.arrayElement([
+            {
+              [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            },
+            undefined,
+          ]),
+          variables: faker.helpers.arrayElement([
+            {
+              [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            },
+            undefined,
+          ]),
+        },
+      },
+      shared: faker.helpers.arrayElement([
+        {
+          [faker.string.alphanumeric(5)]: {
+            type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+            class: faker.helpers.arrayElement([
+              faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+              undefined,
+            ]),
+            id: faker.helpers.arrayElement([
+              faker.helpers.fromRegExp(
+                '^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$',
+              ),
+              undefined,
+            ]),
+            params: faker.helpers.arrayElement([{}, undefined]),
+          },
+        },
+        undefined,
+      ]),
+    },
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getCancelDeploymentQueueItemResponseMock200 = (
+  overrideResponse: Partial<DeploymentQueueItem> = {},
+): DeploymentQueueItem => ({
+  id: faker.string.uuid(),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  project_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  env_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  mode: faker.helpers.arrayElement(['deploy', 'rollback'] as const),
+  state: faker.helpers.arrayElement(Object.values(DeploymentQueueItemState)),
+  position: faker.number.int({ min: undefined, max: undefined }),
+  rollback_to_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  expected_base_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_by: faker.string.uuid(),
+  created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  expires_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  attempts: faker.number.int({ min: undefined, max: undefined }),
+  last_error: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  reason_code: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  reason_message: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  settled_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  settled_at: faker.helpers.arrayElement([
+    `${faker.date.past().toISOString().split('.')[0]}Z`,
+    undefined,
+  ]),
+  deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  manifest: faker.helpers.arrayElement([
+    {
+      workloads: {
+        [faker.string.alphanumeric(5)]: {
+          resources: faker.helpers.arrayElement([
+            {
+              [faker.string.alphanumeric(5)]: {
+                type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+                class: faker.helpers.arrayElement([
+                  faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+                  undefined,
+                ]),
+                id: faker.helpers.arrayElement([
+                  faker.helpers.fromRegExp(
+                    '^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$',
+                  ),
+                  undefined,
+                ]),
+                params: faker.helpers.arrayElement([{}, undefined]),
+              },
+            },
+            undefined,
+          ]),
+          outputs: faker.helpers.arrayElement([
+            {
+              [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            },
+            undefined,
+          ]),
+          variables: faker.helpers.arrayElement([
+            {
+              [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+            },
+            undefined,
+          ]),
+        },
+      },
+      shared: faker.helpers.arrayElement([
+        {
+          [faker.string.alphanumeric(5)]: {
+            type: faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+            class: faker.helpers.arrayElement([
+              faker.helpers.fromRegExp('^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$'),
+              undefined,
+            ]),
+            id: faker.helpers.arrayElement([
+              faker.helpers.fromRegExp(
+                '^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$',
+              ),
+              undefined,
+            ]),
+            params: faker.helpers.arrayElement([{}, undefined]),
+          },
+        },
+        undefined,
+      ]),
+    },
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getCancelDeploymentQueueItemResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getCancelDeploymentQueueItemResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getCancelDeploymentQueueItemResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
 
 export const getListLastDeploymentsResponseMock = (
   overrideResponse: Partial<DeploymentPage> = {},
@@ -1018,9 +1662,14 @@ export const getCreateDeploymentMockHandler = (
   overrideResponse?:
     | DeploymentDryRun
     | Deployment
+    | DeploymentQueueItem
     | ((
         info: Parameters<Parameters<typeof http.post>[1]>[0],
-      ) => Promise<DeploymentDryRun | Deployment> | DeploymentDryRun | Deployment),
+      ) =>
+        | Promise<DeploymentDryRun | Deployment | DeploymentQueueItem>
+        | DeploymentDryRun
+        | Deployment
+        | DeploymentQueueItem),
   options?: RequestHandlerOptions,
 ) => {
   return http.post(
@@ -1091,6 +1740,32 @@ export const getCreateDeploymentMockHandler201 = (
   );
 };
 
+export const getCreateDeploymentMockHandler202 = (
+  overrideResponse?:
+    | DeploymentQueueItem
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<DeploymentQueueItem> | DeploymentQueueItem),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/deployments',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCreateDeploymentResponseMock202(),
+        ),
+        { status: 202, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
 export const getCreateDeploymentMockHandler400 = (
   overrideResponse?:
     | N400BadRequestResponse
@@ -1135,6 +1810,292 @@ export const getCreateDeploymentMockHandler409 = (
               ? await overrideResponse(info)
               : overrideResponse
             : getCreateDeploymentResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListDeploymentQueueItemsMockHandler = (
+  overrideResponse?:
+    | DeploymentQueueItemPage
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<DeploymentQueueItemPage> | DeploymentQueueItemPage),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/deployment-queue',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListDeploymentQueueItemsResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListDeploymentQueueItemsMockHandler200 = (
+  overrideResponse?:
+    | DeploymentQueueItemPage
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<DeploymentQueueItemPage> | DeploymentQueueItemPage),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/deployment-queue',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListDeploymentQueueItemsResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getListDeploymentQueueItemsMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/deployment-queue',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getListDeploymentQueueItemsResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetDeploymentQueueItemMockHandler = (
+  overrideResponse?:
+    | DeploymentQueueItem
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<DeploymentQueueItem> | DeploymentQueueItem),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/deployment-queue/:queueItemId',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getGetDeploymentQueueItemResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetDeploymentQueueItemMockHandler200 = (
+  overrideResponse?:
+    | DeploymentQueueItem
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<DeploymentQueueItem> | DeploymentQueueItem),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/deployment-queue/:queueItemId',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getGetDeploymentQueueItemResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetDeploymentQueueItemMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/deployment-queue/:queueItemId',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getGetDeploymentQueueItemResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCancelDeploymentQueueItemMockHandler = (
+  overrideResponse?:
+    | DeploymentQueueItem
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<DeploymentQueueItem> | DeploymentQueueItem),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/deployment-queue/:queueItemId/actions/cancel',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCancelDeploymentQueueItemResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCancelDeploymentQueueItemMockHandler200 = (
+  overrideResponse?:
+    | DeploymentQueueItem
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<DeploymentQueueItem> | DeploymentQueueItem),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/deployment-queue/:queueItemId/actions/cancel',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCancelDeploymentQueueItemResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCancelDeploymentQueueItemMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/deployment-queue/:queueItemId/actions/cancel',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCancelDeploymentQueueItemResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCancelDeploymentQueueItemMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/deployment-queue/:queueItemId/actions/cancel',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCancelDeploymentQueueItemResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getCancelDeploymentQueueItemMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/deployment-queue/:queueItemId/actions/cancel',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getCancelDeploymentQueueItemResponseMock409(),
         ),
         { status: 409, headers: { 'Content-Type': 'application/json' } },
       );
@@ -2061,6 +3022,9 @@ export const getListDeploymentResourceNodesMockHandler404 = (
 export const getDeploymentMock = () => [
   getListDeploymentsMockHandler(),
   getCreateDeploymentMockHandler(),
+  getListDeploymentQueueItemsMockHandler(),
+  getGetDeploymentQueueItemMockHandler(),
+  getCancelDeploymentQueueItemMockHandler(),
   getListLastDeploymentsMockHandler(),
   getGetDeploymentMockHandler(),
   getWaitForDeploymentCompleteMockHandler(),
