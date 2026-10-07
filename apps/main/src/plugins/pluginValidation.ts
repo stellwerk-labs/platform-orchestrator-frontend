@@ -3,6 +3,7 @@ import {
   type PluginBridgeSession,
   type PluginContextualActionDescriptor,
   type PluginDescriptor,
+  type PluginEntitlementWarning,
   type PluginInvocationRequest,
   type PluginOperationRequestMessage,
   type PluginReadyMessage,
@@ -58,6 +59,30 @@ const isEntitlementProjection = (value: unknown) => {
         ),
     )
   );
+};
+
+export const entitlementWarning = (
+  plugin: PluginDescriptor,
+): PluginEntitlementWarning | undefined => {
+  const warning = plugin.entitlement?.warning;
+  if (
+    !isRecord(warning) ||
+    typeof warning.code !== 'string' ||
+    typeof warning.message !== 'string' ||
+    warning.message.trim() === '' ||
+    typeof warning.grace_until !== 'string' ||
+    !Number.isFinite(Date.parse(warning.grace_until)) ||
+    !Array.isArray(warning.features) ||
+    !warning.features.every((feature) => typeof feature === 'string')
+  ) {
+    return undefined;
+  }
+  return {
+    code: warning.code,
+    message: warning.message,
+    grace_until: warning.grace_until,
+    features: warning.features,
+  };
 };
 
 export const isPluginContextualActionDescriptor = (

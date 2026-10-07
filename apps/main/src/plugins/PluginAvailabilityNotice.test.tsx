@@ -12,6 +12,8 @@ const access: PluginFeatureAccess = {
   safety: true,
 };
 
+const graceUntil = '2026-10-14T12:00:00Z';
+
 const plugin: PluginDescriptor = {
   id: 'dev.example.plugin',
   display_name: 'Example plugin',
@@ -71,6 +73,61 @@ describe('plugin availability notice', () => {
     );
     expect(screen.getByRole('alert')).toHaveTextContent('limited licence access');
     expect(screen.getByRole('alert')).not.toHaveTextContent('new work disabled');
+  });
+
+  it('shows the Core grace warning with its end next to a fully usable plugin', () => {
+    render(
+      <PluginAvailabilityNotice
+        plugin={{
+          ...plugin,
+          entitlement: {
+            features: { example: { ...access, state: 'grace', grace_until: graceUntil } },
+            warning: {
+              code: 'plugin_entitlement_grace',
+              message:
+                'The signed plugin licence is in its grace period. Ask an administrator to renew it.',
+              grace_until: graceUntil,
+              features: ['example'],
+            },
+          },
+        }}
+      />,
+    );
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Example plugin: licence grace period until 14 Oct 2026, 12:00 UTC',
+    );
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'The signed plugin licence is in its grace period. Ask an administrator to renew it.',
+    );
+    expect(screen.getByRole('alert')).not.toHaveTextContent('new work disabled');
+  });
+
+  it.each([
+    ['not an object', 'renew soon'],
+    [
+      'an empty message',
+      { code: 'plugin_entitlement_grace', message: ' ', grace_until: graceUntil, features: [] },
+    ],
+    [
+      'an unreadable end',
+      { code: 'plugin_entitlement_grace', message: 'renew', grace_until: 'soon', features: [] },
+    ],
+    [
+      'malformed features',
+      {
+        code: 'plugin_entitlement_grace',
+        message: 'renew',
+        grace_until: graceUntil,
+        features: [1],
+      },
+    ],
+  ])('ignores a grace warning with %s', (_, warning) => {
+    render(
+      <PluginAvailabilityNotice
+        plugin={{ ...plugin, entitlement: { features: { example: access }, warning } }}
+      />,
+    );
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
   it('updates from development expiry to valid production without retaining stale warnings', () => {

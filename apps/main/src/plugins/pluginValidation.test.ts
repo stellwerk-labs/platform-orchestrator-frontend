@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   coreOrgRoute,
+  entitlementWarning,
   findPluginForOrgPath,
   isExpectedPluginReadyEvent,
   isPluginDescriptor,
@@ -72,6 +73,30 @@ describe('plugin registration validation', () => {
         },
       }),
     ).toBe(false);
+  });
+
+  it('never hides a plugin because of its entitlement warning', () => {
+    const warning = {
+      code: 'plugin_entitlement_grace',
+      message: 'Renew the licence.',
+      grace_until: '2026-10-14T12:00:00Z',
+      features: ['example'],
+    };
+    const withWarning = (value: unknown) => ({
+      ...plugin,
+      entitlement: { features: {}, warning: value },
+    });
+    expect(entitlementWarning(withWarning(warning))).toEqual(warning);
+    for (const malformed of [
+      null,
+      'Renew',
+      { ...warning, grace_until: 'later' },
+      { ...warning, message: 7 },
+    ]) {
+      expect(isPluginDescriptor(withWarning(malformed))).toBe(true);
+      expect(entitlementWarning(withWarning(malformed))).toBeUndefined();
+    }
+    expect(entitlementWarning({ ...plugin, entitlement: { features: {} } })).toBeUndefined();
   });
 
   it('accepts a canonical different-origin HTTPS frame', () => {

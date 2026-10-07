@@ -63,6 +63,14 @@ export interface PluginFeatureAccess {
   grace_until?: string;
 }
 
+// Display-only licence notice from Core discovery; it never changes authorization.
+export interface PluginEntitlementWarning {
+  code: string;
+  message: string;
+  grace_until: string;
+  features: string[];
+}
+
 export interface PluginDescriptor {
   id: string;
   display_name: string;
@@ -71,7 +79,9 @@ export interface PluginDescriptor {
   mode: PluginUiMode;
   ui?: PluginUiDescriptor;
   operations: PluginOperationDescriptor[];
-  entitlement?: { features: Record<string, PluginFeatureAccess> };
+  // The warning stays unvalidated here: a malformed notice must never hide the plugin.
+  // Read it through entitlementWarning().
+  entitlement?: { features: Record<string, PluginFeatureAccess>; warning?: unknown };
 }
 
 export interface PluginDiscoveryResponse {
