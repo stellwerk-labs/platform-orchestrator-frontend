@@ -52,6 +52,19 @@ export const getInternalForceFailDeploymentResponseMock = (
       undefined,
     ]),
   },
+  environment_fence: faker.helpers.arrayElement([
+    {
+      code: faker.helpers.arrayElement(['outcome_unreconciled'] as const),
+      deployment_id: faker.string.uuid(),
+      since: `${faker.date.past().toISOString().split('.')[0]}Z`,
+      remedy: faker.helpers.arrayElement(['acknowledge-outcome'] as const),
+      remedy_available_at: faker.helpers.arrayElement([
+        `${faker.date.past().toISOString().split('.')[0]}Z`,
+        undefined,
+      ]),
+    },
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
@@ -93,6 +106,19 @@ export const getInternalForceFailDeploymentResponseMock200 = (
       undefined,
     ]),
   },
+  environment_fence: faker.helpers.arrayElement([
+    {
+      code: faker.helpers.arrayElement(['outcome_unreconciled'] as const),
+      deployment_id: faker.string.uuid(),
+      since: `${faker.date.past().toISOString().split('.')[0]}Z`,
+      remedy: faker.helpers.arrayElement(['acknowledge-outcome'] as const),
+      remedy_available_at: faker.helpers.arrayElement([
+        `${faker.date.past().toISOString().split('.')[0]}Z`,
+        undefined,
+      ]),
+    },
+    undefined,
+  ]),
   ...overrideResponse,
 });
 

@@ -61,6 +61,19 @@ export const getListDeploymentsResponseMock = (
         undefined,
       ]),
     },
+    environment_fence: faker.helpers.arrayElement([
+      {
+        code: faker.helpers.arrayElement(['outcome_unreconciled'] as const),
+        deployment_id: faker.string.uuid(),
+        since: `${faker.date.past().toISOString().split('.')[0]}Z`,
+        remedy: faker.helpers.arrayElement(['acknowledge-outcome'] as const),
+        remedy_available_at: faker.helpers.arrayElement([
+          `${faker.date.past().toISOString().split('.')[0]}Z`,
+          undefined,
+        ]),
+      },
+      undefined,
+    ]),
   })),
   next_page_token: undefined,
   ...overrideResponse,
@@ -105,6 +118,19 @@ export const getListDeploymentsResponseMock200 = (
         undefined,
       ]),
     },
+    environment_fence: faker.helpers.arrayElement([
+      {
+        code: faker.helpers.arrayElement(['outcome_unreconciled'] as const),
+        deployment_id: faker.string.uuid(),
+        since: `${faker.date.past().toISOString().split('.')[0]}Z`,
+        remedy: faker.helpers.arrayElement(['acknowledge-outcome'] as const),
+        remedy_available_at: faker.helpers.arrayElement([
+          `${faker.date.past().toISOString().split('.')[0]}Z`,
+          undefined,
+        ]),
+      },
+      undefined,
+    ]),
   })),
   next_page_token: undefined,
   ...overrideResponse,
@@ -838,6 +864,19 @@ export const getListLastDeploymentsResponseMock = (
         undefined,
       ]),
     },
+    environment_fence: faker.helpers.arrayElement([
+      {
+        code: faker.helpers.arrayElement(['outcome_unreconciled'] as const),
+        deployment_id: faker.string.uuid(),
+        since: `${faker.date.past().toISOString().split('.')[0]}Z`,
+        remedy: faker.helpers.arrayElement(['acknowledge-outcome'] as const),
+        remedy_available_at: faker.helpers.arrayElement([
+          `${faker.date.past().toISOString().split('.')[0]}Z`,
+          undefined,
+        ]),
+      },
+      undefined,
+    ]),
   })),
   next_page_token: undefined,
   ...overrideResponse,
@@ -882,6 +921,19 @@ export const getListLastDeploymentsResponseMock200 = (
         undefined,
       ]),
     },
+    environment_fence: faker.helpers.arrayElement([
+      {
+        code: faker.helpers.arrayElement(['outcome_unreconciled'] as const),
+        deployment_id: faker.string.uuid(),
+        since: `${faker.date.past().toISOString().split('.')[0]}Z`,
+        remedy: faker.helpers.arrayElement(['acknowledge-outcome'] as const),
+        remedy_available_at: faker.helpers.arrayElement([
+          `${faker.date.past().toISOString().split('.')[0]}Z`,
+          undefined,
+        ]),
+      },
+      undefined,
+    ]),
   })),
   next_page_token: undefined,
   ...overrideResponse,
@@ -942,6 +994,19 @@ export const getGetDeploymentResponseMock = (): Deployment => ({
         undefined,
       ]),
     },
+    environment_fence: faker.helpers.arrayElement([
+      {
+        code: faker.helpers.arrayElement(['outcome_unreconciled'] as const),
+        deployment_id: faker.string.uuid(),
+        since: `${faker.date.past().toISOString().split('.')[0]}Z`,
+        remedy: faker.helpers.arrayElement(['acknowledge-outcome'] as const),
+        remedy_available_at: faker.helpers.arrayElement([
+          `${faker.date.past().toISOString().split('.')[0]}Z`,
+          undefined,
+        ]),
+      },
+      undefined,
+    ]),
   },
   ...{
     manifest: {
@@ -1041,6 +1106,19 @@ export const getGetDeploymentResponseMock200 = (): Deployment => ({
         undefined,
       ]),
     },
+    environment_fence: faker.helpers.arrayElement([
+      {
+        code: faker.helpers.arrayElement(['outcome_unreconciled'] as const),
+        deployment_id: faker.string.uuid(),
+        since: `${faker.date.past().toISOString().split('.')[0]}Z`,
+        remedy: faker.helpers.arrayElement(['acknowledge-outcome'] as const),
+        remedy_available_at: faker.helpers.arrayElement([
+          `${faker.date.past().toISOString().split('.')[0]}Z`,
+          undefined,
+        ]),
+      },
+      undefined,
+    ]),
   },
   ...{
     manifest: {
@@ -1149,6 +1227,19 @@ export const getWaitForDeploymentCompleteResponseMock = (): Deployment => ({
         undefined,
       ]),
     },
+    environment_fence: faker.helpers.arrayElement([
+      {
+        code: faker.helpers.arrayElement(['outcome_unreconciled'] as const),
+        deployment_id: faker.string.uuid(),
+        since: `${faker.date.past().toISOString().split('.')[0]}Z`,
+        remedy: faker.helpers.arrayElement(['acknowledge-outcome'] as const),
+        remedy_available_at: faker.helpers.arrayElement([
+          `${faker.date.past().toISOString().split('.')[0]}Z`,
+          undefined,
+        ]),
+      },
+      undefined,
+    ]),
   },
   ...{
     manifest: {
@@ -1248,6 +1339,19 @@ export const getWaitForDeploymentCompleteResponseMock200 = (): Deployment => ({
         undefined,
       ]),
     },
+    environment_fence: faker.helpers.arrayElement([
+      {
+        code: faker.helpers.arrayElement(['outcome_unreconciled'] as const),
+        deployment_id: faker.string.uuid(),
+        since: `${faker.date.past().toISOString().split('.')[0]}Z`,
+        remedy: faker.helpers.arrayElement(['acknowledge-outcome'] as const),
+        remedy_available_at: faker.helpers.arrayElement([
+          `${faker.date.past().toISOString().split('.')[0]}Z`,
+          undefined,
+        ]),
+      },
+      undefined,
+    ]),
   },
   ...{
     manifest: {
