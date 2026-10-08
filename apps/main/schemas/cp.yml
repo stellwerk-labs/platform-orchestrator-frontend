@@ -24,6 +24,77 @@ paths:
               schema: { $ref: '#/components/schemas/PluginCapability' }
         '403': { $ref: '#/components/responses/403Forbidden' }
         '404': { $ref: '#/components/responses/404NotFound' }
+  /plugin-packages:
+    get:
+      operationId: listPluginPackages
+      summary: List the plugin packages known to the Plugin Manager.
+      description: Platform-scoped. Requires the platform permission plugin_manager_read, held only by the operators configured in IAM; organization roles and plugin workloads never qualify. Returns 404 plugin_host_disabled while the plugin host is off.
+      tags: [Plugin Manager]
+      security: [{userIdHeader: []}]
+      responses:
+        '200':
+          description: Every package at one Plugin Manager revision.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PluginPackagePage'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+  /plugin-installations:
+    get:
+      operationId: listPluginInstallations
+      summary: List the plugin installations and their organization enablements.
+      description: Requires plugin_manager_read. Returns 404 plugin_host_disabled while the plugin host is off.
+      tags: [Plugin Manager]
+      security: [{userIdHeader: []}]
+      responses:
+        '200':
+          description: Every installation at one Plugin Manager revision.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PluginInstallationPage'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+  /plugin-installations/{installationId}:
+    get:
+      operationId: getPluginInstallation
+      summary: Read one plugin installation and its organization enablements.
+      description: Requires plugin_manager_read. Returns 404 plugin_host_disabled while the plugin host is off.
+      tags: [Plugin Manager]
+      security: [{userIdHeader: []}]
+      parameters:
+        - $ref: '#/components/parameters/installationIdPathParam'
+      responses:
+        '200':
+          description: The installation at the current Plugin Manager revision.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PluginInstallation'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+  /plugin-audit-events:
+    get:
+      operationId: listPluginAuditEvents
+      summary: Read the append-only Plugin Manager audit trail.
+      description: Requires plugin_manager_read. One event per committed change, in commit order, with actor, reason, and the state before and after.
+      tags: [Plugin Manager]
+      security: [{userIdHeader: []}]
+      parameters:
+        - name: after
+          in: query
+          description: Return events after this event ID.
+          schema: {type: integer, format: int64, minimum: 0, default: 0}
+        - name: limit
+          in: query
+          schema: {type: integer, minimum: 1, maximum: 200, default: 100}
+      responses:
+        '200':
+          description: One page of audit events.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PluginAuditEventPage'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
   /internal/orgs:
     get:
       operationId: listInternalOrganizations
@@ -2381,6 +2452,12 @@ components:
       required: true
       schema:
         type: string
+    installationIdPathParam:
+      name: installationId
+      in: path
+      description: The Core-assigned plugin installation UUID
+      required: true
+      schema: {type: string, format: uuid}
     idempotencyKeyHeader:
       name: Idempotency-Key
       in: header
@@ -2596,6 +2673,213 @@ components:
           items: { type: string }
         admin_action:
           { type: string, description: Scope-safe remediation guidance for an administrator. }
+    PluginPackage:
+      type: object
+      required: [manifest_sha256, plugin_id, version, manifest, created_at, created_by]
+      properties:
+        revision: {type: integer, format: int64, description: The Plugin Manager revision this response reflects.}
+        manifest_sha256: {type: string}
+        plugin_id: {type: string}
+        version: {type: string}
+        manifest:
+          type: object
+          x-go-type: json.RawMessage
+        created_at: {type: string, format: date-time}
+        created_by: {type: string, format: uuid}
+    PluginPackagePage:
+      type: object
+      required: [revision, items]
+      properties:
+        revision: {type: integer, format: int64}
+        items:
+          type: array
+          items: {$ref: '#/components/schemas/PluginPackage'}
+    PluginOrganizationMode:
+      type: string
+      description: selected while the operator enables each organization; all while Core enables every organization, existing and created later, except those whose enablement is disabled.
+      enum: [selected, all]
+      x-enum-varnames: [PluginOrganizationModeSelected, PluginOrganizationModeAll]
+    PluginOrganizationDefaults:
+      type: object
+      description: The timezone and approval policies of every enablement Core creates on its own. Changing them changes no existing enablement.
+      required: [timezone, approval_policies]
+      properties:
+        timezone: {type: string}
+        approval_policies:
+          type: object
+          additionalProperties: {type: string}
+    PluginInstallation:
+      type: object
+      required: [installation_id, plugin_id, package_sha256, state, availability, backend_url, organization_mode, organization_defaults, organizations, created_at, created_by, updated_at, updated_by]
+      properties:
+        revision: {type: integer, format: int64, description: The Plugin Manager revision this response reflects.}
+        installation_id: {type: string, format: uuid}
+        plugin_id: {type: string}
+        package_sha256: {type: string, description: The package Core serves.}
+        target_package_sha256: {type: string, description: The package of a pending upgrade. Core serves package_sha256 until an activate reads this digest from the running plugin.}
+        state:
+          type: string
+          enum: [installed, active, disabled, uninstalled, purged]
+          x-enum-varnames: [PluginInstallationStateInstalled, PluginInstallationStateActive, PluginInstallationStateDisabled, PluginInstallationStateUninstalled, PluginInstallationStatePurged]
+        availability:
+          description: Derived from the state, never set. available while active, not_enabled (safety-only) while disabled, unavailable while installed and not yet proven by the running plugin, not_installed once uninstalled or purged.
+          $ref: '#/components/schemas/PluginAvailabilityState'
+        diagnostic: {$ref: '#/components/schemas/PluginInstallationDiagnostic'}
+        observation: {$ref: '#/components/schemas/PluginStatusObservation'}
+        backend_url: {type: string}
+        ui_origin: {type: string}
+        service_user_id: {type: string, format: uuid}
+        admission_checker_id: {type: string, format: uuid}
+        organization_mode: {$ref: '#/components/schemas/PluginOrganizationMode'}
+        organization_defaults: {$ref: '#/components/schemas/PluginOrganizationDefaults'}
+        organizations:
+          type: array
+          description: Every organization the installation is enabled for, ordered by organization ID.
+          items: {$ref: '#/components/schemas/PluginEnablement'}
+        entitlement: {$ref: '#/components/schemas/PluginInstallationEntitlement'}
+        pending_organizations:
+          type: array
+          description: Only in organization mode all, absent when empty. The active organizations without an enablement, ordered by ID, which Core could not enable when they were created because the plugin host was off or the installation-wide grant's organization limit was reached. Setting mode all again enables them.
+          items: {type: string}
+        created_at: {type: string, format: date-time}
+        created_by: {type: string, format: uuid}
+        updated_at: {type: string, format: date-time}
+        updated_by: {type: string, format: uuid}
+    PluginInstallationDiagnostic:
+      type: object
+      description: Why the last status read from the running plugin does not prove the package Core is to serve (the pending upgrade's, if any). Absent while it does or before Core read it.
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [plugin_status_unreachable, plugin_status_invalid, plugin_installation_mismatch, plugin_package_digest_mismatch, plugin_migration_generation_mismatch]
+          x-enum-varnames: [PluginDiagnosticStatusUnreachable, PluginDiagnosticStatusInvalid, PluginDiagnosticInstallationMismatch, PluginDiagnosticPackageDigestMismatch, PluginDiagnosticMigrationGenerationMismatch]
+        message: {type: string}
+    PluginStatusObservation:
+      type: object
+      description: What Core last read from the running plugin's status endpoint, on activation. Either the report or a failure with its detail.
+      required: [observed_at]
+      properties:
+        observed_at: {type: string, format: date-time}
+        failure:
+          type: string
+          enum: [plugin_status_unreachable, plugin_status_invalid]
+          x-enum-varnames: [PluginStatusFailureUnreachable, PluginStatusFailureInvalid]
+        detail: {type: string, description: The cause of a failure.}
+        installation_id: {type: string, format: uuid, description: The installation UUID the plugin reported.}
+        package_sha256: {type: string, description: The package digest the plugin reported.}
+        migration_generation: {type: integer, format: int64, minimum: 0, description: The migration generation applied in the plugin database.}
+    PluginCapabilityRegistration:
+      type: object
+      description: Whether IAM holds the capability declarations of the served package for the organization. Core registers them right after the organization is enabled and after every activation, and at start-up and every minute compares every enabled organization's catalogue in IAM with the served package and replaces only what drifted. Disabling or removing an enablement keeps the catalogue in IAM.
+      required: [state]
+      properties:
+        state:
+          type: string
+          enum: [registered, pending, failed]
+          x-enum-varnames: [PluginCapabilityRegistrationStateRegistered, PluginCapabilityRegistrationStatePending, PluginCapabilityRegistrationStateFailed]
+          description: registered once Core registered or confirmed the served package's declarations; pending until Core reconciled the served package for the organization, for example right after an upgrade switched it; failed when Core's last attempt for the served package failed, which Core retries.
+        package_sha256: {type: string, description: The package Core last reconciled for the organization.}
+        reconciled_at: {type: string, format: date-time, description: When Core last reconciled the organization.}
+        detail: {type: string, description: Why the last attempt failed.}
+    PluginEnablement:
+      type: object
+      required: [org_id, state, timezone, approval_policies, created_at, created_by, updated_at, updated_by, capability_registration]
+      properties:
+        org_id: {type: string}
+        state:
+          type: string
+          enum: [enabled, disabled]
+          x-enum-varnames: [PluginEnablementStateEnabled, PluginEnablementStateDisabled]
+        timezone: {type: string}
+        approval_policies:
+          type: object
+          additionalProperties: {type: string}
+        created_at: {type: string, format: date-time}
+        created_by: {type: string, format: uuid}
+        updated_at: {type: string, format: date-time}
+        updated_by: {type: string, format: uuid}
+        capability_registration: {$ref: '#/components/schemas/PluginCapabilityRegistration'}
+        entitlement_grant:
+          description: Only when the served package requires a licence. The grant that covers the organization, its own organization grant or else the installation-wide grant; absent while none does, and the organization is then not entitled.
+          allOf:
+            - {$ref: '#/components/schemas/PluginEntitlementGrant'}
+    PluginInstallationEntitlement:
+      type: object
+      description: Only when the served package requires a licence. Each enablement shows the grant that covers its organization.
+      required: [enabled_organizations]
+      properties:
+        installation_grant: {$ref: '#/components/schemas/PluginEntitlementGrant'}
+        enabled_organizations: {type: integer, minimum: 0, description: "The enabled enablements of the installation, which the installation-wide grant's organization_limit caps."}
+    PluginEntitlementGrant:
+      type: object
+      description: An imported grant as an operator sees it. Core decides with the grant that covers an organization; plugins see only the non-secret feature projection.
+      required: [scope, issuer, issuance_id, sequence, features, trust_class, not_before, expires_at, grace_until, state]
+      properties:
+        scope: {$ref: '#/components/schemas/PluginGrantScope'}
+        issuer: {type: string}
+        issuance_id: {type: string, format: uuid}
+        sequence: {type: integer, format: int64, minimum: 1}
+        features:
+          type: array
+          items: {type: string}
+        organization_limit: {type: integer, format: int64, minimum: 1, description: Only on an installation-wide grant that carries one. The number of organizations the installation may enable.}
+        trust_class:
+          type: string
+          enum: [production, development]
+          x-enum-varnames: [PluginEntitlementGrantTrustClassProduction, PluginEntitlementGrantTrustClassDevelopment]
+        not_before: {type: string, format: date-time}
+        expires_at: {type: string, format: date-time}
+        grace_until: {type: string, format: date-time}
+        state:
+          type: string
+          enum: [valid, grace, expired, not_yet_valid, revoked, untrusted]
+          x-enum-varnames: [PluginEntitlementGrantStateValid, PluginEntitlementGrantStateGrace, PluginEntitlementGrantStateExpired, PluginEntitlementGrantStateNotYetValid, PluginEntitlementGrantStateRevoked, PluginEntitlementGrantStateUntrusted]
+          description: The grant's state under the current issuer trust, never earlier than the time Core's decisions observed.
+    PluginInstallationPage:
+      type: object
+      required: [revision, items]
+      properties:
+        revision: {type: integer, format: int64}
+        items:
+          type: array
+          items: {$ref: '#/components/schemas/PluginInstallation'}
+    PluginAuditEvent:
+      type: object
+      required: [id, revision, occurred_at, actor, action, reason, idempotency_key_sha256]
+      properties:
+        id: {type: integer, format: int64}
+        revision: {type: integer, format: int64}
+        occurred_at: {type: string, format: date-time}
+        actor: {type: string, format: uuid}
+        action: {type: string}
+        installation_id: {type: string, format: uuid}
+        org_id: {type: string}
+        reason: {type: string}
+        request_id: {type: string}
+        idempotency_key_sha256: {type: string}
+        before:
+          type: object
+          description: The changed resource before the change. Absent for a creation.
+          x-go-type: json.RawMessage
+          x-go-type-skip-optional-pointer: true
+        after:
+          type: object
+          description: The changed resource after the change.
+          x-go-type: json.RawMessage
+          x-go-type-skip-optional-pointer: true
+    PluginAuditEventPage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: {$ref: '#/components/schemas/PluginAuditEvent'}
+    PluginGrantScope:
+      type: string
+      description: 'The grant that covers the organization: organization when the organization has a grant of its own, which then decides alone (feature set, validity and revocation), installation when the installation-wide grant covers it. Absent while no grant covers the organization, which is then not entitled.'
+      enum: [organization, installation]
+      x-enum-varnames: [PluginGrantScopeOrganization, PluginGrantScopeInstallation]
     DeploymentOutcomeAcknowledgementBody:
       type: object
       additionalProperties: false

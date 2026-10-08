@@ -1729,10 +1729,10 @@ components:
         - permission
       properties:
         resource:
-          description: The resource to check permissions on.
+          description: The resource to check permissions on; platform for a platform-level permission.
           type: string
-          pattern: ^(organization|project|env):[a-zA-Z0-9/_|\-=+]+$
-          x-pattern-error: 'resource must be organization:<id>, project:<id>, or env:<id> where id matches regex pattern: ^[a-zA-Z0-9/_|\-=+]+$'
+          pattern: ^(platform|(organization|project|env):[a-zA-Z0-9/_|\-=+]+)$
+          x-pattern-error: 'resource must be platform, organization:<id>, project:<id>, or env:<id> where id matches regex pattern: ^[a-zA-Z0-9/_|\-=+]+$'
         permission:
           description: The permission string.
           type: string

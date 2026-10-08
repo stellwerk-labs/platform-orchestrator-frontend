@@ -47,3 +47,7 @@ export const generateModulesUrl = (orgId: string) => `/orgs/${orgId}/modules`;
 export const generateProfileUrl = (orgId: string) => `/orgs/${orgId}/profile`;
 export const generateModuleUrl = (orgId: string, moduleId: string) =>
   `/orgs/${orgId}/modules/${moduleId}/configuration`;
+
+export const generatePluginManagerUrl = () => '/platform/plugins';
+export const generatePluginInstallationUrl = (installationId: string) =>
+  `/platform/plugins/${installationId}`;
