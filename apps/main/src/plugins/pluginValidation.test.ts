@@ -10,7 +10,7 @@ import {
   validatePluginBridgeRequest,
   validatePluginFrameUrl,
 } from './pluginValidation';
-import type { PluginBridgeSession, PluginDescriptor } from './types';
+import type { PluginBridgeSession, PluginDescriptor, PluginFrameHost } from './types';
 
 const plugin: PluginDescriptor = {
   id: 'dev.stellwerk.progressive-rollouts',
@@ -35,6 +35,11 @@ const plugin: PluginDescriptor = {
 };
 
 const session: PluginBridgeSession = { nonce: 'session-nonce', orgId: 'org-one', plugin };
+
+const consoleHost: PluginFrameHost = {
+  consoleOrigin: 'https://console.example.com',
+  apiBaseUrl: 'https://api.example.com',
+};
 
 describe('plugin registration validation', () => {
   it('accepts bounded server entitlement projections and rejects malformed claims', () => {
@@ -100,7 +105,7 @@ describe('plugin registration validation', () => {
   });
 
   it('accepts a canonical different-origin HTTPS frame', () => {
-    expect(validatePluginFrameUrl(plugin.ui!, 'https://console.example.com').toString()).toBe(
+    expect(validatePluginFrameUrl(plugin.ui!, consoleHost).toString()).toBe(
       'https://rollouts.plugins.example.com/embed',
     );
     expect(isPluginDescriptor(plugin)).toBe(true);
@@ -108,24 +113,65 @@ describe('plugin registration validation', () => {
 
   it('rejects same-host cookies across ports, origin escapes and unsupported SDK versions', () => {
     expect(() =>
-      validatePluginFrameUrl(
-        { ...plugin.ui!, origin: 'https://console.example.com' },
-        'https://console.example.com',
-      ),
+      validatePluginFrameUrl({ ...plugin.ui!, origin: 'https://console.example.com' }, consoleHost),
     ).toThrow(/different hostname/);
     expect(() =>
       validatePluginFrameUrl(
         { ...plugin.ui!, origin: 'https://console.example.com:8443' },
-        'https://console.example.com:443',
+        { ...consoleHost, consoleOrigin: 'https://console.example.com:443' },
       ),
     ).toThrow(/different hostname/);
     expect(() =>
       validatePluginFrameUrl(
         { ...plugin.ui!, entrypoint: 'https://attacker.example.com/embed' },
-        'https://console.example.com',
+        consoleHost,
       ),
     ).toThrow(/registered origin/);
     expect(isPluginDescriptor({ ...plugin, ui: { ...plugin.ui, sdk_version: '2' } })).toBe(false);
+  });
+
+  it('keeps plugin UIs off the API hostname and its subdomains, which receive the session cookie', () => {
+    const frameAt =
+      (origin: string, host = consoleHost) =>
+      () =>
+        validatePluginFrameUrl({ ...plugin.ui!, origin }, host);
+    for (const origin of [
+      'https://api.example.com',
+      'https://api.example.com:8443',
+      'https://rollouts.api.example.com',
+      'https://a.b.api.example.com',
+    ]) {
+      expect(frameAt(origin)).toThrow(/API hostname or a subdomain of it/);
+    }
+    expect(
+      frameAt('https://rollouts.api.example.com', {
+        ...consoleHost,
+        apiBaseUrl: 'https://API.Example.com/v1',
+      }),
+    ).toThrow(/API hostname or a subdomain of it/);
+    for (const origin of [
+      'https://example.com',
+      'https://xapi.example.com',
+      'https://api.example.com.example.net',
+      'https://rollouts.plugins.example.com',
+    ]) {
+      expect(frameAt(origin)).not.toThrow();
+    }
+  });
+
+  it('treats an empty or relative API base URL as the Console origin', () => {
+    for (const apiBaseUrl of ['', '/api']) {
+      const host = { ...consoleHost, apiBaseUrl };
+      expect(() =>
+        validatePluginFrameUrl(
+          { ...plugin.ui!, origin: 'https://rollouts.console.example.com' },
+          host,
+        ),
+      ).toThrow(/API hostname or a subdomain of it/);
+      expect(validatePluginFrameUrl(plugin.ui!, host).origin).toBe(
+        'https://rollouts.plugins.example.com',
+      );
+    }
   });
 
   it('separates host operations from plugin operations and rejects collisions', () => {

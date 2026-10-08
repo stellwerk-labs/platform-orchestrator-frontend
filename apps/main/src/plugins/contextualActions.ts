@@ -6,7 +6,7 @@ import {
   normalizePluginRoutePrefix,
   validatePluginFrameUrl,
 } from './pluginValidation';
-import type { PluginDescriptor, PluginModuleVersionContextValue } from './types';
+import type { PluginDescriptor, PluginFrameHost, PluginModuleVersionContextValue } from './types';
 
 export interface ModuleVersionContextualActionContext {
   orgId: string;
@@ -40,8 +40,7 @@ const moduleVersionContextValue = (
 export const resolveModuleVersionContextualActions = (
   descriptors: unknown[],
   context: ModuleVersionContextualActionContext,
-  hostOrigin: string,
-  allowInsecureLocalhost = false,
+  host: PluginFrameHost,
 ): ResolvedPluginContextualAction[] =>
   descriptors.flatMap((candidate) => {
     if (!isPluginDescriptor(candidate)) return [];
@@ -49,7 +48,7 @@ export const resolveModuleVersionContextualActions = (
     if (plugin.state !== 'available' || plugin.mode !== 'full' || !plugin.ui) return [];
     const ui = plugin.ui;
     try {
-      validatePluginFrameUrl(ui, hostOrigin, allowInsecureLocalhost);
+      validatePluginFrameUrl(ui, host);
     } catch {
       return [];
     }

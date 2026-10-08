@@ -5,6 +5,7 @@ import { Link } from 'react-router';
 
 import { useListPlugins } from './pluginDiscovery';
 import {
+  consolePluginFrameHost,
   isPluginDescriptor,
   normalizePluginRoutePrefix,
   validatePluginFrameUrl,
@@ -22,7 +23,7 @@ export const PluginNavigationItems = ({ orgId, onKeyDown }: PluginNavigationItem
     .filter(({ mode, ui }) => mode !== 'hidden' && ui)
     .filter((plugin) => {
       try {
-        validatePluginFrameUrl(plugin.ui!, window.location.origin, import.meta.env.DEV);
+        validatePluginFrameUrl(plugin.ui!, consolePluginFrameHost());
         return true;
       } catch {
         return false;

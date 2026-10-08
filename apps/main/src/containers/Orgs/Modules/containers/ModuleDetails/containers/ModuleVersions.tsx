@@ -45,7 +45,7 @@ import type {
   ModuleVersionPublishBody,
 } from '@src/models/v2/controlplane';
 import { useListPlugins } from '@src/plugins/pluginDiscovery';
-import { isPluginDescriptor } from '@src/plugins/pluginValidation';
+import { consolePluginFrameHost, isPluginDescriptor } from '@src/plugins/pluginValidation';
 import { DATE_FORMATS_TYPES, formatDate } from '@src/utilities/datetime/datetime';
 
 import { moduleVersionExtensionActions } from '../../../extensions/moduleVersionActions';
@@ -696,8 +696,7 @@ export const ModuleVersions = () => {
           {moduleVersionExtensionActions(
             { orgId, moduleId, version },
             plugins,
-            window.location.origin,
-            import.meta.env.DEV,
+            consolePluginFrameHost(),
           ).map((action) => (
             <Button
               key={action.id}

@@ -46,6 +46,15 @@ export interface PluginUiDescriptor {
   contextual_actions?: PluginContextualActionDescriptor[];
 }
 
+// Where the Console runs and where it sends the user's credentialed API calls.
+export interface PluginFrameHost {
+  consoleOrigin: string;
+  // An empty or relative API base URL means the Console's own origin.
+  apiBaseUrl: string;
+  // Vite development builds only: admit loopback plugin UIs over HTTP.
+  allowInsecureLocalhost?: boolean;
+}
+
 export interface PluginOperationDescriptor {
   id: string;
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';

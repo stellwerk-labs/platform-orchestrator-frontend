@@ -29,7 +29,8 @@ The session cookie belongs to IAM, not to the Console: IAM sets it with
 subdomain of it, on any port. A plugin UI origin must therefore lie outside that
 scope, and outside the API's CORS policy, which answers its allowed origins with
 credentials; otherwise plugin JavaScript could call the API as the user. The
-Console refuses a UI origin on its own hostname, on any port, because cookies
+Console refuses a UI origin on its own hostname, and on the hostname of its
+configured API base URL or a subdomain of it, each on any port, because cookies
 are scoped by hostname rather than origin. The Helm chart refuses a
 `console.gatewayApi.route.pluginUiOrigins` entry that is not an exact HTTPS
 origin, that uses the Console hostname, the API hostname or a subdomain of it,

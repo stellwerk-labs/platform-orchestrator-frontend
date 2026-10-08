@@ -128,7 +128,7 @@ describe('Module Version action permissions', () => {
         mode: 'full',
         ui: {
           sdk_version: '1',
-          origin: 'https://rollouts.plugins.example.com',
+          origin: 'https://rollouts-ui.example.net',
           entrypoint: '/embed',
           route_prefix: 'rollouts',
           navigation_label: 'Rollouts',

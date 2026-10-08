@@ -1,9 +1,12 @@
+import { windowEnv } from '@src/config/environment';
+
 import {
   type PluginBridgeRequestMessage,
   type PluginBridgeSession,
   type PluginContextualActionDescriptor,
   type PluginDescriptor,
   type PluginEntitlementWarning,
+  type PluginFrameHost,
   type PluginInvocationRequest,
   type PluginOperationRequestMessage,
   type PluginReadyMessage,
@@ -138,11 +141,13 @@ export const isValidPluginRoutePrefix = (routePrefix: string) => {
   return normalized.length > 0 && routePrefixPattern.test(normalized) && !normalized.includes('//');
 };
 
-export const validatePluginFrameUrl = (
-  ui: PluginUiDescriptor,
-  hostOrigin: string,
-  allowInsecureLocalhost = false,
-) => {
+export const consolePluginFrameHost = (): PluginFrameHost => ({
+  consoleOrigin: window.location.origin,
+  apiBaseUrl: windowEnv.BASE_URL,
+  allowInsecureLocalhost: import.meta.env.DEV,
+});
+
+export const validatePluginFrameUrl = (ui: PluginUiDescriptor, host: PluginFrameHost) => {
   if (ui.sdk_version !== pluginUiSdkVersion || !isValidPluginRoutePrefix(ui.route_prefix)) {
     throw new Error('The plugin UI descriptor is incompatible.');
   }
@@ -153,12 +158,23 @@ export const validatePluginFrameUrl = (
       'The plugin UI origin must be a canonical origin without credentials or a path.',
     );
   }
-  const consoleOrigin = new URL(hostOrigin);
+  const consoleOrigin = new URL(host.consoleOrigin);
   if (declaredOrigin.hostname === consoleOrigin.hostname) {
     throw new Error('Plugin UI pages must use a different hostname from the Console.');
   }
+  // IAM scopes the session cookie to the API hostname (Domain=), so browsers send
+  // it to that hostname and every subdomain of it, on any port.
+  const apiHostname = new URL(host.apiBaseUrl || '/', consoleOrigin).hostname;
+  if (
+    declaredOrigin.hostname === apiHostname ||
+    declaredOrigin.hostname.endsWith(`.${apiHostname}`)
+  ) {
+    throw new Error(
+      'Plugin UI pages must not use the API hostname or a subdomain of it, which receive the session cookie.',
+    );
+  }
   const insecureLocalhost =
-    allowInsecureLocalhost &&
+    host.allowInsecureLocalhost &&
     declaredOrigin.protocol === 'http:' &&
     ['localhost', '127.0.0.1', '[::1]'].includes(declaredOrigin.hostname);
   if (declaredOrigin.protocol !== 'https:' && !insecureLocalhost) {

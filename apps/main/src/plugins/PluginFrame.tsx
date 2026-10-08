@@ -7,6 +7,7 @@ import { useUserPreferencesStore } from '@src/hooks/zustand/useUserPreferencesSt
 import { invokeBridgeOperation, type PluginDeploymentMaterial } from './hostOperationInvocation';
 import {
   bridgeOperationDescriptors,
+  consolePluginFrameHost,
   coreOrgRoute,
   isExpectedPluginReadyEvent,
   normalizePluginRoutePrefix,
@@ -46,7 +47,7 @@ export const PluginFrame = ({ orgId, plugin }: PluginFrameProps) => {
   );
   const frameUrl = useMemo(() => {
     if (!plugin.ui) throw new Error('The plugin has no registered UI contribution.');
-    return validatePluginFrameUrl(plugin.ui, window.location.origin, import.meta.env.DEV);
+    return validatePluginFrameUrl(plugin.ui, consolePluginFrameHost());
   }, [plugin.ui]);
 
   const childRoute = useMemo(() => {

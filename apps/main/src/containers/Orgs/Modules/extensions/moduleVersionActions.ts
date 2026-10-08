@@ -1,6 +1,6 @@
 import type { CoreModuleVersion } from '@src/models/v2/controlplane';
 import { resolveModuleVersionContextualActions } from '@src/plugins/contextualActions';
-import type { PluginDescriptor } from '@src/plugins/types';
+import type { PluginDescriptor, PluginFrameHost } from '@src/plugins/types';
 
 export interface ModuleVersionActionContext {
   orgId: string;
@@ -18,7 +18,5 @@ export interface ModuleVersionExtensionAction {
 export const moduleVersionExtensionActions = (
   context: ModuleVersionActionContext,
   plugins: PluginDescriptor[],
-  hostOrigin: string,
-  allowInsecureLocalhost = false,
-): ModuleVersionExtensionAction[] =>
-  resolveModuleVersionContextualActions(plugins, context, hostOrigin, allowInsecureLocalhost);
+  host: PluginFrameHost,
+): ModuleVersionExtensionAction[] => resolveModuleVersionContextualActions(plugins, context, host);

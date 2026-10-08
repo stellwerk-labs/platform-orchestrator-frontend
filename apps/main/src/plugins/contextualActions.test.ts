@@ -48,11 +48,15 @@ const version = (lifecycle_status: CoreModuleVersion['lifecycle_status'], semant
     semantic_version: semantic,
   }) as CoreModuleVersion;
 
-const resolve = (descriptor: unknown, moduleVersion = version('proposed', '1.2.0-rc.1')) =>
+const resolve = (
+  descriptor: unknown,
+  moduleVersion = version('proposed', '1.2.0-rc.1'),
+  apiBaseUrl = 'https://api.example.com',
+) =>
   resolveModuleVersionContextualActions(
     [descriptor],
     { orgId: 'atlas', moduleId: 'redis', version: moduleVersion },
-    'https://console.example.com',
+    { consoleOrigin: 'https://console.example.com', apiBaseUrl },
   );
 
 describe('module version contextual plugin actions', () => {
@@ -130,5 +134,9 @@ describe('module version contextual plugin actions', () => {
   it('enforces lifecycle and semantic-version conditions', () => {
     expect(resolve(plugin, version('default', '1.2.0'))).toEqual([]);
     expect(resolve(plugin, version('proposed'))).toEqual([]);
+  });
+
+  it('offers no action into a plugin UI that receives the session cookie', () => {
+    expect(resolve(plugin, undefined, 'https://plugins.example.com')).toEqual([]);
   });
 });

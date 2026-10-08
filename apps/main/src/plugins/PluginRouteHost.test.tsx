@@ -123,6 +123,17 @@ describe('plugin route host', () => {
       { origin: 'https://localhost:8443' },
       'Plugin UI pages must use a different hostname from the Console.',
     ],
+    // VITE_BASE_URL, the Console's API base URL, is http://example.com as in CI.
+    [
+      'the API hostname',
+      { origin: 'https://example.com' },
+      'Plugin UI pages must not use the API hostname or a subdomain of it, which receive the session cookie.',
+    ],
+    [
+      'a subdomain of the API hostname on another port',
+      { origin: 'https://rollouts.example.com:8443' },
+      'Plugin UI pages must not use the API hostname or a subdomain of it, which receive the session cookie.',
+    ],
     [
       'plain HTTP',
       { origin: 'http://rollouts-ui.example.net' },

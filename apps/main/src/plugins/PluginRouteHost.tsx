@@ -7,6 +7,7 @@ import { PluginAvailabilityNotice } from './PluginAvailabilityNotice';
 import { useListPlugins } from './pluginDiscovery';
 import { PluginFrame } from './PluginFrame';
 import {
+  consolePluginFrameHost,
   findPluginForOrgPath,
   isPluginDescriptor,
   validatePluginFrameUrl,
@@ -38,7 +39,7 @@ export const PluginRouteHost = () => {
   if (!plugin) return <ErrorPage />;
 
   try {
-    validatePluginFrameUrl(plugin.ui!, window.location.origin, import.meta.env.DEV);
+    validatePluginFrameUrl(plugin.ui!, consolePluginFrameHost());
     return (
       <>
         <PluginAvailabilityNotice plugin={plugin} />
