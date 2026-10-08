@@ -19,14 +19,25 @@ the existing host protocol, not in plugin-specific domain code.
 
 ## Trust boundary
 
-The child never receives the Console access token. After an exact
-source/origin/nonce handshake, the host transfers a dedicated `MessagePort`. The
-child can request only an operation ID advertised in the discovery descriptor.
-The registered UI must also use a different hostname, not merely a different
-port, because cookies are scoped by hostname rather than origin. Console session
-cookies must be host-only. Production operators should prefer unrelated
-registrable domains for Console and plugin assets so a parent-domain cookie
-cannot cross the iframe boundary.
+The child never receives the user's session or any other credential. After an
+exact source/origin/nonce handshake, the host transfers a dedicated
+`MessagePort`. The child can request only an operation ID advertised in the
+discovery descriptor.
+
+The session cookie belongs to IAM, not to the Console: IAM sets it with
+`Domain=` the API hostname, so browsers send it to the API hostname and to every
+subdomain of it, on any port. A plugin UI origin must therefore lie outside that
+scope, and outside the API's CORS policy, which answers its allowed origins with
+credentials; otherwise plugin JavaScript could call the API as the user. The
+Console refuses a UI origin on its own hostname, on any port, because cookies
+are scoped by hostname rather than origin. The Helm chart refuses a
+`console.gatewayApi.route.pluginUiOrigins` entry that is not an exact HTTPS
+origin, that uses the Console hostname, the API hostname or a subdomain of it,
+or that an entry of `global.gatewayApi.backend.cors.allowOrigins` matches; list
+the exact Console origins there before adding plugin UIs. Serve plugin UIs from
+a registrable domain of their own, so they cannot set cookies for a parent
+domain they would share with the Console or the API either.
+
 The host validates the SDK version, nonce, organization, operation registry,
 structured parameters, and idempotency requirement before posting this fixed
 envelope to Core:

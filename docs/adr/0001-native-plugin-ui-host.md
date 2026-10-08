@@ -16,7 +16,10 @@ authority.
 Core returns organization-scoped plugin descriptors and an exact operation
 registry. The Console validates the descriptor and mounts its entrypoint in a
 sandboxed iframe whose registered HTTPS origin must use a different hostname
-from the Console, so host-only Console cookies cannot reach the frame.
+from the Console. The user's session cookie is IAM's, set with `Domain=` the API
+hostname, so the API hostname and all its subdomains receive it. Plugin UI
+origins must lie outside that scope and outside the API's credentialed CORS
+policy, so that plugin JavaScript reaches Core only through the host.
 
 ```text
 Plugin iframe              OSS Console host                 Core gateway
@@ -46,5 +49,9 @@ and resource authorization.
 - Theme, locale, route, and operation responses need an explicit versioned SDK.
 - The Console CSP and the plugin's `frame-ancestors` policy must permit only the
   intended origin pair.
+- Plugin UI origins must stay off the API hostname and its subdomains and out of
+  the API's CORS allowlist, which the Helm chart enforces. A registrable domain
+  of their own also keeps plugin UIs from setting cookies for a parent domain
+  they would share with the Console or the API.
 - Integrated testing requires both origins and a real discovery/invocation
   gateway; a same-origin component mock cannot prove this boundary.
