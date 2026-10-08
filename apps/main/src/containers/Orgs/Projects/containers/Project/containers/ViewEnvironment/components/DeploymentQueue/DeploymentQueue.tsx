@@ -48,7 +48,12 @@ const reasonAdvice: Record<string, string> = {
     'The request asked not to start after a failed Deployment, and the Deployment it waited for failed. Fix the cause and request it again.',
 };
 
-const uuidPattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+// What the Deployment named by `reason_deployment_id` is, per reason code.
+const reasonDeploymentLabel: Record<string, string> = {
+  previous_deployment_failed: 'failed Deployment',
+  outcome_unreconciled: 'failed Deployment',
+  deployment_base_changed: 'current Deployment',
+};
 
 const cancelRefusals: Record<string, string> = {
   queue_item_dispatching: 'The request is starting right now and can no longer be cancelled.',
@@ -242,10 +247,8 @@ export const DeploymentQueue = ({ environmentUuid }: DeploymentQueueProps) => {
           detail: 'It waited longer than its time limit. Request it again if it is still needed.',
         };
       default: {
-        const failedDeploymentId =
-          item.reason_code === 'previous_deployment_failed'
-            ? item.reason_message?.match(uuidPattern)?.[0]
-            : undefined;
+        const reasonDeploymentId = item.reason_deployment_id;
+        const reasonLabel = reasonDeploymentLabel[item.reason_code ?? ''];
         return {
           type: 'warning' as const,
           title: `${request} was rejected${item.reason_code ? ` (${item.reason_code})` : ''}.`,
@@ -254,7 +257,7 @@ export const DeploymentQueue = ({ environmentUuid }: DeploymentQueueProps) => {
               {[reasonAdvice[item.reason_code ?? ''], item.reason_message]
                 .filter(Boolean)
                 .join(' ')}
-              {failedDeploymentId && (
+              {reasonDeploymentId && reasonLabel && (
                 <>
                   {' '}
                   <Link
@@ -262,10 +265,10 @@ export const DeploymentQueue = ({ environmentUuid }: DeploymentQueueProps) => {
                       orgId,
                       projectId,
                       envId,
-                      failedDeploymentId,
+                      reasonDeploymentId,
                       'resources',
                     )}>
-                    {`Open failed Deployment ${failedDeploymentId}`}
+                    {`Open ${reasonLabel} ${reasonDeploymentId}`}
                   </Link>
                 </>
               )}

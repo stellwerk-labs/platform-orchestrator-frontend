@@ -220,6 +220,7 @@ export const getListDeploymentQueueItemsResponseMock = (
       faker.string.alpha({ length: { min: 10, max: 20 } }),
       undefined,
     ]),
+    reason_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
     settled_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
     settled_at: faker.helpers.arrayElement([
       `${faker.date.past().toISOString().split('.')[0]}Z`,
@@ -324,6 +325,7 @@ export const getListDeploymentQueueItemsResponseMock200 = (
       faker.string.alpha({ length: { min: 10, max: 20 } }),
       undefined,
     ]),
+    reason_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
     settled_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
     settled_at: faker.helpers.arrayElement([
       `${faker.date.past().toISOString().split('.')[0]}Z`,
@@ -436,6 +438,7 @@ export const getGetDeploymentQueueItemResponseMock = (
     faker.string.alpha({ length: { min: 10, max: 20 } }),
     undefined,
   ]),
+  reason_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
   settled_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
   settled_at: faker.helpers.arrayElement([
     `${faker.date.past().toISOString().split('.')[0]}Z`,
@@ -533,6 +536,7 @@ export const getGetDeploymentQueueItemResponseMock200 = (
     faker.string.alpha({ length: { min: 10, max: 20 } }),
     undefined,
   ]),
+  reason_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
   settled_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
   settled_at: faker.helpers.arrayElement([
     `${faker.date.past().toISOString().split('.')[0]}Z`,
@@ -639,6 +643,7 @@ export const getCancelDeploymentQueueItemResponseMock = (
     faker.string.alpha({ length: { min: 10, max: 20 } }),
     undefined,
   ]),
+  reason_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
   settled_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
   settled_at: faker.helpers.arrayElement([
     `${faker.date.past().toISOString().split('.')[0]}Z`,
@@ -736,6 +741,7 @@ export const getCancelDeploymentQueueItemResponseMock200 = (
     faker.string.alpha({ length: { min: 10, max: 20 } }),
     undefined,
   ]),
+  reason_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
   settled_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
   settled_at: faker.helpers.arrayElement([
     `${faker.date.past().toISOString().split('.')[0]}Z`,

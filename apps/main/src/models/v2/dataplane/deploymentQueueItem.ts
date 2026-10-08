@@ -37,6 +37,12 @@ for failed.
    */
   reason_code?: string;
   reason_message?: string;
+  /** The Deployment the reason refers to: for `previous_deployment_failed` the failed Deployment the item waited
+for, for `outcome_unreconciled` the failed plugin-dispatched Deployment whose outcome is unreconciled, for
+`deployment_base_changed` the Environment's current Deployment that replaced the expected base. Absent when
+the reason refers to no Deployment.
+   */
+  reason_deployment_id?: string;
   /** The user who cancelled the item. */
   settled_by?: string;
   settled_at?: string;

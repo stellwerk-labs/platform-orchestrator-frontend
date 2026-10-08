@@ -227,6 +227,7 @@ describe('DeploymentQueue', () => {
 
   it('turns rejection codes into the next step', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
+    const fencingId = '2c4d6e80-1a3b-4c5d-9e7f-8a0b1c2d3e4f';
     serveQueue([[queueItem()], []]);
     server.use(
       getGetDeploymentQueueItemMockHandler(
@@ -235,6 +236,7 @@ describe('DeploymentQueue', () => {
           position: 0,
           reason_code: 'outcome_unreconciled',
           reason_message: 'failed plugin-dispatched Deployment may still have an active Runner',
+          reason_deployment_id: fencingId,
         }),
       ),
     );
@@ -251,6 +253,12 @@ describe('DeploymentQueue', () => {
     expect(
       screen.getByText(/Someone allowed to acknowledge its outcome must do so/),
     ).toHaveTextContent('may still have an active Runner');
+    expect(
+      screen.getByRole('link', { name: `Open failed Deployment ${fencingId}` }),
+    ).toHaveAttribute(
+      'href',
+      `/orgs/my-org/projects/my-project/envs/my-env/deploys/${fencingId}/resources`,
+    );
   });
 
   it('marks the requests that must not start after a failed Deployment', async () => {
@@ -275,7 +283,8 @@ describe('DeploymentQueue', () => {
           state: 'rejected',
           position: 0,
           reason_code: 'previous_deployment_failed',
-          reason_message: `deployment ${failedId} failed before this request could start`,
+          reason_message: 'the Deployment this request waited for failed',
+          reason_deployment_id: failedId,
         }),
       ),
     );
@@ -290,7 +299,7 @@ describe('DeploymentQueue', () => {
       ),
     ).toBeInTheDocument();
     expect(screen.getByText(/the Deployment it waited for failed/)).toHaveTextContent(
-      `deployment ${failedId} failed before this request could start`,
+      'the Deployment this request waited for failed',
     );
     expect(
       screen.getByRole('link', { name: `Open failed Deployment ${failedId}` }),
@@ -320,6 +329,61 @@ describe('DeploymentQueue', () => {
     await act(() => vi.advanceTimersByTimeAsync(5_000));
 
     expect(await screen.findByText(/the Deployment it waited for failed/)).toBeInTheDocument();
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+
+  it('links the current Deployment that replaced the base of a rejected request', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const currentId = '9a1b2c3d-4e5f-4a6b-8c7d-0e1f2a3b4c5d';
+    serveQueue([[queueItem()], []]);
+    server.use(
+      getGetDeploymentQueueItemMockHandler(
+        queueItem({
+          state: 'rejected',
+          position: 0,
+          reason_code: 'deployment_base_changed',
+          reason_message: 'the Environment moved on',
+          reason_deployment_id: currentId,
+        }),
+      ),
+    );
+    renderQueue();
+
+    expect(await screen.findByText('Ada Admin')).toBeInTheDocument();
+    await act(() => vi.advanceTimersByTimeAsync(5_000));
+
+    expect(await screen.findByText(/The Environment changed after this request/)).toHaveTextContent(
+      'the Environment moved on',
+    );
+    expect(
+      screen.getByRole('link', { name: `Open current Deployment ${currentId}` }),
+    ).toHaveAttribute(
+      'href',
+      `/orgs/my-org/projects/my-project/envs/my-env/deploys/${currentId}/resources`,
+    );
+  });
+
+  it('does not read a Deployment out of the reason message', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const mentionedId = '5e8a1c40-2b7d-4c39-8f1e-6a9b0d3c7f55';
+    serveQueue([[queueItem({ halt_on_failure: true })], []]);
+    server.use(
+      getGetDeploymentQueueItemMockHandler(
+        queueItem({
+          halt_on_failure: true,
+          state: 'rejected',
+          position: 0,
+          reason_code: 'previous_deployment_failed',
+          reason_message: `deployment ${mentionedId} failed before this request could start`,
+        }),
+      ),
+    );
+    renderQueue();
+
+    expect(await screen.findByText('Ada Admin')).toBeInTheDocument();
+    await act(() => vi.advanceTimersByTimeAsync(5_000));
+
+    expect(await screen.findByText(new RegExp(mentionedId))).toBeInTheDocument();
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 
