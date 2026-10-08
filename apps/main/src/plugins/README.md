@@ -97,9 +97,13 @@ still checked by the normal bridge and server authorization path.
 
 ```sh
 pnpm --filter main-app check-typescript
-pnpm --filter main-app exec vitest run \
-  src/plugins/pluginValidation.test.ts \
-  src/plugins/contextualActions.test.ts \
-  src/plugins/pluginInvocation.test.ts --silent
+VITE_BASE_URL=http://example.com pnpm --filter main-app exec vitest run src/plugins --silent
 pnpm exec eslint --max-warnings=0 apps/main/src/plugins
 ```
+
+`PluginFrame.test.tsx` plays the plugin frame in jsdom, which cannot load a
+cross-origin document: it reads what the host posts to the frame window,
+dispatches window messages with an explicit source and origin, and talks over
+the real `MessagePort` the host transfers. Core answers come from MSW at
+`VITE_BASE_URL`. Only a real browser with two origins proves the CSP, cookie
+and frame isolation itself.
