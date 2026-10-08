@@ -28,6 +28,7 @@ const queueItem = (overrides: Partial<DeploymentQueueItem> = {}): DeploymentQueu
   mode: 'deploy',
   state: 'queued',
   position: 1,
+  halt_on_failure: false,
   created_by: 'user-1',
   created_at: new Date(Date.now() - 5 * minute).toISOString(),
   expires_at: new Date(Date.now() + 180 * minute).toISOString(),
@@ -250,6 +251,76 @@ describe('DeploymentQueue', () => {
     expect(
       screen.getByText(/Someone allowed to acknowledge its outcome must do so/),
     ).toHaveTextContent('may still have an active Runner');
+  });
+
+  it('marks the requests that must not start after a failed Deployment', async () => {
+    serveQueue([[queueItem(), second({ halt_on_failure: true })]]);
+    renderQueue();
+
+    const rows = (await screen.findAllByRole('row')).slice(1);
+    const [head, next] = rows as [HTMLElement, HTMLElement];
+    expect(within(head).queryByText('Halts on failure')).not.toBeInTheDocument();
+    expect(within(next).getByText('Waiting')).toBeInTheDocument();
+    expect(within(next).getByText('Halts on failure')).toBeInTheDocument();
+  });
+
+  it('names the failed Deployment of a halted request and links it', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const failedId = '5e8a1c40-2b7d-4c39-8f1e-6a9b0d3c7f55';
+    serveQueue([[queueItem({ halt_on_failure: true })], []]);
+    server.use(
+      getGetDeploymentQueueItemMockHandler(
+        queueItem({
+          halt_on_failure: true,
+          state: 'rejected',
+          position: 0,
+          reason_code: 'previous_deployment_failed',
+          reason_message: `deployment ${failedId} failed before this request could start`,
+        }),
+      ),
+    );
+    renderQueue();
+
+    expect(await screen.findByText('Halts on failure')).toBeInTheDocument();
+    await act(() => vi.advanceTimersByTimeAsync(5_000));
+
+    expect(
+      await screen.findByText(
+        'Queued deploy requested by Ada Admin was rejected (previous_deployment_failed).',
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/the Deployment it waited for failed/)).toHaveTextContent(
+      `deployment ${failedId} failed before this request could start`,
+    );
+    expect(
+      screen.getByRole('link', { name: `Open failed Deployment ${failedId}` }),
+    ).toHaveAttribute(
+      'href',
+      `/orgs/my-org/projects/my-project/envs/my-env/deploys/${failedId}/resources`,
+    );
+  });
+
+  it('shows a halt rejection without a link when the message names no Deployment', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    serveQueue([[queueItem({ halt_on_failure: true })], []]);
+    server.use(
+      getGetDeploymentQueueItemMockHandler(
+        queueItem({
+          halt_on_failure: true,
+          state: 'rejected',
+          position: 0,
+          reason_code: 'previous_deployment_failed',
+          reason_message: 'the previous deployment failed',
+        }),
+      ),
+    );
+    renderQueue();
+
+    expect(await screen.findByText('Ada Admin')).toBeInTheDocument();
+    await act(() => vi.advanceTimersByTimeAsync(5_000));
+
+    expect(await screen.findByText(/the Deployment it waited for failed/)).toBeInTheDocument();
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 
   it('says when a request expired without repeating its code', async () => {

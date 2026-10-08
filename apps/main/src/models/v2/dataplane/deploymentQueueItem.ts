@@ -20,6 +20,10 @@ export interface DeploymentQueueItem {
   position: number;
   rollback_to_deployment_id?: string;
   expected_base_deployment_id?: string;
+  /** The item is rejected with `previous_deployment_failed` instead of being promoted when the Deployment it waited
+for failed.
+   */
+  halt_on_failure: boolean;
   created_by: string;
   created_at: string;
   expires_at: string;
@@ -28,7 +32,8 @@ export interface DeploymentQueueItem {
   /** The most recent transient promotion failure. */
   last_error?: string;
   /** Why the item was cancelled, expired or rejected, for example `cancelled`, `expired`, `environment_deleting`,
-`outcome_unreconciled`, `deployment_base_changed`, `pin_protection` or `actor_forbidden`.
+`outcome_unreconciled`, `deployment_base_changed`, `previous_deployment_failed`, `pin_protection` or
+`actor_forbidden`.
    */
   reason_code?: string;
   reason_message?: string;

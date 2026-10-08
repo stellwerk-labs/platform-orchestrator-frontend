@@ -203,6 +203,7 @@ export const getListDeploymentQueueItemsResponseMock = (
     position: faker.number.int({ min: undefined, max: undefined }),
     rollback_to_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
     expected_base_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    halt_on_failure: faker.datatype.boolean(),
     created_by: faker.string.uuid(),
     created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
     expires_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
@@ -306,6 +307,7 @@ export const getListDeploymentQueueItemsResponseMock200 = (
     position: faker.number.int({ min: undefined, max: undefined }),
     rollback_to_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
     expected_base_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    halt_on_failure: faker.datatype.boolean(),
     created_by: faker.string.uuid(),
     created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
     expires_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
@@ -417,6 +419,7 @@ export const getGetDeploymentQueueItemResponseMock = (
   position: faker.number.int({ min: undefined, max: undefined }),
   rollback_to_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
   expected_base_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  halt_on_failure: faker.datatype.boolean(),
   created_by: faker.string.uuid(),
   created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
   expires_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
@@ -513,6 +516,7 @@ export const getGetDeploymentQueueItemResponseMock200 = (
   position: faker.number.int({ min: undefined, max: undefined }),
   rollback_to_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
   expected_base_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  halt_on_failure: faker.datatype.boolean(),
   created_by: faker.string.uuid(),
   created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
   expires_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
@@ -618,6 +622,7 @@ export const getCancelDeploymentQueueItemResponseMock = (
   position: faker.number.int({ min: undefined, max: undefined }),
   rollback_to_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
   expected_base_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  halt_on_failure: faker.datatype.boolean(),
   created_by: faker.string.uuid(),
   created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
   expires_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
@@ -714,6 +719,7 @@ export const getCancelDeploymentQueueItemResponseMock200 = (
   position: faker.number.int({ min: undefined, max: undefined }),
   rollback_to_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
   expected_base_deployment_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  halt_on_failure: faker.datatype.boolean(),
   created_by: faker.string.uuid(),
   created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
   expires_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
@@ -1066,6 +1072,14 @@ export const getGetDeploymentResponseMock = (): Deployment => ({
       ]),
     },
     runner_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    pending_changes: faker.helpers.arrayElement([
+      {
+        code: faker.helpers.arrayElement(['result_may_change'] as const),
+        running: faker.number.int({ min: 0, max: undefined }),
+        queued: faker.number.int({ min: 0, max: undefined }),
+      },
+      undefined,
+    ]),
   },
 });
 
@@ -1178,6 +1192,14 @@ export const getGetDeploymentResponseMock200 = (): Deployment => ({
       ]),
     },
     runner_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    pending_changes: faker.helpers.arrayElement([
+      {
+        code: faker.helpers.arrayElement(['result_may_change'] as const),
+        running: faker.number.int({ min: 0, max: undefined }),
+        queued: faker.number.int({ min: 0, max: undefined }),
+      },
+      undefined,
+    ]),
   },
 });
 
@@ -1299,6 +1321,14 @@ export const getWaitForDeploymentCompleteResponseMock = (): Deployment => ({
       ]),
     },
     runner_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    pending_changes: faker.helpers.arrayElement([
+      {
+        code: faker.helpers.arrayElement(['result_may_change'] as const),
+        running: faker.number.int({ min: 0, max: undefined }),
+        queued: faker.number.int({ min: 0, max: undefined }),
+      },
+      undefined,
+    ]),
   },
 });
 
@@ -1411,6 +1441,14 @@ export const getWaitForDeploymentCompleteResponseMock200 = (): Deployment => ({
       ]),
     },
     runner_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    pending_changes: faker.helpers.arrayElement([
+      {
+        code: faker.helpers.arrayElement(['result_may_change'] as const),
+        running: faker.number.int({ min: 0, max: undefined }),
+        queued: faker.number.int({ min: 0, max: undefined }),
+      },
+      undefined,
+    ]),
   },
 });
 

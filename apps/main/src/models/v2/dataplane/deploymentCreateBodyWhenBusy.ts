@@ -5,10 +5,11 @@
 
 /**
  * What a deploy or rollback request does when its Environment is busy with another Deployment, has queued requests
-or is still settling the previous Deployment with Core. `reject` (the default) answers 409 with the error code
-`environment_busy`. `queue` waits in the Environment's deployment queue and answers 202 with the queue item.
-A queued request is resolved like a new request when it reaches the head of the queue. Plan-only requests and
-dry runs are never queued.
+or is still settling the previous Deployment with Core. `queue` (the default) waits in the Environment's
+deployment queue and answers 202 with the queue item. `reject` answers 409 with the error code
+`environment_busy`. A queued request is resolved like a new request when it reaches the head of the queue.
+Requests authorized by an organization token cannot wait and get 409 `environment_busy` either way. Plan-only
+requests and dry runs are never queued and ignore this field.
  *
  */
 export type DeploymentCreateBodyWhenBusy =

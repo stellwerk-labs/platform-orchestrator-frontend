@@ -79,6 +79,8 @@ export * from './n409ConflictResponse';
 export * from './openidConfiguration';
 export * from './organizationId';
 export * from './pageTokenQueryParamParameter';
+export * from './pendingEnvironmentChanges';
+export * from './pendingEnvironmentChangesCode';
 export * from './perPageQueryParamParameter';
 export * from './projectIdQueryParamParameter';
 export * from './remoteRunnerMessage';

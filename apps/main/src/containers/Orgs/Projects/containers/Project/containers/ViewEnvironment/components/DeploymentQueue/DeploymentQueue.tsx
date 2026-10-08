@@ -1,5 +1,16 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Card, Empty, Flex, message, Popconfirm, Table, Typography } from 'antd';
+import {
+  Alert,
+  Button,
+  Card,
+  Empty,
+  Flex,
+  message,
+  Popconfirm,
+  Table,
+  Tag,
+  Typography,
+} from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { formatDistanceStrict } from 'date-fns';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -33,7 +44,11 @@ const reasonAdvice: Record<string, string> = {
   deployment_base_changed:
     'The Environment changed after this request was prepared. Review the current Deployment and request again.',
   environment_deleting: 'The Environment is being deleted.',
+  previous_deployment_failed:
+    'The request asked not to start after a failed Deployment, and the Deployment it waited for failed. Fix the cause and request it again.',
 };
+
+const uuidPattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
 
 const cancelRefusals: Record<string, string> = {
   queue_item_dispatching: 'The request is starting right now and can no longer be cancelled.',
@@ -160,15 +175,23 @@ export const DeploymentQueue = ({ environmentUuid }: DeploymentQueueProps) => {
     {
       title: 'Status',
       key: 'status',
-      render: (_, item) =>
-        item.attempts > 0 ? (
-          <Typography.Text type={'warning'}>
-            {`Retrying after ${item.attempts} failed attempt(s)`}
-            {item.last_error && `: ${item.last_error}`}
-          </Typography.Text>
-        ) : (
-          'Waiting'
-        ),
+      render: (_, item) => (
+        <Flex gap={'small'} wrap align={'center'}>
+          {item.attempts > 0 ? (
+            <Typography.Text type={'warning'}>
+              {`Retrying after ${item.attempts} failed attempt(s)`}
+              {item.last_error && `: ${item.last_error}`}
+            </Typography.Text>
+          ) : (
+            <span>{'Waiting'}</span>
+          )}
+          {item.halt_on_failure && (
+            <Tag title={'Not started if the Deployment it waits for fails.'}>
+              {'Halts on failure'}
+            </Tag>
+          )}
+        </Flex>
+      ),
     },
     ...(canCancel
       ? [
@@ -218,14 +241,38 @@ export const DeploymentQueue = ({ environmentUuid }: DeploymentQueueProps) => {
           title: `${request} expired.`,
           detail: 'It waited longer than its time limit. Request it again if it is still needed.',
         };
-      default:
+      default: {
+        const failedDeploymentId =
+          item.reason_code === 'previous_deployment_failed'
+            ? item.reason_message?.match(uuidPattern)?.[0]
+            : undefined;
         return {
           type: 'warning' as const,
           title: `${request} was rejected${item.reason_code ? ` (${item.reason_code})` : ''}.`,
-          detail: [reasonAdvice[item.reason_code ?? ''], item.reason_message]
-            .filter(Boolean)
-            .join(' '),
+          detail: (
+            <>
+              {[reasonAdvice[item.reason_code ?? ''], item.reason_message]
+                .filter(Boolean)
+                .join(' ')}
+              {failedDeploymentId && (
+                <>
+                  {' '}
+                  <Link
+                    to={generateDeploymentUrl(
+                      orgId,
+                      projectId,
+                      envId,
+                      failedDeploymentId,
+                      'resources',
+                    )}>
+                    {`Open failed Deployment ${failedDeploymentId}`}
+                  </Link>
+                </>
+              )}
+            </>
+          ),
         };
+      }
     }
   };
 

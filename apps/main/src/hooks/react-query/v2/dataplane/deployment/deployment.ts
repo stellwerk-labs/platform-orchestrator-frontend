@@ -176,9 +176,17 @@ export function useListDeployments<
 
 /**
  * Deploy and rollback requests mutate the Environment and run one at a time. A request that finds the Environment
-busy fails with 409 and the error code `environment_busy`, unless it sets `when_busy` to `queue`: then it waits
-in the Environment's deployment queue and the response is 202 with the queue item. Queued requests are promoted
-strictly in order and resolved against the Environment state at promotion.
+busy waits in the Environment's deployment queue and the response is 202 with the queue item, unless it sets
+`when_busy` to `reject`: then it fails with 409 and the error code `environment_busy`. Requests authorized by an
+organization token cannot wait and always get that 409. Queued requests are promoted strictly in order and
+resolved against the Environment state at promotion.
+ *
+Plan-only requests and dry runs are never queued and ignore `when_busy`, `queue_ttl_seconds` and
+`halt_on_failure`. A dry run is answered while Deployments run or wait. A plan-only request starts while
+requests wait in the queue, but not while a deploy, rollback, destroy or another plan runs, because their Runners
+would contend for the Environment's state lock; it then fails with 409 `environment_busy`. Either response
+carries `pending_changes` when Deployments that run or wait will change the Environment first, so the plan or
+diff may still change.
  *
 Conflicts carry a stable error code: `environment_busy`, `deployment_queue_full`, `outcome_unreconciled` (a failed
 plugin-dispatched Deployment awaits acknowledgement of its outcome), `environment_deleting` and
