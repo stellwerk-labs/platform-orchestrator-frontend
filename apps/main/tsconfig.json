@@ -13,6 +13,7 @@
     "jsx": "react-jsx",
     "strict": true,
     "noEmit": true,
+    "allowImportingTsExtensions": true,
     "module": "esnext",
     "types": [
       "vite/client",
@@ -22,6 +23,8 @@
   },
   "include": [
     "*.ts",
+    "vite.config.mts",
+    "scripts/**/*.mts",
     "*.mjs",
     "./src",
     "tests/",

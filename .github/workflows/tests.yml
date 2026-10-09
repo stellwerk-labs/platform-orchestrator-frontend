@@ -188,6 +188,9 @@ jobs:
       - name: Check typescript
         run: pnpm run check-typescript
 
+      - name: Test bundled dependency notices with Vite
+        run: pnpm run test:licenses
+
       - name: Run eslint
         run: pnpm run lint
 

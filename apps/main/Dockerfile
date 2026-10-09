@@ -28,6 +28,7 @@ RUN sed -i '/^pid/d' /etc/nginx/nginx.conf && \
 COPY --chmod=0644 apps/main/docker/nginx.conf /etc/nginx/conf.d/default.conf
 COPY apps/main/docker/ /app/docker
 COPY --from=build /app/apps/main/dist /app/build
+COPY --from=build /app/apps/main/dist/licenses /licenses
 WORKDIR /app
 
 RUN chown -R nginx:nginx /app
