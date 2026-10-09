@@ -1,6 +1,7 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { useLayoutEffect } from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   getAcknowledgeDeploymentOutcomeMockHandler,
@@ -104,6 +105,40 @@ describe('AcknowledgeOutcome', () => {
       await screen.findByRole('button', { name: 'Acknowledge outcome' }, { timeout: 3000 }),
     ).toBeInTheDocument();
     expect(screen.queryByText(/Acknowledging becomes available at/)).not.toBeInTheDocument();
+  });
+
+  it('refreshes availability when the effect commits after the dispatch window ends', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    const start = Date.parse('2026-10-07T08:00:00Z');
+    vi.setSystemTime(start);
+    const CommitAfterDeadline = () => {
+      useLayoutEffect(() => {
+        vi.setSystemTime(start + 2000);
+      }, []);
+      return (
+        <AcknowledgeOutcome
+          deployment={failedHead}
+          fence={{ ...fence, remedy_available_at: new Date(start + 1000).toISOString() }}
+          environmentUuid={environmentUuid}
+        />
+      );
+    };
+
+    try {
+      grant('deployment.outcome.acknowledge');
+      render(
+        <MockProviders>
+          <CommitAfterDeadline />
+        </MockProviders>,
+      );
+
+      expect(
+        await screen.findByRole('button', { name: 'Acknowledge outcome' }),
+      ).toBeInTheDocument();
+      expect(screen.queryByText(/Acknowledging becomes available at/)).not.toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('is offered at once when the fence carries no dispatch window', async () => {

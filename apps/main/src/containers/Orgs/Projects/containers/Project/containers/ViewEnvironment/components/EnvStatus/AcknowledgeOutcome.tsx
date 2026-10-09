@@ -26,8 +26,8 @@ const useRemedyAvailable = (remedyAvailableAt?: string) => {
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    const remaining = availableAtMs - Date.now();
-    if (remaining <= 0) return;
+    if (now >= availableAtMs) return;
+    const remaining = Math.max(0, availableAtMs - Date.now());
     const timer = setTimeout(() => setNow(Date.now()), Math.min(remaining, MAX_TIMEOUT_MS));
     return () => clearTimeout(timer);
   }, [availableAtMs, now]);
