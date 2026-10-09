@@ -16,6 +16,7 @@
         "*.config.ts",
         "*.config.mts",
         "scripts/**",
+        "licenses/**",
         "$TURBO_ROOT$/LICENSE",
         "$TURBO_ROOT$/pnpm-lock.yaml",
         "src/**/*.json",

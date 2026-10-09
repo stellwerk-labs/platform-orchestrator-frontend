@@ -22,7 +22,12 @@ export default defineConfig({
     svgrPlugin(),
     macrosPlugin(),
     checker({ typescript: true }),
-    dependencyNotices(fileURLToPath(new URL('../../LICENSE', import.meta.url))),
+    dependencyNotices(fileURLToPath(new URL('../../LICENSE', import.meta.url)), {
+      manifestFile: fileURLToPath(
+        new URL('./licenses/supplemental/manifest.json', import.meta.url),
+      ),
+      lockFile: fileURLToPath(new URL('../../pnpm-lock.yaml', import.meta.url)),
+    }),
   ],
   server: {
     port: parseInt(process.env.VITE_PORT || '4200', 10),
