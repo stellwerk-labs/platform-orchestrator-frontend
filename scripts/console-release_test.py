@@ -32,6 +32,14 @@ ENV = {"GITHUB_REPOSITORY": release.REPOSITORY, "GITHUB_REF": "refs/heads/main",
 
 
 class ReleaseTests(unittest.TestCase):
+    def test_runtime_apk_install_does_not_embed_wall_clock_logs(self):
+        dockerfile = (ROOT / "apps/main/Dockerfile").read_text()
+        final = dockerfile.rsplit("FROM nginx:", 1)[1]
+        self.assertIn("apk --no-logfile add --no-network --no-cache /apks/*.apk", final)
+        self.assertIn("RUN --network=none --mount=type=bind,from=apk-inputs,source=/apks,target=/apks,ro", final)
+        for forbidden in ("rm /var/log/apk.log", "rm -f /var/log/apk.log", "--allow-untrusted", "--no-scripts", ">/dev/null"):
+            self.assertNotIn(forbidden, final)
+
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)

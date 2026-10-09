@@ -24,7 +24,7 @@ ARG SOURCE_DATE_EPOCH
 LABEL org.opencontainers.image.source="https://github.com/stellwerk-labs/platform-orchestrator-frontend"
 
 RUN --network=none --mount=type=bind,from=apk-inputs,source=/apks,target=/apks,ro \
-    apk add --no-network --no-cache /apks/*.apk
+    apk --no-logfile add --no-network --no-cache /apks/*.apk
 
 RUN sed -i '/^pid/d' /etc/nginx/nginx.conf && \
     echo 'pid /tmp/nginx.pid;' >> /etc/nginx/nginx.conf && \
