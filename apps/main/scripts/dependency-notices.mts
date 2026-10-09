@@ -221,11 +221,16 @@ export const dependencyNotices = (ownLicense: string, supplement?: Supplement): 
         throw new Error('Vite dependency licence catalogue does not match the bundle');
       }
       catalogue.source = JSON.stringify(entries, null, 2);
+      emitted.set('licenses/platform-orchestrator-frontend/LICENSE', readNotice(ownLicense));
       for (const [fileName, source] of emitted) this.emitFile({ type: 'asset', fileName, source });
       this.emitFile({
         type: 'asset',
-        fileName: 'licenses/platform-orchestrator-frontend/LICENSE',
-        source: readNotice(ownLicense),
+        fileName: 'licenses/manifest.sha256',
+        source:
+          [...emitted, [dependencyLicenseFile, Buffer.from(catalogue.source)] as const]
+            .sort(([first], [second]) => first.localeCompare(second, 'en'))
+            .map(([fileName, source]) => `${sha256(source)}  ${fileName.slice('licenses/'.length)}`)
+            .join('\n') + '\n',
       });
     },
   },

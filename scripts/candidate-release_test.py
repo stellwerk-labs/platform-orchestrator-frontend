@@ -58,16 +58,26 @@ class CandidateReleaseTests(unittest.TestCase):
         text = Path(__file__).parents[1].joinpath(".github/workflows/tests.yml").read_text()
         jobs = dict(re.findall(r"^  ([a-z-]+):\n(.*?)(?=^  [a-z-]+:\n|\Z)", text, re.M | re.S))
         publication = jobs["candidate-release"]
-        image_step = next(step for step in publication.split("\n      - ")
-                          if "uses: docker/build-push-action@" in step)
-        self.assertIn("\n          context: .\n", image_step,
-                      "Build the checked-out approved SHA, not the workflow event's default Git context")
+        build = jobs["build-release-image"]
+        builder = Path(__file__).with_name("build-console-image.sh").read_text()
+        publisher = Path(__file__).with_name("publish-console-artifact.sh").read_text()
+        self.assertIn('"$root"', builder, "Build the checked-out approved source, not GitHub's default Git context")
+        self.assertIn('--file "$root/apps/main/Dockerfile"', builder)
+        self.assertIn('test "$(git -C "$root" rev-parse HEAD)" = "$source_sha"', builder)
         for required in ("github.repository == 'stellwerk-labs/platform-orchestrator-frontend'",
                          "github.event_name == 'workflow_dispatch'", "environment: public-release-candidate",
                          "- candidate-preflight", "- check-all-jobs-success",
-                         "--verify-tag --prerelease --latest=false",
-                         "ref: ${{ inputs.candidate_sha }}", "--check-image-absent \"$GITHUB_REPOSITORY\""):
+                         "- build-release-image", "inputs.candidate_sha", "console-release.py artifact",
+                         "bash scripts/publish-console-artifact.sh"):
             self.assertIn(required, publication)
+        self.assertIn('release_args+=(--prerelease)', publisher)
+        self.assertIn('latest=false', publisher)
+        self.assertIn('--verify-tag --draft --latest=false', publisher)
+        self.assertIn('--check-image-absent "$GITHUB_REPOSITORY"', publisher)
+        self.assertIn('needs.candidate-preflight.result', build)
+        self.assertIn('inputs.candidate_sha', build)
+        self.assertNotIn('push: true', text)
+        self.assertNotIn('--push', builder)
         for forbidden in ("semantic-release-action@", "git tag ", ":latest"):
             self.assertNotIn(forbidden, publication)
         self.assertIn("/environments/public-release-candidate", jobs["candidate-preflight"])

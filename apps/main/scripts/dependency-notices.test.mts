@@ -1,6 +1,15 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises';
+import {
+  mkdir,
+  mkdtemp,
+  readdir,
+  readFile,
+  realpath,
+  rm,
+  symlink,
+  writeFile,
+} from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
@@ -91,6 +100,22 @@ test('real Vite bundle includes only bundled packages and all original notices',
       await readFile(join(output, 'licenses/platform-orchestrator-frontend/LICENSE')),
       await readFile(ownLicense),
     );
+    const directory = join(output, 'licenses');
+    const listed = (await readFile(join(directory, 'manifest.sha256'), 'utf8'))
+      .trimEnd()
+      .split('\n');
+    const files = (await readdir(directory, { recursive: true, withFileTypes: true }))
+      .filter((entry) => entry.isFile() && entry.name !== 'manifest.sha256')
+      .map((entry) => join(entry.parentPath, entry.name).slice(directory.length + 1));
+    assert.deepEqual(listed.map((line) => line.slice(66)).sort(), files.sort());
+    for (const line of listed) {
+      assert.equal(
+        createHash('sha256')
+          .update(await readFile(join(directory, line.slice(66))))
+          .digest('hex'),
+        line.slice(0, 64),
+      );
+    }
   } finally {
     await rm(root, { recursive: true, force: true });
   }

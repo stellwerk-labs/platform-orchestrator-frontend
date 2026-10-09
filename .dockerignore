@@ -9,3 +9,10 @@
 **/vitest-report
 CODEX_HANDOFF.md
 reports
+agents
+**/.cache
+**/*.tfstate*
+**/*kubeconfig*
+**/*.log
+**/playwright-report
+**/test-results
