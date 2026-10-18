@@ -1,5 +1,4 @@
 # Safe JSON Stringify
-
 [![Build Status](https://travis-ci.org/debitoor/safe-json-stringify.svg?branch=master)](https://travis-ci.org/debitoor/safe-json-stringify)
 [![NPM Version](https://img.shields.io/npm/v/safe-json-stringify.svg)](https://www.npmjs.com/package/safe-json-stringify)
 
@@ -9,8 +8,8 @@ Circular references are handled by returning `[Circular]` when a circular refere
 
 Defined getters that throw errors are handled by returning `[Throws]`.
 
-## Usage
-
+Usage
+-----
 Install it using NPM
 
 ```sh
@@ -21,7 +20,7 @@ And require it into your Node project.
 
 ```js
 const safeJsonStringify = require('safe-json-stringify');
-const data = { foo: 'bar' };
+const data = {foo: 'bar'}
 
 console.log(safeJsonStringify(data));
 ```
@@ -34,8 +33,9 @@ console.log(safeJsonStringify(data, null, 2));
 
 An `ensureProperties` function is exposed too, which returns a safe object without the stringify step. Usage: `safeJsonStringify.ensureProperties(data);`.
 
-## Why?
 
+Why?
+----
 The `stringify` function on the JavaScript JSON object will take any data and return a string representation of said data. If this data contains an object literal it will attempt to return the values of any enumerable property set on this object. This can be dangerous because JavaScript supports a couple of ways to define property getters on objects.
 
 The old, non-standard, and now deprecated `Object.prototype.__defineGetter__()` will define a named property which value is the return of a given function.
@@ -43,9 +43,7 @@ The old, non-standard, and now deprecated `Object.prototype.__defineGetter__()` 
 ```js
 // Never ever do this in your code. Please.
 var obj = {};
-obj.__defineGetter__('foo', function () {
-  return 'bar';
-});
+obj.__defineGetter__('foo', function() { return 'bar'; });
 
 JSON.stringify(obj); // {"foo":"bar"}
 ```
@@ -55,9 +53,7 @@ This is kinda bad because we could make that function throw an error.
 ```js
 // Never ever do this in your code. Please.
 var obj = {};
-obj.__defineGetter__('foo', function () {
-  throw new Error('ouch!');
-});
+obj.__defineGetter__('foo', function() { throw new Error('ouch!'); });
 
 JSON.stringify(obj); // error thrown
 ```
@@ -72,10 +68,8 @@ The slightly better `Object.defineProperty()` does the same thing, but has the c
 // Never ever do this in your code. Please.
 var obj = {};
 Object.defineProperty(obj, 'foo', {
-  get: function () {
-    throw new Error('ouch!');
-  },
-  enumerable: true, // enumerable is false by default
+    get: function() { throw new Error('ouch!'); },
+        enumerable: true // enumerable is false by default
 });
 
 JSON.stringify(obj); // error thrown
@@ -88,10 +82,8 @@ var safeJsonStringify = require('safe-json-stringify');
 // Never ever do this in your code. Please.
 var obj = {};
 Object.defineProperty(obj, 'foo', {
-  get: function () {
-    throw new Error('ouch!');
-  },
-  enumerable: true,
+    get: function() { throw new Error('ouch!'); },
+        enumerable: true
 });
 
 safeJsonStringify(obj); // '{"foo":"[Throws]"}'
@@ -99,8 +91,9 @@ safeJsonStringify(obj); // '{"foo":"[Throws]"}'
 
 And it attempts to handle circular references too. It returns "[Circular]" if it spots one.
 
-## License
 
+License
+-------
 The MIT License (MIT)
 
 Copyright (c) 2014-2017 [Debitoor](https://debitoor.com/)

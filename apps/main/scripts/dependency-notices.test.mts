@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import {
   mkdir,
@@ -356,6 +357,59 @@ for (const kind of [
     }
   });
 }
+
+test('real Prettier ignores original supplemental and runtime notices without changing their bytes', async () => {
+  const repo = fileURLToPath(new URL('../../../', import.meta.url));
+  const root = await mkdtemp(join(tmpdir(), 'console-prettier-notices-'));
+  const prettier = require.resolve('prettier/bin/prettier.cjs');
+  const run = (...args: string[]) => {
+    const result = spawnSync(process.execPath, [prettier, ...args], {
+      cwd: root,
+      encoding: 'utf8',
+    });
+    assert.equal(result.status, 0, result.stderr);
+    return result.stdout;
+  };
+  try {
+    await writeFile(join(root, '.prettierignore'), await readFile(join(repo, '.prettierignore')));
+    const originals = new Map<string, Buffer>();
+    for (const directory of ['apps/main/licenses/supplemental', 'scripts/runtime-notices']) {
+      const source = join(repo, directory);
+      for (const entry of await readdir(source, { recursive: true, withFileTypes: true })) {
+        if (!entry.isFile()) continue;
+        const name = join(directory, entry.parentPath.slice(source.length), entry.name);
+        const bytes = await readFile(join(repo, name));
+        originals.set(name, bytes);
+        await mkdir(dirname(join(root, name)), { recursive: true });
+        await writeFile(join(root, name), bytes);
+        assert.equal(JSON.parse(run('--file-info', name)).ignored, true, name);
+      }
+    }
+    const manifest = JSON.parse(
+      await readFile(join(repo, 'apps/main/licenses/supplemental/manifest.json'), 'utf8'),
+    ) as { packages: { notices: { source: string; sha256: string }[] }[] };
+    for (const source of ['format-original-README.md', 'safe-json-stringify-README.md']) {
+      const notice = manifest.packages
+        .flatMap((entry) => entry.notices)
+        .find((entry) => entry.source === source);
+      assert.ok(notice, source);
+      assert.equal(
+        createHash('sha256')
+          .update(originals.get(join('apps/main/licenses/supplemental', source))!)
+          .digest('hex'),
+        notice.sha256,
+      );
+    }
+    await writeFile(join(root, 'format-control.json'), '{"format":true}');
+    run('--write', ...originals.keys(), 'format-control.json');
+    assert.notEqual(await readFile(join(root, 'format-control.json'), 'utf8'), '{"format":true}');
+    for (const [name, bytes] of originals) {
+      assert.deepEqual(await readFile(join(root, name)), bytes, name);
+    }
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
 
 test('Turbo invalidates configuration/helpers/notices and the image copies the same output', async () => {
   const repo = fileURLToPath(new URL('../../../', import.meta.url));

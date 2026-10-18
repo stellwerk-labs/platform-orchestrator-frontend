@@ -1,15 +1,19 @@
-# format
+format
+======
 
 printf, sprintf, and vsprintf for JavaScript
 
-# Installation
+
+Installation
+============
 
 npm install format
 
 The code works in browsers as well, you can copy these functions into your project
 or otherwise include them with your other JavaScript.
 
-# Usage
+Usage
+=====
 
     var format = require('format')
       , printf = format.printf
@@ -33,8 +37,10 @@ See `man 3 printf` or `man 1 printf` for details.
 
 Precision is supported for floating point numbers.
 
-# License
+License
+=======
 
 Copyright 2010 - 2014 Sami Samhuri sami@samhuri.net
 
 [MIT license](http://sjs.mit-license.org)
+
