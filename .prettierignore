@@ -2,3 +2,4 @@ tsconfig.json
 *.html
 *.hbs
 apps/main/licenses/supplemental/**
+scripts/runtime-notices/**
