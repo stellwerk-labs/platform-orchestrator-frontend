@@ -619,7 +619,7 @@ paths:
             type: array
             items:
               type: string
-          example: development
+          example: [development]
           required: false
       responses:
         '200':
@@ -778,7 +778,7 @@ paths:
             type: array
             items:
               type: string
-          example: development
+          example: [development]
           required: false
       responses:
         '200':
@@ -1841,7 +1841,14 @@ paths:
         - name: lifecycleAction
           in: path
           required: true
-          schema: { type: string, enum: [promote, deprecate, mark-defective, restore] }
+          schema:
+            type: string
+            enum: [promote, deprecate, mark-defective, restore]
+            x-enum-varnames:
+              - TransitionModuleVersionParamsLifecycleActionPromote
+              - TransitionModuleVersionParamsLifecycleActionDeprecate
+              - TransitionModuleVersionParamsLifecycleActionMarkDefective
+              - TransitionModuleVersionParamsLifecycleActionRestore
         - $ref: '#/components/parameters/idempotencyKeyHeader'
       requestBody:
         required: true
@@ -2661,8 +2668,9 @@ components:
         ]
     PluginCapability:
       type: object
-      required: [id, display_name, state, capabilities]
+      required: [contract_level, id, display_name, state, capabilities]
       properties:
+        contract_level: {$ref: '#/components/schemas/PluginContractLevel'}
         id: { type: string, description: Immutable reverse-DNS plugin identity. }
         display_name: { type: string }
         version:
@@ -2673,6 +2681,49 @@ components:
           items: { type: string }
         admin_action:
           { type: string, description: Scope-safe remediation guidance for an administrator. }
+        entitlement: {$ref: '#/components/schemas/PluginEntitlementStatus'}
+    PluginContractLevel:
+      type: string
+      enum: [v1alpha]
+      x-enum-varnames: [PluginContractLevelV1alpha]
+      description: Level of the plugin contracts this Control Plane implements. v1alpha supports first-party Stellwerk plugins only and is not a stable partner contract.
+    PluginEntitlementStatus:
+      type: object
+      description: Non-secret server-derived licence projection. Neither this projection nor a capability grants IAM permissions or authorizes execution.
+      required: [features]
+      properties:
+        grant_scope: {$ref: '#/components/schemas/PluginGrantScope'}
+        features:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/PluginFeatureAccess'
+        warning: {$ref: '#/components/schemas/PluginEntitlementWarning'}
+    PluginEntitlementWarning:
+      type: object
+      description: Machine-readable licence warning that never changes authorization. While a declared feature is in its signed grace period, forward work still succeeds. After grace_until forward work is refused with plugin_not_entitled; read, export, cancel and rollback remain available.
+      required: [code, message, grace_until, features]
+      properties:
+        code:
+          type: string
+          enum: [plugin_entitlement_grace]
+          x-enum-varnames: [PluginEntitlementWarningCodeGrace]
+        message: {type: string, description: Human-readable text a client can show as is.}
+        grace_until: {type: string, format: date-time, description: Earliest end of the grace period among the listed features.}
+        features:
+          type: array
+          items: {type: string}
+          description: Declared features in their grace period, sorted.
+    PluginFeatureAccess:
+      type: object
+      required: [state, trust_class, forward, read, safety]
+      properties:
+        state: {type: string, description: 'Effective persisted licence state for this declared feature: valid, grace, expired, not_yet_valid, revoked, untrusted, not_entitled or missing. Forward work is allowed in valid and grace.'}
+        trust_class: {type: string, description: Development or production issuer trust. Empty when there is no verified grant.}
+        forward: {type: boolean}
+        read: {type: boolean}
+        safety: {type: boolean}
+        expires_at: {type: string, format: date-time}
+        grace_until: {type: string, format: date-time}
     PluginPackage:
       type: object
       required: [manifest_sha256, plugin_id, version, manifest, created_at, created_by]
@@ -3017,7 +3068,7 @@ components:
         id_prefix:
           description: An id prefix for the org. If will be a prefix to the auto-generated id.
           type: string
-          example: workshop-
+          example: workshop
           minLength: 1
           maxLength: 15
           pattern: ^[a-z](?:-?[a-z0-9]+)+$

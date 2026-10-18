@@ -1667,7 +1667,7 @@ components:
         format:
           description: The format of the metadata key.
           type: string
-          example: true
+          example: date-time
         pattern:
           description: A regular expression pattern for the metadata key.
           type: string
@@ -1721,7 +1721,7 @@ components:
           description: The format of the metadata key.
           type: string
           nullable: true
-          example: true
+          example: date-time
         pattern:
           description: A regular expression pattern for the metadata key.
           type: string
