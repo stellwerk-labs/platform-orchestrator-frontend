@@ -14,6 +14,11 @@
         ".eslintrc.cjs",
         "tsconfig.json",
         "*.config.ts",
+        "*.config.mts",
+        "scripts/**",
+        "licenses/**",
+        "$TURBO_ROOT$/LICENSE",
+        "$TURBO_ROOT$/pnpm-lock.yaml",
         "src/**/*.json",
         "pnpm-lock.yaml"
       ],

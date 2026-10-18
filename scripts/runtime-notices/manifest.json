@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 1,
+  "scope": "Exact added runtime APK origins. Base distribution notices and source/package metadata remain in the base image; this inventory is not a legal certification.",
+  "packages": [
+    {
+      "name": "bash",
+      "version": "5.3.9-r1",
+      "origin": "bash"
+    },
+    {
+      "name": "jq",
+      "version": "1.8.2-r0",
+      "origin": "jq"
+    },
+    {
+      "name": "readline",
+      "version": "8.3.3-r1",
+      "origin": "readline"
+    },
+    {
+      "name": "libncursesw",
+      "version": "6.6_p20260516-r0",
+      "origin": "ncurses"
+    },
+    {
+      "name": "ncurses-terminfo-base",
+      "version": "6.6_p20260516-r0",
+      "origin": "ncurses"
+    },
+    {
+      "name": "oniguruma",
+      "version": "6.9.10-r0",
+      "origin": "oniguruma"
+    }
+  ],
+  "sources": [
+    {
+      "origin": "bash",
+      "aportsCommit": "1522c3193610902d8493f9790a2755c11f21f26d",
+      "apkbuildURL": "https://raw.githubusercontent.com/alpinelinux/aports/1522c3193610902d8493f9790a2755c11f21f26d/main/bash/APKBUILD",
+      "apkbuildSHA256": "4dbeb2dcbde454870383a81c79d04a63aed951bc9ec7c3ecdc7e9f251d7a55bb",
+      "sourceURL": "https://distfiles.alpinelinux.org/distfiles/v3.24/bash-5.3-1.tar.gz",
+      "sourceSHA512": "426702c8b0fb9e0c9956259973ce5b657890fd47f4f807a64febf20077bb48d0b91474ed6e843d2ef277186b46c5fffa79b808da9b48d4ec027d5e2de1b28ed8",
+      "sourceSHA256": "0d5cd86965f869a26cf64f4b71be7b96f90a3ba8b3d74e27e8e9d9d5550f31ba",
+      "upstreamPatches": [
+        {
+          "url": "https://distfiles.alpinelinux.org/distfiles/v3.24/bash53-001",
+          "sha512": "66d0987f1a8951974c3a707a1980ef391a1f2a2938f0fa46adb77fcdcef6a3ca49e67182b9640ece3e59bb289e5b4a17eb870aa2a525a03e829a7be158d020a6"
+        },
+        {
+          "url": "https://distfiles.alpinelinux.org/distfiles/v3.24/bash53-002",
+          "sha512": "05caea1c1f5a3d27f2aa351c24f324f9d544ded89db4183ae2872e0283dde62dd6166ca4e780304398935b4aa3fb4db77ecf57acd0f0e295d279ffe40b772158"
+        },
+        {
+          "url": "https://distfiles.alpinelinux.org/distfiles/v3.24/bash53-003",
+          "sha512": "3d4004653cb3f2cba984e67b8e7ae54c19351e176b62bb415f88fdd482ae04be063dacf6303c8343ab6c8bf4f2388026c1742ac603a5cd5c330db22a4b76f4cb"
+        },
+        {
+          "url": "https://distfiles.alpinelinux.org/distfiles/v3.24/bash53-004",
+          "sha512": "d3c7c83ae0742f2a4e1bc96e8fdb3f05c8c0a7e631d3473922ac245f83194925ae443e761269fa6a519298b1123ee4008bcbcdaf9180dff0a0df7fbe5e029bbb"
+        },
+        {
+          "url": "https://distfiles.alpinelinux.org/distfiles/v3.24/bash53-005",
+          "sha512": "e81b43b084c1e9d59acd174d0792a93053780bdef61e7f4072d90b425d99a3fb7d35ef4c0ab79c4fb24bb6b38a8d9e99aad2fceac6efddf723a2cd123b32f0ea"
+        },
+        {
+          "url": "https://distfiles.alpinelinux.org/distfiles/v3.24/bash53-006",
+          "sha512": "f7e303405571635e20c26507c46f9ae0a61ea1328fa0492f2eba2095d398f799e62c1dbf0c07b440c290244f2c54186691ef4aaa2d65f2de101f9888386e2391"
+        },
+        {
+          "url": "https://distfiles.alpinelinux.org/distfiles/v3.24/bash53-007",
+          "sha512": "5f9419b34c759b92a29f25d97e5da3f02603b3138afc11523c7bd304139db0cd02ff82a093cf78a338a7f9d88cb50a880fa6a105be83f8ca85ea8ff7d5c5d80b"
+        },
+        {
+          "url": "https://distfiles.alpinelinux.org/distfiles/v3.24/bash53-008",
+          "sha512": "094b7dc2abe6fc41c62494c6b69640fbd8c6bd93e7cde0618504bb8589fc51fec2fb1686b2729c37e430d336d93ec174233d78f23c82026aca49a240a00477c1"
+        },
+        {
+          "url": "https://distfiles.alpinelinux.org/distfiles/v3.24/bash53-009",
+          "sha512": "07f37cee118e510ae58ea408f9d97b942017e1378532d4e3cd5a4d7405994ddadaba5d3ddb4bbda6b375760967faa51add7f46914ba919a27c14e7036f64f3be"
+        }
+      ],
+      "notices": [
+        {
+          "file": "bash/AUTHORS",
+          "sha256": "8ea258e958e649cd29f8094c23e6f58efb83fa0745adb5943d811735a627983a"
+        },
+        {
+          "file": "bash/COPYING",
+          "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+        }
+      ]
+    },
+    {
+      "origin": "readline",
+      "aportsCommit": "a854c03acdac188901fb012f7acbee70a36e8041",
+      "apkbuildURL": "https://raw.githubusercontent.com/alpinelinux/aports/a854c03acdac188901fb012f7acbee70a36e8041/main/readline/APKBUILD",
+      "apkbuildSHA256": "d6ea7771ae1475b0f0843ed543664beba1beea893a99000dbb34ef20878cf4e9",
+      "sourceURL": "https://distfiles.alpinelinux.org/distfiles/v3.24/readline-8.3.tar.gz",
+      "sourceSHA512": "513002753dcf5db9213dbbb61d51217245f6a40d33b1dd45238e8062dfa8eef0c890b87a5548e11db959e842724fb572c4d3d7fb433773762a63c30efe808344",
+      "sourceSHA256": "fe5383204467828cd495ee8d1d3c037a7eba1389c22bc6a041f627976f9061cc",
+      "upstreamPatches": [
+        {
+          "url": "https://distfiles.alpinelinux.org/distfiles/v3.24/readline83-001.patch",
+          "sha512": "ced50af353ed527f6ec0eac5f65261f2ed208825ec72fe2acf5f0217f34f84f33dcbf01b895325f6b33664b5a426bac99506193e2ddb6eea8c79ccad37364b89"
+        },
+        {
+          "url": "https://distfiles.alpinelinux.org/distfiles/v3.24/readline83-002.patch",
+          "sha512": "e45ad6443bd4e271ec8e8ab883de561b6420aec362b0b7f0256086cb5a023d946df55994ed99c76ceb191e8a25e8059ae9b553ef1d546626d671b80af292f04d"
+        },
+        {
+          "url": "https://distfiles.alpinelinux.org/distfiles/v3.24/readline83-003.patch",
+          "sha512": "6b3ebffe994d0cd4d3466b15e3aee9a73613109283a4442f3bf10e28edcd1204df824c71356d66d01ac21014a806023a101fedf94526a19f6f590d9ffdc864cd"
+        }
+      ],
+      "notices": [
+        {
+          "file": "readline/COPYING",
+          "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+        }
+      ]
+    },
+    {
+      "origin": "ncurses",
+      "aportsCommit": "2cee8a7328d061418336ad327b512d96bcd7bc5e",
+      "apkbuildURL": "https://raw.githubusercontent.com/alpinelinux/aports/2cee8a7328d061418336ad327b512d96bcd7bc5e/main/ncurses/APKBUILD",
+      "apkbuildSHA256": "9801a0e262437b470ddfd6c35e55c231a79b6903262fe68df8a547845d095d6a",
+      "sourceURL": "https://distfiles.alpinelinux.org/distfiles/v3.24/ncurses-6.6-20260516.tgz",
+      "sourceSHA512": "20ffc27f3266b078b410f712422db00d77f5fd497e398b7be252fd207ab70ebd72a2bdf8fd6c94e2a9e41bd2b64d1c6502240c0b8423c99add073bd1226f5859",
+      "sourceSHA256": "933438009f594f54656c53c7bc347a7e0ff21881700fc3db811086f7a3fd3b60",
+      "upstreamPatches": [],
+      "notices": [
+        {
+          "file": "ncurses/AUTHORS",
+          "sha256": "94ee3c58154b9fe6c800e4d3801d95cde5f8fa409241f4ed661afffe4a892b11"
+        },
+        {
+          "file": "ncurses/COPYING",
+          "sha256": "a85ca5bef8ce71f013bc5f4306c681881b248450f3b63722589891f0b69ea52d"
+        }
+      ]
+    },
+    {
+      "origin": "jq",
+      "aportsCommit": "2437351bfa2aecb328f0b859f4a4987476ae31c9",
+      "apkbuildURL": "https://raw.githubusercontent.com/alpinelinux/aports/2437351bfa2aecb328f0b859f4a4987476ae31c9/main/jq/APKBUILD",
+      "apkbuildSHA256": "185277cca1d71e6b3d63267f1d0e5c4d7596113db34d45e57a82ded1217b180b",
+      "sourceURL": "https://distfiles.alpinelinux.org/distfiles/v3.24/jq-1.8.2.tar.gz",
+      "sourceSHA512": "d4058940cff1cd9946d7f2a9057316bf05915679385386685d140b7a82d870d43ae5b5b4d0a5560c864cf0ef2cc59d7b6ed3afb46b3aea0f4d35329678b2c328",
+      "sourceSHA256": "71b8d6e8f5fe81f6c6d0d110e3892251f6ce76ed095abd315e26e6e1193af3af",
+      "upstreamPatches": [],
+      "notices": [
+        {
+          "file": "jq/AUTHORS",
+          "sha256": "0f1eab8760d70368581eb93b12fb8311faef2208b4fbfea68eea08625220f034"
+        },
+        {
+          "file": "jq/COPYING",
+          "sha256": "ad2b4a266b2268939c1446979759706077421cf906a203aa188c6f396e8cfd74"
+        }
+      ]
+    },
+    {
+      "origin": "oniguruma",
+      "aportsCommit": "31082e89063dfb6b02af0b38c46af803a118137a",
+      "apkbuildURL": "https://raw.githubusercontent.com/alpinelinux/aports/31082e89063dfb6b02af0b38c46af803a118137a/main/oniguruma/APKBUILD",
+      "apkbuildSHA256": "0eaca067f737ca930a82b3e6175108498379358840fcdf557a3d72062f1b7d48",
+      "sourceURL": "https://distfiles.alpinelinux.org/distfiles/v3.24/oniguruma-6.9.10.tar.gz",
+      "sourceSHA512": "60975b876662dec8701cca5d8d4027c0a36b8effe7dd32679395ed473e26b3d6b72d7f6eb63bd4dc96c3774b594e56808ce14f993f127a5d04363232586160e4",
+      "sourceSHA256": "ad92309d0d13eebc27f6592e875f3efbfa3dda2bf6da5952e00f0a2120c921a8",
+      "upstreamPatches": [],
+      "notices": [
+        {
+          "file": "oniguruma/AUTHORS",
+          "sha256": "172a2a72c080d3067969599308c91385af86fdeb2419f8ad687883ca5a8ff912"
+        },
+        {
+          "file": "oniguruma/COPYING",
+          "sha256": "70ba5469ea0bab6e18a32d7009068f996503168d27be57747e08da34337ff26f"
+        }
+      ]
+    }
+  ]
+}

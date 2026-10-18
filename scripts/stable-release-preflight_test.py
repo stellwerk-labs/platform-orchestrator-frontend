@@ -71,31 +71,37 @@ class StableReleaseTests(unittest.TestCase):
         text = Path(__file__).parents[1].joinpath(".github/workflows/tests.yml").read_text()
         jobs = dict(re.findall(r"^  ([a-z-]+):\n(.*?)(?=^  [a-z-]+:\n|\Z)", text, re.M | re.S))
         release = jobs["release"]
-        image_step = next(
-            step for step in release.split("\n      - ") if "uses: docker/build-push-action@" in step
-        )
+        build, publish = jobs["build-release-image"], jobs["stable-publish"]
+        builder = Path(__file__).with_name("build-console-image.sh").read_text()
+        publisher = Path(__file__).with_name("publish-console-artifact.sh").read_text()
         for required in (
             "python3 scripts/stable-release-preflight.py",
-            "gh release create \"$RELEASE_TAG\" --verify-tag --draft --latest=false",
-            "gh release edit \"$RELEASE_TAG\" --draft=false --latest",
-            "file: ./apps/main/Dockerfile",
-            "sbom: true",
-            "provenance: mode=max",
-            "org.opencontainers.image.version=${{ steps.release.outputs.version }}",
-            "org.opencontainers.image.revision=${{ github.sha }}",
-            "docker buildx imagetools inspect",
-            "uses: docker/setup-qemu-action@",
-            "uses: docker/setup-buildx-action@",
+            "semantic-release-action@b1269e93b486873118eef1646bfcd46a9d23d3a3",
+            "environment: public-release",
+            "needs: [stable-preflight, check-all-jobs-success]",
             "persist-credentials: false",
         ):
             self.assertIn(required, release)
-        self.assertIn("context: .", image_step)
-        self.assertIn("sbom: true", image_step)
-        self.assertIn("provenance: mode=max", image_step)
-        self.assertLess(release.index("stable-release-preflight.py"), release.index("gh release create"))
-        self.assertLess(release.index("gh release create"), release.index("docker/build-push-action@"))
-        self.assertLess(release.index("docker/build-push-action@"), release.index("imagetools inspect"))
-        self.assertLess(release.index("imagetools inspect"), release.index("gh release edit"))
+        self.assertLess(release.index("console-release.py preflight"), release.index("semantic-release-action@"))
+        self.assertIn('needs.release.outputs.version', build)
+        self.assertIn('needs: [release, build-release-image]', publish)
+        self.assertIn('environment: public-release', publish)
+        self.assertIn('console-release.py artifact', publish)
+        for required in ('--no-cache', '--sbom="generator=$buildkit_sbom_generator"', '--provenance=mode=max',
+                         'org.opencontainers.image.version=$version', 'org.opencontainers.image.revision=$source_sha'):
+            self.assertIn(required, builder)
+        for required in ('uses: docker/setup-qemu-action@', 'uses: docker/setup-buildx-action@',
+                         'release_content.py compare', 'generate-console-sbom.sh', 'scan-release-content.sh'):
+            self.assertIn(required, build)
+        self.assertLess(publisher.index('console-release.py" verify'), publisher.index('gh release create'))
+        self.assertLess(publisher.index('stable-release-preflight.py'), publisher.index('gh release create'))
+        self.assertLess(publisher.index('gh release create'), publisher.index('oras cp --no-tty'))
+        self.assertLess(publisher.index('oras cp --no-tty'), publisher.index('cosign_release verify '))
+        self.assertLess(publisher.index('cosign_release verify '), publisher.index('gh release upload'))
+        self.assertLess(publisher.index('gh release upload'), publisher.index('gh release edit'))
+        self.assertIn('if [[ "$GITHUB_EVENT_NAME" == push ]]; then latest=true; fi', publisher)
+        self.assertNotIn('gh release create', release)
+        self.assertNotIn('push: true', text)
         self.assertIn("scripts/test-release-versioning.sh", jobs["code-quality"])
 
 

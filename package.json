@@ -10,6 +10,7 @@
     "start": "turbo start",
     "test": "turbo test",
     "test:ci": "turbo test:ci --cache-dir=.turbo",
+    "test:licenses": "node --experimental-strip-types --test apps/main/scripts/dependency-notices.test.mts",
     "test:report": "turbo test-report",
     "coverage": "turbo coverage",
     "lint": "eslint --max-warnings=0 .",

@@ -1,0 +1,219 @@
+{
+  "schemaVersion": 1,
+  "packages": [
+    {
+      "name": "@amplitude/rrweb-packer",
+      "version": "2.0.0-alpha.36",
+      "identifier": "MIT",
+      "integrity": "sha512-kqKg6OGoxHZvG4jwyO4kIjLdf8MkL6JcY5iLB09PQNP7O36ysnrH+ecJfa4V1Rld99kX25Pefkw4bzKmmFAqcg==",
+      "packageJSONSHA256": "5d42c857c5eff8220828655bc37f4eea581a0ea55501fd02029b33ff5bc1ddac",
+      "notices": [
+        {
+          "fileName": "LICENSE",
+          "source": "rrweb-LICENSE",
+          "sha256": "8bb7c5aa5a387e9a3c467ba00c83755d9c02a2f997f75fe9516881eea32c427f"
+        }
+      ],
+      "provenance": {
+        "packageSource": "https://github.com/amplitude/rrweb/tree/43ef4ef1cc1f288cfc21454cbca62cc118baa052",
+        "note": "The npm package omits the complete repository-root MIT notice. Preserve the notice at its exact npm gitHead, without modifying the installed dependency.",
+        "sources": [
+          {
+            "url": "https://raw.githubusercontent.com/amplitude/rrweb/43ef4ef1cc1f288cfc21454cbca62cc118baa052/LICENSE",
+            "sha256": "8bb7c5aa5a387e9a3c467ba00c83755d9c02a2f997f75fe9516881eea32c427f"
+          }
+        ]
+      }
+    },
+    {
+      "name": "@amplitude/rrweb-plugin-console-record",
+      "version": "2.0.0-alpha.36",
+      "identifier": "MIT",
+      "integrity": "sha512-7VbXu36PpJA8dSOFxpfpMaoDTuPK5uy1C8mN+Wfdm0X4ROdmrvcTdlQj+jGzhLGeK+xbTixHEy23itCNUau7hQ==",
+      "packageJSONSHA256": "6997bebf9b94a3334b8520f31f42e984f1b596ce2d9b7031625aa6a4f16df4f9",
+      "notices": [
+        {
+          "fileName": "LICENSE",
+          "source": "rrweb-LICENSE",
+          "sha256": "8bb7c5aa5a387e9a3c467ba00c83755d9c02a2f997f75fe9516881eea32c427f"
+        }
+      ],
+      "provenance": {
+        "packageSource": "https://github.com/amplitude/rrweb/tree/43ef4ef1cc1f288cfc21454cbca62cc118baa052",
+        "note": "The npm package omits the complete repository-root MIT notice. Preserve the notice at its exact npm gitHead, without modifying the installed dependency.",
+        "sources": [
+          {
+            "url": "https://raw.githubusercontent.com/amplitude/rrweb/43ef4ef1cc1f288cfc21454cbca62cc118baa052/LICENSE",
+            "sha256": "8bb7c5aa5a387e9a3c467ba00c83755d9c02a2f997f75fe9516881eea32c427f"
+          }
+        ]
+      }
+    },
+    {
+      "name": "@amplitude/rrweb-record",
+      "version": "2.0.0-alpha.36",
+      "identifier": "MIT",
+      "integrity": "sha512-zSHvmG5NUG4jNgWNVM7Oj3+rJPagv+TiHlnSiJ1X0WWLIg1GbUnOoTqpincZS5QupqTxQchNQaUg9MNu0MM3sQ==",
+      "packageJSONSHA256": "5e5802db8205eaaae4ae77846b62ae5f922a07cb2b9d14f5d97b8edae645337d",
+      "notices": [
+        {
+          "fileName": "LICENSE",
+          "source": "rrweb-LICENSE",
+          "sha256": "8bb7c5aa5a387e9a3c467ba00c83755d9c02a2f997f75fe9516881eea32c427f"
+        }
+      ],
+      "provenance": {
+        "packageSource": "https://github.com/amplitude/rrweb/tree/43ef4ef1cc1f288cfc21454cbca62cc118baa052",
+        "note": "The npm package omits the complete repository-root MIT notice. Preserve the notice at its exact npm gitHead, without modifying the installed dependency.",
+        "sources": [
+          {
+            "url": "https://raw.githubusercontent.com/amplitude/rrweb/43ef4ef1cc1f288cfc21454cbca62cc118baa052/LICENSE",
+            "sha256": "8bb7c5aa5a387e9a3c467ba00c83755d9c02a2f997f75fe9516881eea32c427f"
+          }
+        ]
+      }
+    },
+    {
+      "name": "@amplitude/rrweb-types",
+      "version": "2.0.0-alpha.36",
+      "identifier": "MIT",
+      "integrity": "sha512-Bd2r3Bs0XIJt5fgPRWVl8bhvA9FCjJn8vQlDTO8ffPxilGPIzUXLQ06+xoLYkK9v+PDKJnCapOTL4A2LilDmgA==",
+      "packageJSONSHA256": "4d19a515f8ee1c4f4828e75bb105781a3a47cc30a11abd101e8a42f577cc5320",
+      "notices": [
+        {
+          "fileName": "LICENSE",
+          "source": "rrweb-LICENSE",
+          "sha256": "8bb7c5aa5a387e9a3c467ba00c83755d9c02a2f997f75fe9516881eea32c427f"
+        }
+      ],
+      "provenance": {
+        "packageSource": "https://github.com/amplitude/rrweb/tree/43ef4ef1cc1f288cfc21454cbca62cc118baa052",
+        "note": "The npm package omits the complete repository-root MIT notice. Preserve the notice at its exact npm gitHead, without modifying the installed dependency.",
+        "sources": [
+          {
+            "url": "https://raw.githubusercontent.com/amplitude/rrweb/43ef4ef1cc1f288cfc21454cbca62cc118baa052/LICENSE",
+            "sha256": "8bb7c5aa5a387e9a3c467ba00c83755d9c02a2f997f75fe9516881eea32c427f"
+          }
+        ]
+      }
+    },
+    {
+      "name": "@ant-design/icons-svg",
+      "version": "4.4.2",
+      "identifier": "MIT",
+      "integrity": "sha512-vHbT+zJEVzllwP+CM+ul7reTEfBR0vgxFe7+lREAsAA7YGsYpboiq2sQNeQeRvh09GfQgs/GyFEvZpJ9cLXpXA==",
+      "packageJSONSHA256": "abbeb2c3dd7e9aee60522b9cd12f30a91c2a3de39a068a876ee4bb162ea9bf71",
+      "notices": [
+        {
+          "fileName": "LICENSE",
+          "source": "ant-icons-LICENSE",
+          "sha256": "5d367fb0a07340571542eb4ee8eb1add62d37b71bad6786a57c2e9a86bf76c70"
+        }
+      ],
+      "provenance": {
+        "packageSource": "https://github.com/ant-design/ant-design-icons/tree/038764e4e46499212751a452704f64231fa756ba",
+        "note": "The npm package omits the complete repository-root MIT notice. Preserve the notice at its exact npm gitHead, without modifying the installed dependency.",
+        "sources": [
+          {
+            "url": "https://raw.githubusercontent.com/ant-design/ant-design-icons/038764e4e46499212751a452704f64231fa756ba/LICENSE",
+            "sha256": "5d367fb0a07340571542eb4ee8eb1add62d37b71bad6786a57c2e9a86bf76c70"
+          }
+        ]
+      }
+    },
+    {
+      "name": "format",
+      "version": "0.2.2",
+      "identifier": "MIT",
+      "integrity": "sha512-wzsgA6WOq+09wrU1tsJ09udeR/YZRaeArL9e1wPbFg3GG2yDnC2ldKpxs4xunpFF9DgqCqOIra3bc1HWrJ37Ww==",
+      "packageJSONSHA256": "0754698e3180d26da07fa0ca1fbfce331c0e1652db512aee35b443204bdec553",
+      "notices": [
+        {
+          "fileName": "LICENSE",
+          "source": "format-LICENSE",
+          "sha256": "8b9122f3be164acdadc1899cad8d729ec6fc3090b1e4b6a8742a2ea4bd1300ff"
+        },
+        {
+          "fileName": "NOTICE.original-README.md",
+          "source": "format-original-README.md",
+          "sha256": "e078ab4217332db9ac446cdf23e932eabd21d6db7c239a6495df4d3802251f20"
+        },
+        {
+          "fileName": "NOTICE.original-header.txt",
+          "source": "format-original-header.txt",
+          "sha256": "0b7cb3792c0467cbe27a5ee796338949cc90e5f7f3c8f9ce5785578ce816eb80"
+        }
+      ],
+      "provenance": {
+        "packageSource": "https://github.com/samsonjs/format/tree/4f898096759776b7c84fa7a25b13c923dadfe46e",
+        "note": "The exact npm source declares MIT using the legacy licenses field. Full terms are rendered from the pinned MIT template behind its author-linked sjs.mit-license.org notice. Both original 2010-2014 README and 2010-2013 source-header copyrights are retained, rather than the website's dynamic current year. Original notices are included.",
+        "sources": [
+          {
+            "url": "https://raw.githubusercontent.com/samsonjs/format/4f898096759776b7c84fa7a25b13c923dadfe46e/Readme.md",
+            "sha256": "e078ab4217332db9ac446cdf23e932eabd21d6db7c239a6495df4d3802251f20"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/samsonjs/format/4f898096759776b7c84fa7a25b13c923dadfe46e/format.js",
+            "sha256": "666bd4da85e596b4e3e119f201ea5c69dae64e2e9f75a5758de777b9550a6155"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/remy/mit-license/73ebb8ca1e2280883e92498e18fcdb1c633c226c/licenses/MIT.ejs",
+            "sha256": "75bd0d442091ebfb2ab8f7e3a1d507686fc7c9e87a1579558e2537e7b2b447a4"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/remy/mit-license/73ebb8ca1e2280883e92498e18fcdb1c633c226c/users/sjs.json",
+            "sha256": "a7ebf86c82df7f2c28c1ef515d5a2b8e93713b33d04e93fe2e571c0d3e67982e"
+          }
+        ]
+      }
+    },
+    {
+      "name": "safe-json-stringify",
+      "version": "1.2.0",
+      "identifier": "MIT",
+      "integrity": "sha512-gH8eh2nZudPQO6TytOvbxnuhYBOvDBBLW52tz5q6X58lJcd/tkmqFR+5Z9adS8aJtURSXWThWy/xJtJwixErvg==",
+      "packageJSONSHA256": "4ed56a5504045e9faf6c49c5f698d9885dc1a382afb019d717509f53603960d6",
+      "notices": [
+        {
+          "fileName": "LICENSE.source-README.md",
+          "source": "safe-json-stringify-README.md",
+          "sha256": "15f5b7afb7621e468450767720462bb69bd55bb3ea5e0ac9d2a3d0f4635a3279"
+        }
+      ],
+      "provenance": {
+        "packageSource": "https://github.com/debitoor/safe-json-stringify/tree/21c0afaf22f6c78d26cf47ee6884b58906bed062",
+        "note": "The exact npm source and installed README contain the complete MIT notice, but no root licence file. Preserve that README verbatim.",
+        "sources": [
+          {
+            "url": "https://raw.githubusercontent.com/debitoor/safe-json-stringify/21c0afaf22f6c78d26cf47ee6884b58906bed062/README.md",
+            "sha256": "15f5b7afb7621e468450767720462bb69bd55bb3ea5e0ac9d2a3d0f4635a3279"
+          }
+        ]
+      }
+    },
+    {
+      "name": "toggle-selection",
+      "version": "1.0.6",
+      "identifier": "MIT",
+      "integrity": "sha512-BiZS+C1OS8g/q2RRbJmy59xpyghNBqrr6k5L/uKBGRsTfxmu3ffiRnd8mlGPUVayg8pvfi5urfnu8TU7DVOkLQ==",
+      "packageJSONSHA256": "fbde858ede9465c03e5270332090684350327e360760d185b2ed4fc3aff73f15",
+      "notices": [
+        {
+          "fileName": "LICENSE",
+          "source": "toggle-selection-LICENSE",
+          "sha256": "771e50e27b24269923639e8e0cc650e7187ffeab5726f6a6f47d9ea83865089d"
+        }
+      ],
+      "provenance": {
+        "packageSource": "https://github.com/sudodoki/toggle-selection/tree/466460c75ca40630d8de940490718247fce79a3e",
+        "note": "This notice was not included in npm 1.0.6. Upstream PR #6, merged 2017-08-02, starts at the exact npm source revision and adds only LICENSE in merge 538dc4e9de40b8aee41f1e9066a4c5de3f4adc0a. Preserve this later upstream correction verbatim.",
+        "sources": [
+          {
+            "url": "https://raw.githubusercontent.com/sudodoki/toggle-selection/538dc4e9de40b8aee41f1e9066a4c5de3f4adc0a/LICENSE",
+            "sha256": "771e50e27b24269923639e8e0cc650e7187ffeab5726f6a6f47d9ea83865089d"
+          }
+        ]
+      }
+    }
+  ]
+}
