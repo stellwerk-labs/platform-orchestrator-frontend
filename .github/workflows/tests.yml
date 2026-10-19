@@ -22,6 +22,11 @@ permissions:
 
 env:
   NODE_VERSION: 22
+  PYTHONDONTWRITEBYTECODE: '1'
+  CONSOLE_PUBLIC_RELEASES_ENABLED: ${{ vars.CONSOLE_PUBLIC_RELEASES_ENABLED }}
+  RELEASE_FORBIDDEN_LITERAL: ${{ secrets.CONSOLE_FORBIDDEN_LITERAL }}
+  RELEASE_SOURCE_SHA: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate_sha || github.sha }}
+  RELEASE_VERSION: ${{ inputs.candidate_tag }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -35,7 +40,13 @@ jobs:
     permissions:
       actions: read
       contents: read
+      packages: read
     steps:
+      - name: Enforce dormancy before checkout or API access
+        run: |
+          test "$GITHUB_REPOSITORY" = stellwerk-labs/platform-orchestrator-frontend
+          test "$GITHUB_REF" = refs/heads/main
+          test "$CONSOLE_PUBLIC_RELEASES_ENABLED" = true
       - name: Checkout approved candidate
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -50,89 +61,32 @@ jobs:
           CANDIDATE_SHA: ${{ inputs.candidate_sha }}
         run: |
           set -euo pipefail
+          python3 scripts/console-release.py preflight
           gh api "repos/$GITHUB_REPOSITORY/environments/public-release-candidate" > "$RUNNER_TEMP/candidate-environment.json"
           python3 scripts/candidate-release.py "$CANDIDATE_TAG" "$CANDIDATE_SHA" \
-            --environment-json "$RUNNER_TEMP/candidate-environment.json"
+            --environment-json "$RUNNER_TEMP/candidate-environment.json" --check-image-absent "$GITHUB_REPOSITORY"
 
-  candidate-release:
-    if: github.repository == 'stellwerk-labs/platform-orchestrator-frontend' && github.event_name == 'workflow_dispatch'
-    needs:
-      - candidate-preflight
-      - check-all-jobs-success
+  stable-preflight:
+    if: github.repository == 'stellwerk-labs/platform-orchestrator-frontend' && github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.CONSOLE_PUBLIC_RELEASES_ENABLED == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    environment: public-release-candidate
-    concurrency:
-      group: release-${{ github.repository }}
-      cancel-in-progress: false
+    timeout-minutes: 5
     permissions:
-      actions: read
-      contents: write
-      packages: write
+      contents: read
+      packages: read
     steps:
-      - name: Checkout tested immutable candidate
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Enforce dormancy before checkout or API access
+        run: |
+          test "$GITHUB_REPOSITORY" = stellwerk-labs/platform-orchestrator-frontend
+          test "$GITHUB_REF" = refs/heads/main
+          test "$CONSOLE_PUBLIC_RELEASES_ENABLED" = true
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ inputs.candidate_sha }}
           fetch-depth: 0
           persist-credentials: false
-
-      - name: Revalidate candidate and refuse existing publication
+      - name: Require existing stable human-review environment and exact public source
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CANDIDATE_TAG: ${{ inputs.candidate_tag }}
-          CANDIDATE_SHA: ${{ inputs.candidate_sha }}
-        run: |
-          set -euo pipefail
-          gh api "repos/$GITHUB_REPOSITORY/environments/public-release-candidate" > "$RUNNER_TEMP/candidate-environment.json"
-          python3 scripts/candidate-release.py "$CANDIDATE_TAG" "$CANDIDATE_SHA" \
-            --environment-json "$RUNNER_TEMP/candidate-environment.json" \
-            --check-image-absent "$GITHUB_REPOSITORY"
-
-      - name: Reserve candidate release without creating a tag or changing latest
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CANDIDATE_TAG: ${{ inputs.candidate_tag }}
-        run: |
-          set -euo pipefail
-          gh release create "$CANDIDATE_TAG" --verify-tag --prerelease --latest=false \
-            --title "$CANDIDATE_TAG" --notes-file "docs/releases/$CANDIDATE_TAG.md"
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.0.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.0.0
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.0.0
-
-      - name: Build and push exact candidate image
-        id: image
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.0.0
-        with:
-          context: .
-          file: ./apps/main/Dockerfile
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/stellwerk-labs/platform-orchestrator-frontend:${{ inputs.candidate_tag }}
-          sbom: true
-          provenance: mode=max
-          labels: |
-            org.opencontainers.image.version=${{ inputs.candidate_tag }}
-            org.opencontainers.image.revision=${{ inputs.candidate_sha }}
-
-      - name: Verify candidate image by immutable digest
-        env:
-          IMAGE_DIGEST: ${{ steps.image.outputs.digest }}
-        run: |
-          set -euo pipefail
-          [[ "$IMAGE_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]
-          docker buildx imagetools inspect "ghcr.io/stellwerk-labs/platform-orchestrator-frontend@$IMAGE_DIGEST"
+        run: python3 scripts/console-release.py preflight
 
   code-quality:
     name: 🚨 Lint
@@ -146,6 +100,9 @@ jobs:
         run: |
           python3 scripts/candidate-release_test.py
           python3 scripts/stable-release-preflight_test.py
+          python3 scripts/console-release_test.py
+          python3 scripts/release_workflow_test.py
+          python3 scripts/console_sbom_test.py
 
       - name: Checkout the exact semantic-release action
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -188,6 +145,16 @@ jobs:
       - name: Check typescript
         run: pnpm run check-typescript
 
+      - name: Test bundled dependency notices with Vite
+        run: |
+          pnpm run test:licenses
+          node --test scripts/verify-runtime-notices.test.mjs
+
+      - name: Test original-layer, final-tree and binary scanner contracts
+        run: |
+          bash scripts/install-release-tools.sh "$RUNNER_TEMP/release-tools"
+          PATH="$RUNNER_TEMP/release-tools:$PATH" python3 scripts/release_content_test.py
+
       - name: Run eslint
         run: pnpm run lint
 
@@ -222,104 +189,210 @@ jobs:
 
   release:
     if: github.repository == 'stellwerk-labs/platform-orchestrator-frontend' && github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: check-all-jobs-success
+    needs: [stable-preflight, check-all-jobs-success]
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 5
+    # Source/write gate. Exact artifact publication has its own later gate.
+    environment: public-release
     concurrency:
       group: release-${{ github.repository }}
       cancel-in-progress: false
     permissions:
       contents: write
-      issues: write
-      packages: write
-      pull-requests: write
+      packages: read
+    outputs:
+      version: ${{ steps.release.outputs.version }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate_sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
-
+      - name: Repeat public source and reviewer checks before tag assignment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/console-release.py preflight
       - name: Assign stable version and tag
         id: release
         uses: stellwerk-labs/semantic-release-action@b1269e93b486873118eef1646bfcd46a9d23d3a3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Validate stable source, notes, and unused destinations
+      - name: Validate stable source, notes and unused destinations
         if: steps.release.outputs.version != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ steps.release.outputs.version }}
           SOURCE_SHA: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-          python3 scripts/stable-release-preflight.py "$RELEASE_TAG" "$SOURCE_SHA"
+        run: python3 scripts/stable-release-preflight.py "$RELEASE_TAG" "$SOURCE_SHA"
 
-      - name: Reserve stable draft with reviewed notes
-        if: steps.release.outputs.version != ''
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_TAG: ${{ steps.release.outputs.version }}
-        run: |
-          set -euo pipefail
-          gh release create "$RELEASE_TAG" --verify-tag --draft --latest=false \
-            --title "$RELEASE_TAG" --notes-file "docs/releases/$RELEASE_TAG.md"
-
-      - name: Login to GitHub Container Registry
-        if: steps.release.outputs.version != ''
-        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.0.0
+  build-release-image:
+    if: >-
+      !cancelled() && needs.check-all-jobs-success.result == 'success' &&
+      ((github.event_name == 'workflow_dispatch' && needs.candidate-preflight.result == 'success') ||
+       (github.event_name == 'push' && needs.release.result == 'success' && needs.release.outputs.version != ''))
+    needs: [candidate-preflight, release, check-all-jobs-success]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      RELEASE_VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate_tag || needs.release.outputs.version }}
+    outputs:
+      artifact_id: ${{ steps.upload.outputs.artifact-id }}
+      artifact_digest: ${{ steps.upload.outputs.artifact-digest }}
+      checksums_sha256: ${{ steps.identify.outputs.checksums_sha256 }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up QEMU
-        if: steps.release.outputs.version != ''
-        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.0.0
-
-      - name: Set up Docker Buildx
-        if: steps.release.outputs.version != ''
-        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.0.0
-
-      - name: Set up QEMU
-        if: steps.release.outputs.version != ''
-        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.0.0
-
-      - name: Set up Docker Buildx
-        if: steps.release.outputs.version != ''
-        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.0.0
-
-      - name: Build and push image
-        if: steps.release.outputs.version != ''
-        id: image
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.0.0
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate_sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install verified artifact tools
+        run: |
+          bash scripts/install-release-tools.sh "$RUNNER_TEMP/release-tools"
+          bash scripts/install-oras.sh "$RUNNER_TEMP/release-tools"
+          echo "$RUNNER_TEMP/release-tools" >> "$GITHUB_PATH"
+      - uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.0.0
+      - uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.0.0
         with:
-          context: .
-          file: ./apps/main/Dockerfile
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/stellwerk-labs/${{ github.event.repository.name }}:${{ steps.release.outputs.version }}
-          sbom: true
-          provenance: mode=max
-          labels: |
-            org.opencontainers.image.version=${{ steps.release.outputs.version }}
-            org.opencontainers.image.revision=${{ github.sha }}
-
-      - name: Verify published image
-        if: steps.release.outputs.version != ''
-        env:
-          IMAGE_DIGEST: ${{ steps.image.outputs.digest }}
+          driver-opts: image=moby/buildkit@sha256:cec9f139f45e93c5c69c60f8b07cfad9f43f4ef6b6a6cd917527fea5ff2e3dea
+      - name: First independent no-cache OCI build, never push
+        run: |
+          mkdir "$RUNNER_TEMP/console-first"
+          bash scripts/build-console-image.sh "$RELEASE_VERSION" "$RELEASE_SOURCE_SHA" "$RUNNER_TEMP/console-first/image.oci.tar" "$RUNNER_TEMP/console-first/build.json"
+      - name: Inspect and scan original layers and final first payload
+        run: |
+          mkdir "$RUNNER_TEMP/console-first/layout"
+          tar -xf "$RUNNER_TEMP/console-first/image.oci.tar" -C "$RUNNER_TEMP/console-first/layout"
+          timeout -k 5s 240s bash scripts/check-console-artifact.sh "$RUNNER_TEMP/console-first/layout" "$RUNNER_TEMP/console-first/inspection"
+      - name: Second independent no-cache OCI build, never push
+        run: |
+          mkdir "$RUNNER_TEMP/console-second"
+          bash scripts/build-console-image.sh "$RELEASE_VERSION" "$RELEASE_SOURCE_SHA" "$RUNNER_TEMP/console-second/image.oci.tar" "$RUNNER_TEMP/console-second/build.json"
+      - name: Inspect second payload and compare reproducibility boundary
+        run: |
+          mkdir "$RUNNER_TEMP/console-second/layout"
+          tar -xf "$RUNNER_TEMP/console-second/image.oci.tar" -C "$RUNNER_TEMP/console-second/layout"
+          timeout -k 5s 240s bash scripts/check-console-artifact.sh "$RUNNER_TEMP/console-second/layout" "$RUNNER_TEMP/console-second/inspection"
+          mkdir "$RUNNER_TEMP/console-release"
+          python3 scripts/release_content.py compare "$RUNNER_TEMP/console-first/inspection/report.json" "$RUNNER_TEMP/console-second/inspection/report.json" > "$RUNNER_TEMP/console-release/reproducibility.json"
+      - name: Catalogue real OS and bundled JS identities for each exact platform
+        run: |
+          export SOURCE_DATE_EPOCH="$(git show -s --format=%ct "$RELEASE_SOURCE_SHA")"
+          timeout -k 5s 300s bash scripts/generate-console-sbom.sh "$RUNNER_TEMP/console-first/layout" "$RUNNER_TEMP/console-first/inspection" "$RUNNER_TEMP/console-sbom"
+      - name: Stage all final shipping bytes and scan metadata and archives
+        id: identify
         run: |
           set -euo pipefail
-          [[ "$IMAGE_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]
-          docker buildx imagetools inspect "ghcr.io/stellwerk-labs/platform-orchestrator-frontend@${IMAGE_DIGEST}"
+          cp "$RUNNER_TEMP/console-first/image.oci.tar" "$RUNNER_TEMP/console-release/console-image.oci.tar"
+          for arch in amd64 arm64; do cp "$RUNNER_TEMP/console-sbom/$arch.spdx.json" "$RUNNER_TEMP/console-release/console-linux-$arch.spdx.json"; done
+          python3 scripts/console-release.py stage "$RUNNER_TEMP/console-release" "$RUNNER_TEMP/console-first/layout" "$RUNNER_TEMP/console-first/inspection/report.json"
+          timeout -k 5s 240s bash scripts/scan-release-content.sh "$RUNNER_TEMP/console-release" "$RELEASE_FORBIDDEN_LITERAL"
+          echo "checksums_sha256=$(sha256sum "$RUNNER_TEMP/console-release/SHA256SUMS" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+      - name: Preserve exact artifact before human publication review
+        id: upload
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: console-release-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/console-release
+          if-no-files-found: error
+          retention-days: 14
 
-      - name: Publish verified stable release
-        if: steps.release.outputs.version != ''
+  candidate-release:
+    if: >-
+      !cancelled() && github.repository == 'stellwerk-labs/platform-orchestrator-frontend' &&
+      github.event_name == 'workflow_dispatch' &&
+      needs.candidate-preflight.result == 'success' &&
+      needs.check-all-jobs-success.result == 'success' && needs.build-release-image.result == 'success'
+    needs:
+      - candidate-preflight
+      - check-all-jobs-success
+      - build-release-image
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: public-release-candidate
+    concurrency:
+      group: release-${{ github.repository }}
+      cancel-in-progress: false
+    permissions:
+      actions: read
+      contents: write
+      packages: write
+      id-token: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      RELEASE_CHECKSUMS_SHA256: ${{ needs.build-release-image.outputs.checksums_sha256 }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate_sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify immutable artifact identity from this exact producer run
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_TAG: ${{ steps.release.outputs.version }}
+          ARTIFACT_ID: ${{ needs.build-release-image.outputs.artifact_id }}
+          ARTIFACT_DIGEST: ${{ needs.build-release-image.outputs.artifact_digest }}
         run: |
           set -euo pipefail
-          gh release edit "$RELEASE_TAG" --draft=false --latest
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$ARTIFACT_ID" > "$RUNNER_TEMP/console-artifact.json"
+          python3 scripts/console-release.py artifact "$RUNNER_TEMP/console-artifact.json" "$ARTIFACT_ID" "$ARTIFACT_DIGEST"
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          artifact-ids: ${{ needs.build-release-image.outputs.artifact_id }}
+          path: ${{ runner.temp }}/console-release
+          merge-multiple: true
+      - name: Install verified publication tools
+        run: |
+          bash scripts/install-release-tools.sh "$RUNNER_TEMP/release-tools"
+          bash scripts/install-oras.sh "$RUNNER_TEMP/release-tools"
+          echo "$RUNNER_TEMP/release-tools" >> "$GITHUB_PATH"
+      - name: Publish only the reviewed OCI bytes and verify exact signatures and assets
+        run: bash scripts/publish-console-artifact.sh "$RUNNER_TEMP/console-release"
+
+  stable-publish:
+    if: >-
+      !cancelled() && github.repository == 'stellwerk-labs/platform-orchestrator-frontend' &&
+      github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.release.outputs.version != '' &&
+      needs.release.result == 'success' && needs.build-release-image.result == 'success'
+    needs: [release, build-release-image]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: public-release
+    concurrency:
+      group: release-${{ github.repository }}
+      cancel-in-progress: false
+    permissions:
+      actions: read
+      contents: write
+      packages: write
+      id-token: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      RELEASE_VERSION: ${{ needs.release.outputs.version }}
+      RELEASE_CHECKSUMS_SHA256: ${{ needs.build-release-image.outputs.checksums_sha256 }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate_sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify immutable artifact identity from this exact producer run
+        env:
+          ARTIFACT_ID: ${{ needs.build-release-image.outputs.artifact_id }}
+          ARTIFACT_DIGEST: ${{ needs.build-release-image.outputs.artifact_digest }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$ARTIFACT_ID" > "$RUNNER_TEMP/console-artifact.json"
+          python3 scripts/console-release.py artifact "$RUNNER_TEMP/console-artifact.json" "$ARTIFACT_ID" "$ARTIFACT_DIGEST"
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          artifact-ids: ${{ needs.build-release-image.outputs.artifact_id }}
+          path: ${{ runner.temp }}/console-release
+          merge-multiple: true
+      - name: Install verified publication tools
+        run: |
+          bash scripts/install-release-tools.sh "$RUNNER_TEMP/release-tools"
+          bash scripts/install-oras.sh "$RUNNER_TEMP/release-tools"
+          echo "$RUNNER_TEMP/release-tools" >> "$GITHUB_PATH"
+      - name: Publish only the reviewed OCI bytes and verify exact signatures and assets
+        run: bash scripts/publish-console-artifact.sh "$RUNNER_TEMP/console-release"

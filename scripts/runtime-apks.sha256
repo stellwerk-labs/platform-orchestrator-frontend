@@ -1,0 +1,12 @@
+4ad962f26fb3c68365171233fe61e3c51bbee1cab35e8dc661198233daeab0dd  https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/bash-5.3.9-r1.apk
+63bc58e20566fcf6215b9d2160a76af18def4f73c354dc8ea6d6004e0d0331ac  https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/jq-1.8.2-r0.apk
+cf8caa8a88bc4ce9d9e395567fefaf9ef7fbd55c50ae6155b35c1b58f3755023  https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/libncursesw-6.6_p20260516-r0.apk
+ce83be6d0bd10584a53c3a5868cc1595ce5f0f8e0b621f8f7f70b6144e521fc9  https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/ncurses-terminfo-base-6.6_p20260516-r0.apk
+5860ef9fd15b8e675278483d1b05d0efd043450b9f1b618647cb1b4f43d53a06  https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/oniguruma-6.9.10-r0.apk
+766911ecb986a6c5cf0841a6b556cd1e9dbbf22b3559726de32416486cd15c81  https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/readline-8.3.3-r1.apk
+95f4f976bdf2f4ca18ff41c32916eb6d7b12a0dae12504d55d04427460d6542f  https://dl-cdn.alpinelinux.org/alpine/v3.24/main/aarch64/bash-5.3.9-r1.apk
+1c146410d19ea643e81414352bc259ef9d2bf75d8c7208334614cca124a13f43  https://dl-cdn.alpinelinux.org/alpine/v3.24/main/aarch64/jq-1.8.2-r0.apk
+51a7aa4b3ec40b144d0801c0544e0a9f62e2a41d04b6067bb5e95786040741c6  https://dl-cdn.alpinelinux.org/alpine/v3.24/main/aarch64/libncursesw-6.6_p20260516-r0.apk
+e0c546b9461bdce206a90bc720cb69aa4628b5a5b8d908c3e5084e00f28f6a9d  https://dl-cdn.alpinelinux.org/alpine/v3.24/main/aarch64/ncurses-terminfo-base-6.6_p20260516-r0.apk
+df2b17f23b16edb362db6cc4750c4e51afe91573616c2c123365b94fdec29036  https://dl-cdn.alpinelinux.org/alpine/v3.24/main/aarch64/oniguruma-6.9.10-r0.apk
+9f0ae0923c02b0d6aba62e9173542b65396ba3f0efefcbf087ea32f1120e7b34  https://dl-cdn.alpinelinux.org/alpine/v3.24/main/aarch64/readline-8.3.3-r1.apk

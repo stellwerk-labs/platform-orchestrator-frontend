@@ -1,0 +1,14 @@
+[extend]
+useDefault = true
+
+[[rules]]
+id = "generic-api-key"
+[[rules.allowlists]]
+description = "Public apk-tools cache-version markers, not credentials"
+regexTarget = "match"
+regexes = ['''^APK_(?:PREUPGRADE|SELFUPGRADE)_TOKEN=laiNgeiThu6ip1Tf$''']
+# Source app_upgrade.c:19-22,163-164 explains these public cache markers.
+# Exact Alpine apk-tools 3.0.8-r0 vendor patch updates the marker from Te to Tf:
+# https://raw.githubusercontent.com/alpinelinux/aports/4588b452722bd4800efdc6cce4f6e980e02a997f/main/apk-tools/repo-hash-sha1.patch
+# Patch SHA512: 6f6442d73d994964d78f06433a611902cbb066a457f3532544278b1422aa0aa276ccec1f2438ea7e93a8a048d3fdbf72ccd9a79d210f44870fda467bc43cb9fd
+# Source archive SHA512: 3616435508dead5240f8d9fe74e87e2aa93262f9e466f50af8f60100e166403393b1e491c115395864d4179b219699831ecb61dc60960b5dfb1f10816d75f95f

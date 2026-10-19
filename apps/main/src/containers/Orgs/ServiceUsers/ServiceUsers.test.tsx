@@ -52,7 +52,19 @@ describe('ServiceUsers', () => {
     deleteServiceUserRequestSent = false;
     regenerateServiceUserTokenRequestSent = false;
     server.use(
-      getListServiceUsersMockHandler(),
+      getListServiceUsersMockHandler({
+        items: [
+          {
+            id: '11111111-1111-4111-8111-111111111111',
+            display_name: 'Service user',
+            generated_at: '2025-09-24T12:40:13Z',
+            generated_by: 'ffffffff-ffff-ffff-ffff-ffffffffffff',
+            current_token_expires_at: '2027-09-24T12:40:13Z',
+            roles: [{ id: 'c77c670e-8464-4352-9c86-4fef1d523f22' }],
+          },
+        ],
+        next_page_token: undefined,
+      }),
       getListRolesMockHandler({
         items: [
           {
@@ -118,7 +130,7 @@ describe('ServiceUsers', () => {
       </MockProviders>,
     );
 
-    await userEvent.click((await screen.findAllByRole('button', { name: 'Open menu' }))[0]!);
+    await userEvent.click(await screen.findByRole('button', { name: 'Open menu' }));
     await userEvent.click(await screen.findByRole('menuitem', { name: /Delete/ }));
 
     await userEvent.click(await screen.findByRole('button', { name: 'Yes' }));
@@ -134,7 +146,7 @@ describe('ServiceUsers', () => {
       </MockProviders>,
     );
 
-    await userEvent.click((await screen.findAllByRole('button', { name: 'Open menu' }))[0]!);
+    await userEvent.click(await screen.findByRole('button', { name: 'Open menu' }));
     await userEvent.click(await screen.findByRole('menuitem', { name: /Regenerate token/ }));
 
     const dialog = await screen.findByRole('dialog');
@@ -155,10 +167,13 @@ describe('ServiceUsers', () => {
       </MockProviders>,
     );
 
-    await userEvent.click((await screen.findAllByRole('button', { name: 'Open menu' }))[0]!);
-    await userEvent.click(await screen.findByRole('menuitem', { name: /Regenerate token/ }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Open menu' }));
+    const regenerateAction = await screen.findByRole('menuitem', { name: /Regenerate token/ });
+    expect(regenerateAction).toHaveAttribute('aria-disabled', 'true');
+    await userEvent.click(regenerateAction);
 
     expect(screen.queryByText('Regenerate Service User token', { exact: true })).toBeFalsy();
+    expect(regenerateServiceUserTokenRequestSent).toBeFalsy();
   });
 
   it("should disable delete service user action when user doesn't have permissions", async () => {
@@ -169,9 +184,12 @@ describe('ServiceUsers', () => {
       </MockProviders>,
     );
 
-    await userEvent.click((await screen.findAllByRole('button', { name: 'Open menu' }))[1]!);
-    await userEvent.click(await screen.findByRole('menuitem', { name: /Delete/ }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Open menu' }));
+    const deleteAction = await screen.findByRole('menuitem', { name: /Delete/ });
+    expect(deleteAction).toHaveAttribute('aria-disabled', 'true');
+    await userEvent.click(deleteAction);
 
     expect(screen.queryByText('Delete service user', { exact: true })).toBeFalsy();
+    expect(deleteServiceUserRequestSent).toBeFalsy();
   });
 });
