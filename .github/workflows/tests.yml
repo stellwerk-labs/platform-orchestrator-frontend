@@ -101,6 +101,7 @@ jobs:
           python3 scripts/candidate-release_test.py
           python3 scripts/stable-release-preflight_test.py
           python3 scripts/console-release_test.py
+          python3 scripts/release_workflow_test.py
           python3 scripts/console_sbom_test.py
 
       - name: Checkout the exact semantic-release action
@@ -226,7 +227,7 @@ jobs:
 
   build-release-image:
     if: >-
-      always() && needs.check-all-jobs-success.result == 'success' &&
+      !cancelled() && needs.check-all-jobs-success.result == 'success' &&
       ((github.event_name == 'workflow_dispatch' && needs.candidate-preflight.result == 'success') ||
        (github.event_name == 'push' && needs.release.result == 'success' && needs.release.outputs.version != ''))
     needs: [candidate-preflight, release, check-all-jobs-success]
@@ -298,7 +299,11 @@ jobs:
           retention-days: 14
 
   candidate-release:
-    if: github.repository == 'stellwerk-labs/platform-orchestrator-frontend' && github.event_name == 'workflow_dispatch'
+    if: >-
+      !cancelled() && github.repository == 'stellwerk-labs/platform-orchestrator-frontend' &&
+      github.event_name == 'workflow_dispatch' &&
+      needs.candidate-preflight.result == 'success' &&
+      needs.check-all-jobs-success.result == 'success' && needs.build-release-image.result == 'success'
     needs:
       - candidate-preflight
       - check-all-jobs-success
@@ -345,7 +350,10 @@ jobs:
         run: bash scripts/publish-console-artifact.sh "$RUNNER_TEMP/console-release"
 
   stable-publish:
-    if: github.repository == 'stellwerk-labs/platform-orchestrator-frontend' && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.release.outputs.version != ''
+    if: >-
+      !cancelled() && github.repository == 'stellwerk-labs/platform-orchestrator-frontend' &&
+      github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.release.outputs.version != '' &&
+      needs.release.result == 'success' && needs.build-release-image.result == 'success'
     needs: [release, build-release-image]
     runs-on: ubuntu-latest
     timeout-minutes: 30
