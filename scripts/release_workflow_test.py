@@ -32,6 +32,23 @@ def dependencies(job):
     return ()
 
 
+def builder_configuration(job):
+    steps = re.findall(r"^      - uses: docker/setup-buildx-action@([0-9a-f]{40})[^\n]*\n"
+                       r"((?: {8,}[^\n]*\n)+)", job, re.M)
+    if len(steps) != 1 or steps[0][0] != "37fe631027851001ddb9b187196cc803df7f5f0e":
+        raise ValueError("expected the single pinned Buildx setup step")
+    body = steps[0][1]
+    versions = re.findall(r"^          version: (.+)$", body, re.M)
+    options = re.search(r"^          driver-opts: \|\n((?:            [^\n]+\n)+)", body, re.M)
+    if versions != ["v0.38.0"] or not options:
+        raise ValueError("explicit supported Buildx version and creation options required")
+    values = [line.strip() for line in options[1].splitlines()]
+    if values != ["image=moby/buildkit@sha256:cec9f139f45e93c5c69c60f8b07cfad9f43f4ef6b6a6cd917527fea5ff2e3dea",
+                  "provenance-add-gha=false"]:
+        raise ValueError("keep pinned BuildKit and omit only auxiliary GHA context at builder creation")
+    return versions[0], values
+
+
 def ancestors(job):
     found, pending = set(), list(dependencies(job))
     while pending:
@@ -80,6 +97,26 @@ def condition(job, values, changed=None):
 
 
 class ReleaseWorkflowTests(unittest.TestCase):
+    def test_builder_omits_auxiliary_gha_context_without_dropping_attestations(self):
+        version, options = builder_configuration(JOBS["build-release-image"])
+        self.assertEqual(version, "v0.38.0")
+        self.assertIn("provenance-add-gha=false", options)
+        builder = (ROOT / "scripts/build-console-image.sh").read_text()
+        for required in ("--provenance=mode=max", '--sbom="generator=$buildkit_sbom_generator"',
+                         "--no-cache", "--platform linux/amd64,linux/arm64", "timeout -k 5s 300s"):
+            self.assertIn(required, builder)
+        self.assertNotIn("BUILDX_GIT_INFO", builder)
+        self.assertNotIn("BUILDX_NO_DEFAULT_ATTESTATIONS", JOBS["build-release-image"])
+
+    def test_missing_moved_enabled_or_unsupported_builder_option_is_refused(self):
+        job = JOBS["build-release-image"]
+        for changed in (job.replace("v0.38.0", "v0.37.2"),
+                        job.replace("            provenance-add-gha=false\n", ""),
+                        job.replace("provenance-add-gha=false", "provenance-add-gha=true"),
+                        job.replace("            provenance-add-gha=false", "          provenance-add-gha: false")):
+            with self.subTest(changed=changed), self.assertRaises(ValueError):
+                builder_configuration(changed)
+
     def values(self, event, **overrides):
         values = {"needs." + name + ".result": "success" for name in JOBS}
         values.update({"github.repository": release.REPOSITORY, "github.event_name": event,
