@@ -11,11 +11,16 @@ import type {
   N404NotFoundResponse,
   PluginCapability,
 } from '../../../../../models/v2/controlplane';
-import { PluginAvailabilityState } from '../../../../../models/v2/controlplane';
+import {
+  PluginAvailabilityState,
+  PluginContractLevel,
+  PluginGrantScope,
+} from '../../../../../models/v2/controlplane';
 
 export const getGetPluginCapabilityResponseMock = (
   overrideResponse: Partial<PluginCapability> = {},
 ): PluginCapability => ({
+  contract_level: faker.helpers.arrayElement(Object.values(PluginContractLevel)),
   id: faker.string.alpha({ length: { min: 10, max: 20 } }),
   display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
   version: faker.helpers.arrayElement([
@@ -28,6 +33,44 @@ export const getGetPluginCapabilityResponseMock = (
   ),
   admin_action: faker.helpers.arrayElement([
     faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  entitlement: faker.helpers.arrayElement([
+    {
+      grant_scope: faker.helpers.arrayElement([
+        faker.helpers.arrayElement(Object.values(PluginGrantScope)),
+        undefined,
+      ]),
+      features: {
+        [faker.string.alphanumeric(5)]: {
+          state: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          trust_class: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          forward: faker.datatype.boolean(),
+          read: faker.datatype.boolean(),
+          safety: faker.datatype.boolean(),
+          expires_at: faker.helpers.arrayElement([
+            `${faker.date.past().toISOString().split('.')[0]}Z`,
+            undefined,
+          ]),
+          grace_until: faker.helpers.arrayElement([
+            `${faker.date.past().toISOString().split('.')[0]}Z`,
+            undefined,
+          ]),
+        },
+      },
+      warning: faker.helpers.arrayElement([
+        {
+          code: faker.helpers.arrayElement(['plugin_entitlement_grace'] as const),
+          message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          grace_until: `${faker.date.past().toISOString().split('.')[0]}Z`,
+          features: Array.from(
+            { length: faker.number.int({ min: 1, max: 10 }) },
+            (_, i) => i + 1,
+          ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+        },
+        undefined,
+      ]),
+    },
     undefined,
   ]),
   ...overrideResponse,
@@ -36,6 +79,7 @@ export const getGetPluginCapabilityResponseMock = (
 export const getGetPluginCapabilityResponseMock200 = (
   overrideResponse: Partial<PluginCapability> = {},
 ): PluginCapability => ({
+  contract_level: faker.helpers.arrayElement(Object.values(PluginContractLevel)),
   id: faker.string.alpha({ length: { min: 10, max: 20 } }),
   display_name: faker.string.alpha({ length: { min: 10, max: 20 } }),
   version: faker.helpers.arrayElement([
@@ -48,6 +92,44 @@ export const getGetPluginCapabilityResponseMock200 = (
   ),
   admin_action: faker.helpers.arrayElement([
     faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  entitlement: faker.helpers.arrayElement([
+    {
+      grant_scope: faker.helpers.arrayElement([
+        faker.helpers.arrayElement(Object.values(PluginGrantScope)),
+        undefined,
+      ]),
+      features: {
+        [faker.string.alphanumeric(5)]: {
+          state: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          trust_class: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          forward: faker.datatype.boolean(),
+          read: faker.datatype.boolean(),
+          safety: faker.datatype.boolean(),
+          expires_at: faker.helpers.arrayElement([
+            `${faker.date.past().toISOString().split('.')[0]}Z`,
+            undefined,
+          ]),
+          grace_until: faker.helpers.arrayElement([
+            `${faker.date.past().toISOString().split('.')[0]}Z`,
+            undefined,
+          ]),
+        },
+      },
+      warning: faker.helpers.arrayElement([
+        {
+          code: faker.helpers.arrayElement(['plugin_entitlement_grace'] as const),
+          message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          grace_until: `${faker.date.past().toISOString().split('.')[0]}Z`,
+          features: Array.from(
+            { length: faker.number.int({ min: 1, max: 10 }) },
+            (_, i) => i + 1,
+          ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
+        },
+        undefined,
+      ]),
+    },
     undefined,
   ]),
   ...overrideResponse,

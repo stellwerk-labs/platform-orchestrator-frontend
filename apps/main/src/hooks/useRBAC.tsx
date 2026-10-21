@@ -32,7 +32,13 @@ export enum RBACPermission {
   MODULE_VERSION_UNPIN = 'module.version.unpin',
   MODULE_VERSION_PIN_DEFECTIVE = 'module.version.pin-defective',
   RESOURCE_TYPE_WRITE = 'resource_type_write',
+  DEPLOYMENT_WRITE = 'deployment_write',
+  DEPLOYMENT_OUTCOME_ACKNOWLEDGE = 'deployment.outcome.acknowledge',
+  PLUGIN_MANAGER_READ = 'plugin_manager_read',
 }
+
+/** The resource of platform-level permissions, which no organization role grants. */
+export const PLATFORM_RESOURCE = 'platform';
 
 export const permissionAllowed = (
   result: ResourcePermissionCheckResult | undefined,

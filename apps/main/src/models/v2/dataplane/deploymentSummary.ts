@@ -4,6 +4,7 @@
  */
 import type { DeploymentId } from './deploymentId';
 import type { DeploymentMetrics } from './deploymentMetrics';
+import type { EnvironmentFence } from './environmentFence';
 import type { OrganizationId } from './organizationId';
 
 /**
@@ -33,4 +34,5 @@ export interface DeploymentSummary {
   /** A message associated with the 'status'. */
   status_message: string;
   metrics: DeploymentMetrics;
+  environment_fence?: EnvironmentFence;
 }

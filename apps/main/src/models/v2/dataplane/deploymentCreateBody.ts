@@ -5,6 +5,7 @@
 import type { DeploymentCreateBodyMode } from './deploymentCreateBodyMode';
 import type { DeploymentCreateBodyModuleVersions } from './deploymentCreateBodyModuleVersions';
 import type { DeploymentCreateBodyRunnerLogLevel } from './deploymentCreateBodyRunnerLogLevel';
+import type { DeploymentCreateBodyWhenBusy } from './deploymentCreateBodyWhenBusy';
 import type { DeploymentManifest } from './deploymentManifest';
 
 export interface DeploymentCreateBody {
@@ -52,4 +53,31 @@ by the runner.
   is_dry_run?: boolean;
   /** The log level for the runner. */
   runner_log_level?: DeploymentCreateBodyRunnerLogLevel;
+  /** What a deploy or rollback request does when its Environment is busy with another Deployment, has queued requests
+or is still settling the previous Deployment with Core. `queue` (the default) waits in the Environment's
+deployment queue and answers 202 with the queue item. `reject` answers 409 with the error code
+`environment_busy`. A queued request is resolved like a new request when it reaches the head of the queue.
+Requests authorized by an organization token cannot wait and get 409 `environment_busy` either way. Plan-only
+requests and dry runs are never queued and ignore this field.
+   */
+  when_busy?: DeploymentCreateBodyWhenBusy;
+  /**
+   * How long a queued request may wait before it expires. Defaults to the Data Plane's configured queue TTL and must not
+exceed its configured maximum. Not valid with `when_busy` set to `reject`.
+   *
+   * @minimum 1
+   */
+  queue_ttl_seconds?: number;
+  /** Whether a queued request must not start when the Deployment it waited for failed. That Deployment is the
+Environment's last deploy, rollback or destroy at promotion, provided it ended after the request was queued;
+plan runs never count, and a later Deployment supersedes an earlier failure. The request then ends `rejected`
+with the reason code `previous_deployment_failed` and the queue continues with the next request. A request that
+starts at once, a plan-only request and a dry run never halt. Not valid with `when_busy` set to `reject`.
+   */
+  halt_on_failure?: boolean;
+  /** The Deployment the request's manifest was derived from. The request fails with the error code `deployment_base_changed`
+when the Environment's current Deployment differs at the moment the Deployment is created, also when a queued request
+is promoted. Dry runs do not check it.
+   */
+  expected_base_deployment_id?: string;
 }

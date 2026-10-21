@@ -3,9 +3,11 @@
  * Do not edit manually.
  */
 import type { DeploymentDiff } from './deploymentDiff';
+import type { PendingEnvironmentChanges } from './pendingEnvironmentChanges';
 
 export interface DeploymentDryRun {
   /** The Runner ID that this deployment would have executed on */
   runner_id: string;
   diff: DeploymentDiff;
+  pending_changes?: PendingEnvironmentChanges;
 }

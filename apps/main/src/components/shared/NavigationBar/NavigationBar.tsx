@@ -4,6 +4,7 @@ import {
   BookOutlined,
   CodeOutlined,
   ContainerOutlined,
+  ControlOutlined,
   CustomerServiceOutlined,
   DeploymentUnitOutlined,
   ExclamationCircleOutlined,
@@ -22,11 +23,14 @@ import { Link, useLocation, useParams } from 'react-router';
 import { windowEnv } from '@src/config/environment';
 import { MatchParams } from '@src/config/routing';
 import { useGetCurrentUser } from '@src/hooks/react-query/v2/iam/user/user';
+import { PLATFORM_RESOURCE, RBACPermission, useRBACPermissions } from '@src/hooks/useRBAC';
+import { PluginNavigationItems } from '@src/plugins/PluginNavigationItems';
 import { getNavigationMenuMinimized } from '@src/utilities/local-storage';
 import {
   generateEnvironmentTypesUrl,
   generateModulesUrl,
   generateOrgMembersUrl,
+  generatePluginManagerUrl,
   generateProjectsUrl,
   generateProvidersUrl,
   generateResourceTypesUrl,
@@ -42,6 +46,12 @@ const NavigationBar = () => {
   const { orgId: routerOrgId } = useParams<keyof MatchParams>() as MatchParams;
 
   const { data: user } = useGetCurrentUser();
+
+  const pluginManagerCheck = {
+    resource: PLATFORM_RESOURCE,
+    permission: RBACPermission.PLUGIN_MANAGER_READ,
+  };
+  const canReadPluginManager = useRBACPermissions([pluginManagerCheck]).allowed(pluginManagerCheck);
 
   const orgId = routerOrgId ? routerOrgId : user?.organization_memberships?.[0]?.id;
 
@@ -95,6 +105,8 @@ const NavigationBar = () => {
                 Modules
               </Link>
             </Menu.Item>
+
+            {orgId && <PluginNavigationItems orgId={orgId} onKeyDown={handleMenuItemKeyDown} />}
 
             <Menu.Item
               key={'resource-types'}
@@ -175,6 +187,18 @@ const NavigationBar = () => {
             tabIndex={-1}
             inlineIndent={24}
             selectedKeys={[]}>
+            {canReadPluginManager && (
+              <Menu.Item
+                key={'plugin-manager'}
+                icon={<ControlOutlined />}
+                tabIndex={0}
+                onKeyDown={handleMenuItemKeyDown}>
+                <Link to={generatePluginManagerUrl()} tabIndex={-1}>
+                  Plugin Manager
+                </Link>
+              </Menu.Item>
+            )}
+
             {windowEnv.DOCS_URL && (
               <Menu.Item
                 key={'documentation'}

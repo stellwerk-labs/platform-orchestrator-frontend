@@ -1,0 +1,155 @@
+export const pluginUiSdkVersion = '1' as const;
+
+export type PluginAvailabilityState =
+  | 'available'
+  | 'not_installed'
+  | 'not_enabled'
+  | 'not_entitled'
+  | 'incompatible'
+  | 'unavailable';
+
+export type PluginUiMode = 'full' | 'read_only' | 'safety_only' | 'hidden';
+
+export type PluginModuleVersionLifecycleStatus =
+  | 'proposed'
+  | 'default'
+  | 'deprecated'
+  | 'defective';
+
+export type PluginModuleVersionContextValue = '$module_id' | '$semantic_version' | '$version_uuid';
+
+export interface PluginModuleVersionContextualActionDescriptor {
+  id: string;
+  resource_type: 'module_version';
+  label: string;
+  required_operation_id: string;
+  route: {
+    path: string;
+    query?: Record<string, PluginModuleVersionContextValue>;
+  };
+  when: {
+    lifecycle_status: PluginModuleVersionLifecycleStatus[];
+    semantic_version_required: boolean;
+  };
+  primary?: boolean;
+}
+
+export type PluginContextualActionDescriptor = PluginModuleVersionContextualActionDescriptor;
+
+export interface PluginUiDescriptor {
+  sdk_version: typeof pluginUiSdkVersion;
+  origin: string;
+  entrypoint: string;
+  route_prefix: string;
+  navigation_label: string;
+  core_operations?: PluginOperationDescriptor[];
+  contextual_actions?: PluginContextualActionDescriptor[];
+}
+
+// Where the Console runs and where it sends the user's credentialed API calls.
+export interface PluginFrameHost {
+  consoleOrigin: string;
+  // An empty or relative API base URL means the Console's own origin.
+  apiBaseUrl: string;
+  // Vite development builds only: admit loopback plugin UIs over HTTP.
+  allowInsecureLocalhost?: boolean;
+}
+
+export interface PluginOperationDescriptor {
+  id: string;
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  mutating: boolean;
+}
+
+// Display-only projection from Core discovery, never a client authorization token.
+export interface PluginFeatureAccess {
+  state: string;
+  trust_class: '' | 'development' | 'production';
+  forward: boolean;
+  read: boolean;
+  safety: boolean;
+  expires_at?: string;
+  grace_until?: string;
+}
+
+// Display-only licence notice from Core discovery; it never changes authorization.
+export interface PluginEntitlementWarning {
+  code: string;
+  message: string;
+  grace_until: string;
+  features: string[];
+}
+
+export interface PluginDescriptor {
+  id: string;
+  display_name: string;
+  version?: string;
+  state: PluginAvailabilityState;
+  mode: PluginUiMode;
+  ui?: PluginUiDescriptor;
+  operations: PluginOperationDescriptor[];
+  // The warning stays unvalidated here: a malformed notice must never hide the plugin.
+  // Read it through entitlementWarning().
+  entitlement?: { features: Record<string, PluginFeatureAccess>; warning?: unknown };
+}
+
+export interface PluginDiscoveryResponse {
+  items: PluginDescriptor[];
+}
+
+export interface PluginInvocationRequest {
+  operation_id: string;
+  path_parameters?: Record<string, string>;
+  query?: Record<string, string[]>;
+  body?: unknown;
+  idempotency_key?: string;
+}
+
+export interface PluginInvocationResponse {
+  status: number;
+  body: unknown;
+}
+
+export interface PluginBridgeSession {
+  nonce: string;
+  orgId: string;
+  plugin: PluginDescriptor;
+}
+
+export interface PluginReadyMessage {
+  type: 'stellwerk.plugin.ready';
+  sdk_version: typeof pluginUiSdkVersion;
+  nonce: string;
+}
+
+export interface PluginOperationRequestMessage {
+  type: 'stellwerk.plugin.operation.request';
+  sdk_version: typeof pluginUiSdkVersion;
+  nonce: string;
+  request_id: string;
+  org_id: string;
+  operation_id: string;
+  path_parameters?: Record<string, string>;
+  query?: Record<string, string[]>;
+  body?: unknown;
+  idempotency_key?: string;
+}
+
+export interface PluginNavigateMessage {
+  type: 'stellwerk.plugin.navigate';
+  sdk_version: typeof pluginUiSdkVersion;
+  nonce: string;
+  route: string;
+}
+
+export interface PluginNavigateCoreMessage {
+  type: 'stellwerk.plugin.navigate-core';
+  sdk_version: typeof pluginUiSdkVersion;
+  nonce: string;
+  route: string;
+}
+
+export type PluginBridgeRequestMessage =
+  | PluginOperationRequestMessage
+  | PluginNavigateMessage
+  | PluginNavigateCoreMessage;

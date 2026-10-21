@@ -32,6 +32,25 @@ ENV = {"GITHUB_REPOSITORY": release.REPOSITORY, "GITHUB_REF": "refs/heads/main",
 
 
 class ReleaseTests(unittest.TestCase):
+    def test_browser_assets_build_natively_without_changing_target_runtime(self):
+        dockerfile = (ROOT / "apps/main/Dockerfile").read_text()
+        stages = [line for line in dockerfile.splitlines() if line.startswith("FROM ")]
+        self.assertEqual(stages, [
+            "FROM --platform=$BUILDPLATFORM node:22.23.3-bookworm-slim@sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392 AS base",
+            "FROM base AS build",
+            "FROM nginx:1.30.5-alpine@sha256:0985e772fb9f729e6fa0980da05fca5d9c468e870eed43071545afa9d2e27d94 AS apk-inputs",
+            "FROM nginx:1.30.5-alpine-slim@sha256:32463212baf0e7d91aded2e9b843a4f2b9e017804b8c9d5bae7b51dcef64389c",
+        ])
+        self.assertIn('ARG TARGETARCH\n', dockerfile)
+        self.assertIn('RUN sh /inputs/download-runtime-apks.sh "$TARGETARCH" /apks', dockerfile)
+        self.assertEqual([line for line in dockerfile.splitlines()
+                          if line.startswith("COPY --from=build ")], [
+            "COPY --from=build /app/apps/main/dist /app/build",
+            "COPY --from=build /app/apps/main/dist/licenses /licenses",
+            "COPY --from=build /app/scripts/runtime-notices /licenses/runtime-apks",
+        ])
+        self.assertIn("USER 101\n", dockerfile)
+
     def test_runtime_apk_install_does_not_embed_wall_clock_logs(self):
         dockerfile = (ROOT / "apps/main/Dockerfile").read_text()
         final = dockerfile.rsplit("FROM nginx:", 1)[1]

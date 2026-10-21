@@ -3,8 +3,11 @@
  * Do not edit manually.
  */
 import type { PluginAvailabilityState } from './pluginAvailabilityState';
+import type { PluginContractLevel } from './pluginContractLevel';
+import type { PluginEntitlementStatus } from './pluginEntitlementStatus';
 
 export interface PluginCapability {
+  contract_level: PluginContractLevel;
   /** Immutable reverse-DNS plugin identity. */
   id: string;
   display_name: string;
@@ -14,4 +17,5 @@ export interface PluginCapability {
   capabilities: string[];
   /** Scope-safe remediation guidance for an administrator. */
   admin_action?: string;
+  entitlement?: PluginEntitlementStatus;
 }

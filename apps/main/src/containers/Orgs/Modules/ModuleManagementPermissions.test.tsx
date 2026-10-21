@@ -13,6 +13,8 @@ import { getGetResourceTypeQueryKey } from '@src/hooks/react-query/v2/controlpla
 import { getCheckPermissionsQueryKey } from '@src/hooks/react-query/v2/iam/user/user';
 import { RBACPermission } from '@src/hooks/useRBAC';
 import type { ResourcePermissionCheck } from '@src/models/v2/iam';
+import { getListPluginsQueryKey } from '@src/plugins/pluginDiscovery';
+import type { PluginDescriptor } from '@src/plugins/types';
 import { MockProviders } from '@src/testing-utils/MockProviders';
 
 import { ModulePins } from './containers/ModuleDetails/containers/ModulePins';
@@ -38,6 +40,7 @@ const createClient = () => {
     status: 'active',
     previous_default_version_uuid: 'previous',
   });
+  client.setQueryData(getListPluginsQueryKey('atlas'), { items: [] });
   return client;
 };
 
@@ -62,8 +65,10 @@ const renderVersions = (
   grants: RBACPermission[],
   status: 'proposed' | 'default' = 'default',
   semver = '1.1.0',
+  plugins: PluginDescriptor[] = [],
 ) => {
   const client = createClient();
+  client.setQueryData(getListPluginsQueryKey('atlas'), { items: plugins });
   const permissions = [
     RBACPermission.MODULE_VERSION_PUBLISH,
     ...Object.values(moduleVersionActionPermission),
@@ -114,6 +119,47 @@ const renderVersions = (
 };
 
 describe('Module Version action permissions', () => {
+  it('renders an advertised full-mode plugin action inside its registered mount', () => {
+    renderVersions([], 'proposed', '1.1.0', [
+      {
+        id: 'dev.stellwerk.progressive-rollouts',
+        display_name: 'Progressive Rollouts',
+        state: 'available',
+        mode: 'full',
+        ui: {
+          sdk_version: '1',
+          origin: 'https://rollouts-ui.example.net',
+          entrypoint: '/embed',
+          route_prefix: 'rollouts',
+          navigation_label: 'Rollouts',
+          contextual_actions: [
+            {
+              id: 'progressive-rollouts.create',
+              resource_type: 'module_version',
+              label: 'Create Progressive Rollout',
+              required_operation_id: 'createProgressiveRollout',
+              route: {
+                path: 'new',
+                query: { module: '$module_id', version: '$semantic_version' },
+              },
+              when: {
+                lifecycle_status: ['proposed'],
+                semantic_version_required: true,
+              },
+              primary: true,
+            },
+          ],
+        },
+        operations: [{ id: 'createProgressiveRollout', method: 'POST', mutating: true }],
+      },
+    ]);
+
+    expect(screen.getByRole('link', { name: 'Create Progressive Rollout' })).toHaveAttribute(
+      'href',
+      '/orgs/atlas/rollouts/new?module=redis&version=1.1.0',
+    );
+  });
+
   it('keeps lifecycle controls disabled without their exact grants', () => {
     renderVersions([]);
     expect(screen.getByRole('button', { name: 'Publish Module Version' })).toBeDisabled();

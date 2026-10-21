@@ -28,8 +28,12 @@ import type {
   DeploymentDryRun,
   DeploymentEncryptedOutputs,
   DeploymentPage,
+  DeploymentQueueCancelBody,
+  DeploymentQueueItem,
+  DeploymentQueueItemPage,
   DeploymentResultsUpdateBody,
   Error,
+  ListDeploymentQueueItemsParams,
   ListDeploymentsParams,
   ListLastDeploymentsParams,
   N400BadRequestResponse,
@@ -171,6 +175,23 @@ export function useListDeployments<
 }
 
 /**
+ * Deploy and rollback requests mutate the Environment and run one at a time. A request that finds the Environment
+busy waits in the Environment's deployment queue and the response is 202 with the queue item, unless it sets
+`when_busy` to `reject`: then it fails with 409 and the error code `environment_busy`. Requests authorized by an
+organization token cannot wait and always get that 409. Queued requests are promoted strictly in order and
+resolved against the Environment state at promotion.
+ *
+Plan-only requests and dry runs are never queued and ignore `when_busy`, `queue_ttl_seconds` and
+`halt_on_failure`. A dry run is answered while Deployments run or wait. A plan-only request starts while
+requests wait in the queue, but not while a deploy, rollback, destroy or another plan runs, because their Runners
+would contend for the Environment's state lock; it then fails with 409 `environment_busy`. Either response
+carries `pending_changes` when Deployments that run or wait will change the Environment first, so the plan or
+diff may still change.
+ *
+Conflicts carry a stable error code: `environment_busy`, `deployment_queue_full`, `outcome_unreconciled` (a failed
+plugin-dispatched Deployment awaits acknowledgement of its outcome), `environment_deleting` and
+`deployment_base_changed`. Other conflicts keep the code `HTTP-409`.
+ *
  * @summary Create a new deployment in the target project and environment.
  */
 export const createDeployment = (
@@ -179,7 +200,7 @@ export const createDeployment = (
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal,
 ) => {
-  return customInstance<DeploymentDryRun | Deployment>(
+  return customInstance<DeploymentDryRun | Deployment | DeploymentQueueItem>(
     {
       url: `/orgs/${orgId}/deployments`,
       method: 'POST',
@@ -259,6 +280,392 @@ export const useCreateDeployment = <
   TContext
 > => {
   const mutationOptions = getCreateDeploymentMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+/**
+ * @summary List deployment queue items in the organization in queue order.
+ */
+export const listDeploymentQueueItems = (
+  orgId: string,
+  params?: ListDeploymentQueueItemsParams,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<DeploymentQueueItemPage>(
+    { url: `/orgs/${orgId}/deployment-queue`, method: 'GET', params, signal },
+    options,
+  );
+};
+
+export const getListDeploymentQueueItemsQueryKey = (
+  orgId?: string,
+  params?: ListDeploymentQueueItemsParams,
+) => {
+  return [`/orgs/${orgId}/deployment-queue`, ...(params ? [params] : [])] as const;
+};
+
+export const getListDeploymentQueueItemsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listDeploymentQueueItems>>,
+  TError = ErrorType<N400BadRequestResponse>,
+>(
+  orgId: string,
+  params?: ListDeploymentQueueItemsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listDeploymentQueueItems>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListDeploymentQueueItemsQueryKey(orgId, params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listDeploymentQueueItems>>> = ({
+    signal,
+  }) => listDeploymentQueueItems(orgId, params, requestOptions, signal);
+
+  return { queryKey, queryFn, enabled: !!orgId, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listDeploymentQueueItems>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ListDeploymentQueueItemsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listDeploymentQueueItems>>
+>;
+export type ListDeploymentQueueItemsQueryError = ErrorType<N400BadRequestResponse>;
+
+export function useListDeploymentQueueItems<
+  TData = Awaited<ReturnType<typeof listDeploymentQueueItems>>,
+  TError = ErrorType<N400BadRequestResponse>,
+>(
+  orgId: string,
+  params: undefined | ListDeploymentQueueItemsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listDeploymentQueueItems>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listDeploymentQueueItems>>,
+          TError,
+          Awaited<ReturnType<typeof listDeploymentQueueItems>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useListDeploymentQueueItems<
+  TData = Awaited<ReturnType<typeof listDeploymentQueueItems>>,
+  TError = ErrorType<N400BadRequestResponse>,
+>(
+  orgId: string,
+  params?: ListDeploymentQueueItemsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listDeploymentQueueItems>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listDeploymentQueueItems>>,
+          TError,
+          Awaited<ReturnType<typeof listDeploymentQueueItems>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useListDeploymentQueueItems<
+  TData = Awaited<ReturnType<typeof listDeploymentQueueItems>>,
+  TError = ErrorType<N400BadRequestResponse>,
+>(
+  orgId: string,
+  params?: ListDeploymentQueueItemsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listDeploymentQueueItems>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary List deployment queue items in the organization in queue order.
+ */
+
+/**
+ *
+ */
+export function useListDeploymentQueueItems<
+  TData = Awaited<ReturnType<typeof listDeploymentQueueItems>>,
+  TError = ErrorType<N400BadRequestResponse>,
+>(
+  orgId: string,
+  params?: ListDeploymentQueueItemsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listDeploymentQueueItems>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getListDeploymentQueueItemsQueryOptions(orgId, params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
+ * @summary Get a deployment queue item, including the manifest it requested.
+ */
+export const getDeploymentQueueItem = (
+  orgId: string,
+  queueItemId: string,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<DeploymentQueueItem>(
+    { url: `/orgs/${orgId}/deployment-queue/${queueItemId}`, method: 'GET', signal },
+    options,
+  );
+};
+
+export const getGetDeploymentQueueItemQueryKey = (orgId?: string, queueItemId?: string) => {
+  return [`/orgs/${orgId}/deployment-queue/${queueItemId}`] as const;
+};
+
+export const getGetDeploymentQueueItemQueryOptions = <
+  TData = Awaited<ReturnType<typeof getDeploymentQueueItem>>,
+  TError = ErrorType<N404NotFoundResponse>,
+>(
+  orgId: string,
+  queueItemId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getDeploymentQueueItem>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetDeploymentQueueItemQueryKey(orgId, queueItemId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getDeploymentQueueItem>>> = ({ signal }) =>
+    getDeploymentQueueItem(orgId, queueItemId, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!(orgId && queueItemId),
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof getDeploymentQueueItem>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type GetDeploymentQueueItemQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getDeploymentQueueItem>>
+>;
+export type GetDeploymentQueueItemQueryError = ErrorType<N404NotFoundResponse>;
+
+export function useGetDeploymentQueueItem<
+  TData = Awaited<ReturnType<typeof getDeploymentQueueItem>>,
+  TError = ErrorType<N404NotFoundResponse>,
+>(
+  orgId: string,
+  queueItemId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getDeploymentQueueItem>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getDeploymentQueueItem>>,
+          TError,
+          Awaited<ReturnType<typeof getDeploymentQueueItem>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetDeploymentQueueItem<
+  TData = Awaited<ReturnType<typeof getDeploymentQueueItem>>,
+  TError = ErrorType<N404NotFoundResponse>,
+>(
+  orgId: string,
+  queueItemId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getDeploymentQueueItem>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getDeploymentQueueItem>>,
+          TError,
+          Awaited<ReturnType<typeof getDeploymentQueueItem>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetDeploymentQueueItem<
+  TData = Awaited<ReturnType<typeof getDeploymentQueueItem>>,
+  TError = ErrorType<N404NotFoundResponse>,
+>(
+  orgId: string,
+  queueItemId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getDeploymentQueueItem>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary Get a deployment queue item, including the manifest it requested.
+ */
+
+/**
+ *
+ */
+export function useGetDeploymentQueueItem<
+  TData = Awaited<ReturnType<typeof getDeploymentQueueItem>>,
+  TError = ErrorType<N404NotFoundResponse>,
+>(
+  orgId: string,
+  queueItemId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getDeploymentQueueItem>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetDeploymentQueueItemQueryOptions(orgId, queueItemId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
+ * Cancels a request that is still waiting. Requires the `deployment_write` permission on its Environment. Repeating the
+identical cancellation returns the cancelled item. A request that is being promoted at this moment answers 409 with the
+error code `queue_item_dispatching`; read the item again to see whether it was dispatched.
+ *
+ * @summary Cancel a queued deployment request.
+ */
+export const cancelDeploymentQueueItem = (
+  orgId: string,
+  queueItemId: string,
+  deploymentQueueCancelBody?: DeploymentQueueCancelBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<DeploymentQueueItem>(
+    {
+      url: `/orgs/${orgId}/deployment-queue/${queueItemId}/actions/cancel`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: deploymentQueueCancelBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getCancelDeploymentQueueItemMutationOptions = <
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof cancelDeploymentQueueItem>>,
+    TError,
+    { orgId: string; queueItemId: string; data: DeploymentQueueCancelBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof cancelDeploymentQueueItem>>,
+  TError,
+  { orgId: string; queueItemId: string; data: DeploymentQueueCancelBody },
+  TContext
+> => {
+  const mutationKey = ['cancelDeploymentQueueItem'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof cancelDeploymentQueueItem>>,
+    { orgId: string; queueItemId: string; data: DeploymentQueueCancelBody }
+  > = (props) => {
+    const { orgId, queueItemId, data } = props ?? {};
+
+    return cancelDeploymentQueueItem(orgId, queueItemId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CancelDeploymentQueueItemMutationResult = NonNullable<
+  Awaited<ReturnType<typeof cancelDeploymentQueueItem>>
+>;
+export type CancelDeploymentQueueItemMutationBody = DeploymentQueueCancelBody;
+export type CancelDeploymentQueueItemMutationError = ErrorType<
+  N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+/**
+ * @summary Cancel a queued deployment request.
+ */
+export const useCancelDeploymentQueueItem = <
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof cancelDeploymentQueueItem>>,
+      TError,
+      { orgId: string; queueItemId: string; data: DeploymentQueueCancelBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof cancelDeploymentQueueItem>>,
+  TError,
+  { orgId: string; queueItemId: string; data: DeploymentQueueCancelBody },
+  TContext
+> => {
+  const mutationOptions = getCancelDeploymentQueueItemMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };

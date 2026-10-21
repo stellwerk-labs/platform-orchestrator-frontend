@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router';
+import { createBrowserRouter, Outlet } from 'react-router';
 
 import { App as AppRoot } from '@src/AppRoot';
 import { MainLayout } from '@src/components/shared/MainLayout';
@@ -13,6 +13,7 @@ import { SsoLogin } from '@src/containers/Auth/containers/SsoLogin';
 import { Device } from '@src/containers/Device';
 import { AcceptInvite } from '@src/containers/Orgs/AcceptInvite';
 import { Orgs } from '@src/containers/Orgs/Orgs';
+import { pluginManagerRoute } from '@src/containers/Platform/PluginManager/pluginManagerRoute';
 import { ResourceGraphFullPage } from '@src/containers/ResourceGraphFullPage/ResourceGraphFullPage';
 import { RedirectRoot } from '@src/RedirectRoot';
 
@@ -102,6 +103,16 @@ export const router = createBrowserRouter([
             <AcceptInvite />
           </SaasRoute>
         ),
+      },
+      {
+        element: (
+          <PrivateRoute>
+            <MainLayout>
+              <Outlet />
+            </MainLayout>
+          </PrivateRoute>
+        ),
+        children: [pluginManagerRoute],
       },
       {
         path: 'devicelogins/:deviceLoginCode',

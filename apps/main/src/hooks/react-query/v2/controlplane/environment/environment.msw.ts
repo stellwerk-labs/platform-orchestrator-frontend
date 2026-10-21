@@ -7,6 +7,7 @@ import type { RequestHandlerOptions } from 'msw';
 import { http, HttpResponse } from 'msw';
 
 import type {
+  DeploymentOutcomeAcknowledgement,
   Environment,
   EnvironmentDeletionImpact,
   EnvironmentPage,
@@ -843,6 +844,100 @@ export const getUpdateRunnerInAnEnvironmentResponseMock404 = (
 });
 
 export const getUpdateRunnerInAnEnvironmentResponseMock409 = (
+  overrideResponse: Partial<N409ConflictResponse> = {},
+): N409ConflictResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getAcknowledgeDeploymentOutcomeResponseMock = (
+  overrideResponse: Partial<
+    DeploymentOutcomeAcknowledgement | DeploymentOutcomeAcknowledgement
+  > = {},
+): DeploymentOutcomeAcknowledgement | DeploymentOutcomeAcknowledgement =>
+  faker.helpers.arrayElement([
+    {
+      deployment_id: faker.string.uuid(),
+      environment_id: faker.string.uuid(),
+      plugin_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      operation_ref: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      actor_id: faker.string.uuid(),
+      reason: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      acknowledged_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+      replayed: faker.datatype.boolean(),
+      ...overrideResponse,
+    },
+    {
+      deployment_id: faker.string.uuid(),
+      environment_id: faker.string.uuid(),
+      plugin_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      operation_ref: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      actor_id: faker.string.uuid(),
+      reason: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      acknowledged_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+      replayed: faker.datatype.boolean(),
+      ...overrideResponse,
+    },
+  ]);
+
+export const getAcknowledgeDeploymentOutcomeResponseMock200 = (
+  overrideResponse: Partial<DeploymentOutcomeAcknowledgement> = {},
+): DeploymentOutcomeAcknowledgement => ({
+  deployment_id: faker.string.uuid(),
+  environment_id: faker.string.uuid(),
+  plugin_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  operation_ref: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  actor_id: faker.string.uuid(),
+  reason: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  acknowledged_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  replayed: faker.datatype.boolean(),
+  ...overrideResponse,
+});
+
+export const getAcknowledgeDeploymentOutcomeResponseMock201 = (
+  overrideResponse: Partial<DeploymentOutcomeAcknowledgement> = {},
+): DeploymentOutcomeAcknowledgement => ({
+  deployment_id: faker.string.uuid(),
+  environment_id: faker.string.uuid(),
+  plugin_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  operation_ref: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  actor_id: faker.string.uuid(),
+  reason: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  acknowledged_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+  replayed: faker.datatype.boolean(),
+  ...overrideResponse,
+});
+
+export const getAcknowledgeDeploymentOutcomeResponseMock400 = (
+  overrideResponse: Partial<N400BadRequestResponse> = {},
+): N400BadRequestResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getAcknowledgeDeploymentOutcomeResponseMock403 = (
+  overrideResponse: Partial<N403ForbiddenResponse> = {},
+): N403ForbiddenResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getAcknowledgeDeploymentOutcomeResponseMock404 = (
+  overrideResponse: Partial<N404NotFoundResponse> = {},
+): N404NotFoundResponse => ({
+  error: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getAcknowledgeDeploymentOutcomeResponseMock409 = (
   overrideResponse: Partial<N409ConflictResponse> = {},
 ): N409ConflictResponse => ({
   error: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -1875,6 +1970,192 @@ export const getUpdateRunnerInAnEnvironmentMockHandler409 = (
     options,
   );
 };
+
+export const getAcknowledgeDeploymentOutcomeMockHandler = (
+  overrideResponse?:
+    | DeploymentOutcomeAcknowledgement
+    | DeploymentOutcomeAcknowledgement
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) =>
+        | Promise<DeploymentOutcomeAcknowledgement | DeploymentOutcomeAcknowledgement>
+        | DeploymentOutcomeAcknowledgement
+        | DeploymentOutcomeAcknowledgement),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/projects/:projectId/envs/:envId/deployments/:deploymentId/actions/acknowledge-outcome',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getAcknowledgeDeploymentOutcomeResponseMock(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getAcknowledgeDeploymentOutcomeMockHandler200 = (
+  overrideResponse?:
+    | DeploymentOutcomeAcknowledgement
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<DeploymentOutcomeAcknowledgement> | DeploymentOutcomeAcknowledgement),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/projects/:projectId/envs/:envId/deployments/:deploymentId/actions/acknowledge-outcome',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getAcknowledgeDeploymentOutcomeResponseMock200(),
+        ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getAcknowledgeDeploymentOutcomeMockHandler201 = (
+  overrideResponse?:
+    | DeploymentOutcomeAcknowledgement
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<DeploymentOutcomeAcknowledgement> | DeploymentOutcomeAcknowledgement),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/projects/:projectId/envs/:envId/deployments/:deploymentId/actions/acknowledge-outcome',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getAcknowledgeDeploymentOutcomeResponseMock201(),
+        ),
+        { status: 201, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getAcknowledgeDeploymentOutcomeMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/projects/:projectId/envs/:envId/deployments/:deploymentId/actions/acknowledge-outcome',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getAcknowledgeDeploymentOutcomeResponseMock400(),
+        ),
+        { status: 400, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getAcknowledgeDeploymentOutcomeMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/projects/:projectId/envs/:envId/deployments/:deploymentId/actions/acknowledge-outcome',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getAcknowledgeDeploymentOutcomeResponseMock403(),
+        ),
+        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getAcknowledgeDeploymentOutcomeMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/projects/:projectId/envs/:envId/deployments/:deploymentId/actions/acknowledge-outcome',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getAcknowledgeDeploymentOutcomeResponseMock404(),
+        ),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
+
+export const getAcknowledgeDeploymentOutcomeMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/projects/:projectId/envs/:envId/deployments/:deploymentId/actions/acknowledge-outcome',
+    async (info) => {
+      return new HttpResponse(
+        JSON.stringify(
+          overrideResponse !== undefined
+            ? typeof overrideResponse === 'function'
+              ? await overrideResponse(info)
+              : overrideResponse
+            : getAcknowledgeDeploymentOutcomeResponseMock409(),
+        ),
+        { status: 409, headers: { 'Content-Type': 'application/json' } },
+      );
+    },
+    options,
+  );
+};
 export const getEnvironmentMock = () => [
   getListInternalEnvironmentsByProjectUuidMockHandler(),
   getGetInternalEnvironmentByUuidMockHandler(),
@@ -1887,4 +2168,5 @@ export const getEnvironmentMock = () => [
   getListEnvironmentsInOrgMockHandler(),
   getInternalUpdateEnvironmentMockHandler(),
   getUpdateRunnerInAnEnvironmentMockHandler(),
+  getAcknowledgeDeploymentOutcomeMockHandler(),
 ];

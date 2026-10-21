@@ -1,6 +1,5 @@
 import { Navigate, RouteObject, UIMatch } from 'react-router';
 
-import { ErrorPage } from '@src/components/shared/ErrorPage/ErrorPage';
 import { EnvironmentTypes } from '@src/containers/Orgs/EnvironmentTypes/containers/EnvironmentTypes';
 import { MembershipDetails } from '@src/containers/Orgs/OrgMembers/MembershipDetails';
 import { OrgMembers } from '@src/containers/Orgs/OrgMembers/OrgMembers';
@@ -23,6 +22,7 @@ import { Runners } from '@src/containers/Orgs/Runners/Runners';
 import { ServiceUserDetails } from '@src/containers/Orgs/ServiceUsers/ServiceUserDetails';
 import { ServiceUsers } from '@src/containers/Orgs/ServiceUsers/ServiceUsers';
 import { i18n } from '@src/i18n/i18n';
+import { PluginRouteHost } from '@src/plugins/PluginRouteHost';
 import { moduleRoutes } from '@src/router/module-routes';
 import {
   generateOrgMembersUrl,
@@ -239,5 +239,5 @@ export const orgRoutes: RouteObject[] = [
     },
     element: <Profile />,
   },
-  { path: '*', element: <ErrorPage /> },
+  { path: '*', element: <PluginRouteHost /> },
 ];

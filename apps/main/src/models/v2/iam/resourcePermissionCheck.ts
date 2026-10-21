@@ -5,9 +5,9 @@
 
 export interface ResourcePermissionCheck {
   /**
-   * The resource to check permissions on.
+   * The resource to check permissions on; platform for a platform-level permission.
    *
-   * @pattern ^(organization|project|env):[a-zA-Z0-9/_|\-=+]+$
+   * @pattern ^(platform|(organization|project|env):[a-zA-Z0-9/_|\-=+]+)$
    */
   resource: string;
   /**
