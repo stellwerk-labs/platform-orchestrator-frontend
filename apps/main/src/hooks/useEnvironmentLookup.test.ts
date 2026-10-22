@@ -1,19 +1,13 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
-import { setupServer } from 'msw/node';
 import React from 'react';
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { EnvironmentPage, EnvironmentStatus } from '@src/models/v2/controlplane';
+import { server } from '@src/testing-utils/mswServer';
 
 import { useEnvironmentLookup } from './useEnvironmentLookup';
-
-const server = setupServer();
-
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
 
 const createWrapper = () => {
   const queryClient = new QueryClient({

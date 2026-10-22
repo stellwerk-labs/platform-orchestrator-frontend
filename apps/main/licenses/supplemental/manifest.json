@@ -99,10 +99,10 @@
     },
     {
       "name": "@ant-design/icons-svg",
-      "version": "4.4.2",
+      "version": "4.6.0",
       "identifier": "MIT",
-      "integrity": "sha512-vHbT+zJEVzllwP+CM+ul7reTEfBR0vgxFe7+lREAsAA7YGsYpboiq2sQNeQeRvh09GfQgs/GyFEvZpJ9cLXpXA==",
-      "packageJSONSHA256": "abbeb2c3dd7e9aee60522b9cd12f30a91c2a3de39a068a876ee4bb162ea9bf71",
+      "integrity": "sha512-PRomU725ABMf/lnQp5HiB7my1kjEbFY0D10N4lXYxK6TIB1gKjIVD5MRThpDaezLgw1D774J8eOeeDB0M6wHrQ==",
+      "packageJSONSHA256": "ee6d61cc698f7649028257b112de70fa972c2df0e88b25611ec88be2f1f6d32d",
       "notices": [
         {
           "fileName": "LICENSE",
@@ -111,11 +111,11 @@
         }
       ],
       "provenance": {
-        "packageSource": "https://github.com/ant-design/ant-design-icons/tree/038764e4e46499212751a452704f64231fa756ba",
+        "packageSource": "https://github.com/ant-design/ant-design-icons/tree/7f2516ac91226d2b41f93b35cb5197c8d94f7189",
         "note": "The npm package omits the complete repository-root MIT notice. Preserve the notice at its exact npm gitHead, without modifying the installed dependency.",
         "sources": [
           {
-            "url": "https://raw.githubusercontent.com/ant-design/ant-design-icons/038764e4e46499212751a452704f64231fa756ba/LICENSE",
+            "url": "https://raw.githubusercontent.com/ant-design/ant-design-icons/7f2516ac91226d2b41f93b35cb5197c8d94f7189/LICENSE",
             "sha256": "5d367fb0a07340571542eb4ee8eb1add62d37b71bad6786a57c2e9a86bf76c70"
           }
         ]

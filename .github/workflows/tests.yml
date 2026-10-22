@@ -143,7 +143,9 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Check typescript
-        run: pnpm run check-typescript
+        run: |
+          pnpm run test:orval
+          pnpm run check-typescript
 
       - name: Test bundled dependency notices with Vite
         run: |

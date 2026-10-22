@@ -18,8 +18,7 @@ export const getTemporaryLoginResponseMock401 = (
 
 export const getTemporaryLoginMockHandler = (
   overrideResponse?:
-    | null
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<null> | null),
+    null | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<null> | null),
 ) => {
   return http.post('http://localhost:8080/temporary-login', async (info) => {
     await delay(1000);
@@ -32,8 +31,7 @@ export const getTemporaryLoginMockHandler = (
 
 export const getTemporaryLoginMockHandler204 = (
   overrideResponse?:
-    | null
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<null> | null),
+    null | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<null> | null),
 ) => {
   return http.post('http://localhost:8080/temporary-login', async (info) => {
     await delay(1000);
@@ -69,8 +67,7 @@ export const getTemporaryLoginMockHandler401 = (
 
 export const getLogoutMockHandler = (
   overrideResponse?:
-    | null
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<null> | null),
+    null | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<null> | null),
 ) => {
   return http.post('http://localhost:8080/logout', async (info) => {
     await delay(1000);
@@ -83,8 +80,7 @@ export const getLogoutMockHandler = (
 
 export const getLogoutMockHandler204 = (
   overrideResponse?:
-    | null
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<null> | null),
+    null | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<null> | null),
 ) => {
   return http.post('http://localhost:8080/logout', async (info) => {
     await delay(1000);

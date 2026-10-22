@@ -20,7 +20,7 @@ import { initializeAmplitude, optOutAmplitude } from '@src/utilities/tracking';
 export const Profile = () => {
   const { data: user, isFetching: userLoading } = useGetCurrentUser();
   const { data: allUserSessions, isFetching: fetchingUserSessions } = useAllPages(
-    getAllPagesQueryKey(getListUserSessionTokensQueryKey(user?.id)),
+    getAllPagesQueryKey(getListUserSessionTokensQueryKey(user?.id ?? '')),
     (params) => listUserSessionTokens(user?.id ?? '', params),
     undefined,
     { enabled: !!user?.id },
@@ -41,7 +41,7 @@ export const Profile = () => {
       {
         onSuccess: () => {
           queryClient.invalidateQueries({
-            queryKey: getAllPagesQueryKey(getListUserSessionTokensQueryKey(user?.id)),
+            queryKey: getAllPagesQueryKey(getListUserSessionTokensQueryKey(user?.id ?? '')),
           });
           queryClient.invalidateQueries({ queryKey: getGetCurrentUserQueryKey() });
         },

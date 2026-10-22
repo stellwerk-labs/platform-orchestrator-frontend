@@ -2774,7 +2774,8 @@ components:
           x-enum-varnames: [PluginInstallationStateInstalled, PluginInstallationStateActive, PluginInstallationStateDisabled, PluginInstallationStateUninstalled, PluginInstallationStatePurged]
         availability:
           description: Derived from the state, never set. available while active, not_enabled (safety-only) while disabled, unavailable while installed and not yet proven by the running plugin, not_installed once uninstalled or purged.
-          $ref: '#/components/schemas/PluginAvailabilityState'
+          allOf:
+            - $ref: '#/components/schemas/PluginAvailabilityState'
         diagnostic: {$ref: '#/components/schemas/PluginInstallationDiagnostic'}
         observation: {$ref: '#/components/schemas/PluginStatusObservation'}
         backend_url: {type: string}
