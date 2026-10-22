@@ -20,7 +20,14 @@ and analytics SDK versions are kept at the reviewed baseline.
 
 The lockfile still contains braces 3.0.3, which has the high-severity
 [GHSA-vfj7-8cjw-p6xm](https://github.com/micromatch/braces/issues/84) advisory and
-no published upstream fix. It is used by pattern-matching build tools; this is
-not evidence of remote code execution in the deployed browser application.
-Its exposure or replacement needs a separate disposition before security
-qualification is complete. No blanket audit exception is included.
+no published upstream fix. Its remaining dependency path is the existing
+development-only jscpd duplication check, using the repository's checked-in
+patterns. It is not shipped in the browser bundle.
+
+On 22 October 2026 the maintainer accepted this finding only for that build-time
+use of trusted patterns. Keep the advisory and the audit's nonzero result
+visible. This is not a patched-package claim or a blanket audit bypass, and does
+not cover new untrusted patterns or other dependencies. Reassess if the inputs
+or trust boundary change. The existing duplication gate and threshold remain
+enabled. jscpd 5 was not adopted because its Linux native dependency graph also
+contains a known certificate-verification issue.
