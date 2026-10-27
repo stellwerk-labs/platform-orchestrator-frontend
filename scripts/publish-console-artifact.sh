@@ -55,8 +55,10 @@ if [[ "$GITHUB_EVENT_NAME" == workflow_dispatch ]]; then release_args+=(--prerel
 gh release create "$RELEASE_VERSION" "${release_args[@]}" --repo "$GITHUB_REPOSITORY" >/dev/null
 # A verified local tag descriptor preserves OCI media types; digest-only copy
 # can change the descriptor and therefore cannot be used for this boundary.
+printf 'Copying verified OCI graph to reserved Console tag.\n'
 timeout -k 5s 120s oras cp --no-tty --from-oci-layout "$layout:$reference" "$image:$RELEASE_VERSION" >/dev/null
-test "$(oras resolve "$image:$RELEASE_VERSION")" = "$digest"
+printf 'OCI copy accepted; checking read-only registry visibility of the exact graph.\n'
+timeout -k 5s 120s python3 "$root/scripts/registry_visibility.py" "$layout" "$image:$RELEASE_VERSION" "$digest"
 while IFS= read -r subject; do
   cosign_release sign --yes --oidc-provider github-actions "$image@$subject" >/dev/null
   cosign_release verify "${verification[@]}" "$image@$subject" >/dev/null
