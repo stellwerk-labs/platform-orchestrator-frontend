@@ -2,13 +2,18 @@ import { defineConfig, OutputOptions } from 'orval';
 
 const defaultOutputs: Omit<OutputOptions, 'target' | 'schemas'> = {
   mode: 'tags-split',
-  prettier: true,
+  formatter: 'prettier',
   client: 'react-query',
+  httpClient: 'axios',
   mock: {
-    type: 'msw',
-    useExamples: true,
-    baseUrl: 'http://example.com',
-    generateEachHttpStatus: true,
+    generators: [
+      {
+        type: 'msw',
+        useExamples: true,
+        baseUrl: 'http://example.com',
+        generateEachHttpStatus: true,
+      },
+    ],
   },
   override: {
     operations: {

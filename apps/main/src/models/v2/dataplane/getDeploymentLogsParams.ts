@@ -7,7 +7,7 @@ export type GetDeploymentLogsParams = {
   /**
    * The private key needed to decrypt the logs. It should be an 'age' private key (see https://age-encryption.org).
    *
-   * @pattern ^AGE-SECRET-KEY-[A-Z0-9]+$
+   * Pattern: ^AGE-SECRET-KEY-[A-Z0-9]+$
    */
   key?: string;
 };

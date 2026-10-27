@@ -7,7 +7,7 @@ export interface InternalAuthorizeBodyCheck {
   /**
    * The resource to check permissions on.
    *
-   * @pattern ^(organization:.*)$
+   * Pattern: ^(organization:.*)$
    */
   resource: string;
   /** The permission string. */
