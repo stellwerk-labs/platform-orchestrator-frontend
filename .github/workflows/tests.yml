@@ -101,6 +101,7 @@ jobs:
           python3 scripts/candidate-release_test.py
           python3 scripts/stable-release-preflight_test.py
           python3 scripts/console-release_test.py
+          python3 scripts/registry_visibility_test.py
           python3 scripts/release_workflow_test.py
           python3 scripts/console_sbom_test.py
 
