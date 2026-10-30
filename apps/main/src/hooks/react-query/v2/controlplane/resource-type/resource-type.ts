@@ -25,6 +25,8 @@ import type {
   InternalListResourceTypesParams,
   ListAvailableResourceTypesParams,
   ListResourceTypesParams,
+  ListResourceTypeVersions200,
+  ListResourceTypeVersionsParams,
   ModuleReasonedCommand,
   N400BadRequestResponse,
   N403ForbiddenResponse,
@@ -34,6 +36,8 @@ import type {
   ResourceTypeCreateBody,
   ResourceTypePage,
   ResourceTypeUpdateBody,
+  ResourceTypeVersion,
+  ResourceTypeVersionPublishBody,
 } from '../../../../../models/v2/controlplane';
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -1291,3 +1295,425 @@ export const useChangeResourceTypeCatalogueStatus = <
 > => {
   return useMutation(getChangeResourceTypeCatalogueStatusMutationOptions(options), queryClient);
 };
+/**
+ * @summary List immutable Resource Type interface versions
+ */
+export const listResourceTypeVersions = (
+  orgId: string,
+  typeId: string,
+  params?: ListResourceTypeVersionsParams,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ListResourceTypeVersions200>(
+    { url: `/orgs/${orgId}/resource-types/${typeId}/versions`, method: 'GET', params, signal },
+    options,
+  );
+};
+
+export const getListResourceTypeVersionsQueryKey = (
+  orgId: string,
+  typeId: string,
+  params?: ListResourceTypeVersionsParams,
+) => {
+  return [`/orgs/${orgId}/resource-types/${typeId}/versions`, ...(params ? [params] : [])] as const;
+};
+
+export const getListResourceTypeVersionsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listResourceTypeVersions>>,
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  typeId: string,
+  params?: ListResourceTypeVersionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listResourceTypeVersions>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListResourceTypeVersionsQueryKey(orgId, typeId, params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listResourceTypeVersions>>> = ({
+    signal,
+  }) => listResourceTypeVersions(orgId, typeId, params, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: orgId !== null && orgId !== undefined && typeId !== null && typeId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof listResourceTypeVersions>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type ListResourceTypeVersionsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listResourceTypeVersions>>
+>;
+export type ListResourceTypeVersionsQueryError = ErrorType<
+  N400BadRequestResponse | N404NotFoundResponse
+>;
+
+export function useListResourceTypeVersions<
+  TData = Awaited<ReturnType<typeof listResourceTypeVersions>>,
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  typeId: string,
+  params: undefined | ListResourceTypeVersionsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listResourceTypeVersions>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listResourceTypeVersions>>,
+          TError,
+          Awaited<ReturnType<typeof listResourceTypeVersions>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useListResourceTypeVersions<
+  TData = Awaited<ReturnType<typeof listResourceTypeVersions>>,
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  typeId: string,
+  params?: ListResourceTypeVersionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listResourceTypeVersions>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listResourceTypeVersions>>,
+          TError,
+          Awaited<ReturnType<typeof listResourceTypeVersions>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useListResourceTypeVersions<
+  TData = Awaited<ReturnType<typeof listResourceTypeVersions>>,
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  typeId: string,
+  params?: ListResourceTypeVersionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listResourceTypeVersions>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary List immutable Resource Type interface versions
+ */
+
+/**
+ *
+ */
+export function useListResourceTypeVersions<
+  TData = Awaited<ReturnType<typeof listResourceTypeVersions>>,
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse>,
+>(
+  orgId: string,
+  typeId: string,
+  params?: ListResourceTypeVersionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listResourceTypeVersions>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getListResourceTypeVersionsQueryOptions(orgId, typeId, params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+/**
+ * @summary Publish an immutable interface without changing previous contracts
+ */
+export const publishResourceTypeVersion = (
+  orgId: string,
+  typeId: string,
+  resourceTypeVersionPublishBody: ResourceTypeVersionPublishBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ResourceTypeVersion>(
+    {
+      url: `/orgs/${orgId}/resource-types/${typeId}/versions`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: resourceTypeVersionPublishBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getPublishResourceTypeVersionMutationKey = () =>
+  ['publishResourceTypeVersion'] as const;
+
+export const getPublishResourceTypeVersionMutationOptions = <
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof publishResourceTypeVersion>>,
+    TError,
+    PublishResourceTypeVersionMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof publishResourceTypeVersion>>,
+  TError,
+  PublishResourceTypeVersionMutationVariables,
+  TContext
+> => {
+  const mutationKey = getPublishResourceTypeVersionMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof publishResourceTypeVersion>>,
+    PublishResourceTypeVersionMutationVariables
+  > = (props) => {
+    const { orgId, typeId, data } = props ?? {};
+
+    return publishResourceTypeVersion(orgId, typeId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PublishResourceTypeVersionMutationResult = NonNullable<
+  Awaited<ReturnType<typeof publishResourceTypeVersion>>
+>;
+export type PublishResourceTypeVersionMutationBody = ResourceTypeVersionPublishBody;
+export type PublishResourceTypeVersionMutationError = ErrorType<
+  N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+export type PublishResourceTypeVersionMutationVariables = {
+  orgId: string;
+  typeId: string;
+  data: ResourceTypeVersionPublishBody;
+};
+
+/**
+ * @summary Publish an immutable interface without changing previous contracts
+ */
+export const usePublishResourceTypeVersion = <
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof publishResourceTypeVersion>>,
+      TError,
+      PublishResourceTypeVersionMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof publishResourceTypeVersion>>,
+  TError,
+  PublishResourceTypeVersionMutationVariables,
+  TContext
+> => {
+  return useMutation(getPublishResourceTypeVersionMutationOptions(options), queryClient);
+};
+/**
+ * @summary Read an exact immutable Resource Type interface
+ */
+export const getResourceTypeVersion = (
+  orgId: string,
+  typeId: string,
+  resourceTypeVersion: number,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ResourceTypeVersion>(
+    {
+      url: `/orgs/${orgId}/resource-types/${typeId}/versions/${resourceTypeVersion}`,
+      method: 'GET',
+      signal,
+    },
+    options,
+  );
+};
+
+export const getGetResourceTypeVersionQueryKey = (
+  orgId: string,
+  typeId: string,
+  resourceTypeVersion: number,
+) => {
+  return [`/orgs/${orgId}/resource-types/${typeId}/versions/${resourceTypeVersion}`] as const;
+};
+
+export const getGetResourceTypeVersionQueryOptions = <
+  TData = Awaited<ReturnType<typeof getResourceTypeVersion>>,
+  TError = ErrorType<N404NotFoundResponse>,
+>(
+  orgId: string,
+  typeId: string,
+  resourceTypeVersion: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getResourceTypeVersion>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetResourceTypeVersionQueryKey(orgId, typeId, resourceTypeVersion);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getResourceTypeVersion>>> = ({ signal }) =>
+    getResourceTypeVersion(orgId, typeId, resourceTypeVersion, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled:
+      orgId !== null &&
+      orgId !== undefined &&
+      typeId !== null &&
+      typeId !== undefined &&
+      resourceTypeVersion !== null &&
+      resourceTypeVersion !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof getResourceTypeVersion>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type GetResourceTypeVersionQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getResourceTypeVersion>>
+>;
+export type GetResourceTypeVersionQueryError = ErrorType<N404NotFoundResponse>;
+
+export function useGetResourceTypeVersion<
+  TData = Awaited<ReturnType<typeof getResourceTypeVersion>>,
+  TError = ErrorType<N404NotFoundResponse>,
+>(
+  orgId: string,
+  typeId: string,
+  resourceTypeVersion: number,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getResourceTypeVersion>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getResourceTypeVersion>>,
+          TError,
+          Awaited<ReturnType<typeof getResourceTypeVersion>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetResourceTypeVersion<
+  TData = Awaited<ReturnType<typeof getResourceTypeVersion>>,
+  TError = ErrorType<N404NotFoundResponse>,
+>(
+  orgId: string,
+  typeId: string,
+  resourceTypeVersion: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getResourceTypeVersion>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getResourceTypeVersion>>,
+          TError,
+          Awaited<ReturnType<typeof getResourceTypeVersion>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetResourceTypeVersion<
+  TData = Awaited<ReturnType<typeof getResourceTypeVersion>>,
+  TError = ErrorType<N404NotFoundResponse>,
+>(
+  orgId: string,
+  typeId: string,
+  resourceTypeVersion: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getResourceTypeVersion>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary Read an exact immutable Resource Type interface
+ */
+
+/**
+ *
+ */
+export function useGetResourceTypeVersion<
+  TData = Awaited<ReturnType<typeof getResourceTypeVersion>>,
+  TError = ErrorType<N404NotFoundResponse>,
+>(
+  orgId: string,
+  typeId: string,
+  resourceTypeVersion: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getResourceTypeVersion>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetResourceTypeVersionQueryOptions(
+    orgId,
+    typeId,
+    resourceTypeVersion,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}

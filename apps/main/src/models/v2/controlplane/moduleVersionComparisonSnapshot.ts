@@ -10,6 +10,14 @@ import type { ModuleVersionComparisonSnapshotModuleParams } from './moduleVersio
 import type { ModuleVersionComparisonSnapshotProviderMapping } from './moduleVersionComparisonSnapshotProviderMapping.ts';
 
 export interface ModuleVersionComparisonSnapshot {
+  /**
+   * Exact immutable Resource Type interface version, distinct from resource_version concurrency metadata.
+   *
+   * @minimum 1
+   */
+  resource_type_version?: number;
+  /** Immutable identity of the exact Resource Type interface. */
+  resource_type_version_uuid?: string;
   output_schema?: ModuleOutputSchema;
   module_source: string;
   /** @nullable */

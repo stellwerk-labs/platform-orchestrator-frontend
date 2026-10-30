@@ -1402,6 +1402,42 @@ export const getListDeploymentResourceNodesResponseMock404 = (
   ...overrideResponse,
 });
 
+export const getCreateModuleTestDeploymentResponseMock = () =>
+  (() => ({
+    runner_id: 'mock-runner',
+    diff: { changes: [], num_added: 0, num_changed: 0, num_removed: 0 },
+  }))();
+
+export const getCreateModuleTestDeploymentResponseMock200 = () =>
+  (() => ({
+    runner_id: 'mock-runner',
+    diff: { changes: [], num_added: 0, num_changed: 0, num_removed: 0 },
+  }))();
+
+export const getCreateModuleTestDeploymentResponseMock201 = () =>
+  (() => ({
+    runner_id: 'mock-runner',
+    diff: { changes: [], num_added: 0, num_changed: 0, num_removed: 0 },
+  }))();
+
+export const getCreateModuleTestDeploymentResponseMock202 = () =>
+  (() => ({
+    runner_id: 'mock-runner',
+    diff: { changes: [], num_added: 0, num_changed: 0, num_removed: 0 },
+  }))();
+
+export const getCreateModuleTestDeploymentResponseMock400 = () =>
+  (() => ({
+    runner_id: 'mock-runner',
+    diff: { changes: [], num_added: 0, num_changed: 0, num_removed: 0 },
+  }))();
+
+export const getCreateModuleTestDeploymentResponseMock409 = () =>
+  (() => ({
+    runner_id: 'mock-runner',
+    diff: { changes: [], num_added: 0, num_changed: 0, num_removed: 0 },
+  }))();
+
 export const getListDeploymentsMockHandler = (
   overrideResponse?:
     | DeploymentPage
@@ -2764,6 +2800,154 @@ export const getListDeploymentResourceNodesMockHandler404 = (
     options,
   );
 };
+
+export const getCreateModuleTestDeploymentMockHandler = (
+  overrideResponse?:
+    | DeploymentDryRun
+    | Deployment
+    | DeploymentQueueItem
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) =>
+        | Promise<DeploymentDryRun | Deployment | DeploymentQueueItem>
+        | DeploymentDryRun
+        | Deployment
+        | DeploymentQueueItem),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-test-deployments',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getCreateModuleTestDeploymentResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateModuleTestDeploymentMockHandler200 = (
+  overrideResponse?:
+    | DeploymentDryRun
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<DeploymentDryRun> | DeploymentDryRun),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-test-deployments',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getCreateModuleTestDeploymentResponseMock200(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateModuleTestDeploymentMockHandler201 = (
+  overrideResponse?:
+    | Deployment
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<Deployment> | Deployment),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-test-deployments',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getCreateModuleTestDeploymentResponseMock201(),
+        { status: 201 },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateModuleTestDeploymentMockHandler202 = (
+  overrideResponse?:
+    | DeploymentQueueItem
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<DeploymentQueueItem> | DeploymentQueueItem),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-test-deployments',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getCreateModuleTestDeploymentResponseMock202(),
+        { status: 202 },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateModuleTestDeploymentMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-test-deployments',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getCreateModuleTestDeploymentResponseMock400(),
+        { status: 400 },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateModuleTestDeploymentMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/module-test-deployments',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getCreateModuleTestDeploymentResponseMock409(),
+        { status: 409 },
+      );
+    },
+    options,
+  );
+};
 export const getDeploymentMock = () => [
   getListDeploymentsMockHandler(),
   getCreateDeploymentMockHandler(),
@@ -2780,4 +2964,5 @@ export const getDeploymentMock = () => [
   getUpdateDeploymentResultsMockHandler(),
   getGetDeploymentTfMockHandler(),
   getListDeploymentResourceNodesMockHandler(),
+  getCreateModuleTestDeploymentMockHandler(),
 ];

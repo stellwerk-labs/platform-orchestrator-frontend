@@ -28,6 +28,7 @@ import type {
   EnvironmentModuleVersionPinCreateBody,
   ListEnvironmentModuleVersionPinsParams,
   ListModuleCatalogueEntriesParams,
+  ListModuleDraftsParams,
   ListModulesParams,
   ListModuleVersionsParams,
   Module,
@@ -35,6 +36,14 @@ import type {
   ModuleCatalogueEntry,
   ModuleCatalogueUpdateBody,
   ModuleCreateBody,
+  ModuleDraft,
+  ModuleDraftCreateBody,
+  ModuleDraftPage,
+  ModuleDraftPublication,
+  ModuleDraftRevision,
+  ModuleDraftTestCaptureBody,
+  ModuleDraftTestSnapshot,
+  ModuleDraftUpdateBody,
   ModulePage,
   ModuleReasonedCommand,
   ModuleUpdateBody,
@@ -3368,6 +3377,1467 @@ export const useExecuteEnvironmentModuleVersionPinBulkOperation = <
 > => {
   return useMutation(
     getExecuteEnvironmentModuleVersionPinBulkOperationMutationOptions(options),
+    queryClient,
+  );
+};
+/**
+ * @summary List retained authoring Drafts of a Module
+ */
+export const listModuleDrafts = (
+  orgId: string,
+  moduleId: string,
+  params?: ListModuleDraftsParams,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleDraftPage>(
+    { url: `/orgs/${orgId}/modules/${moduleId}/drafts`, method: 'GET', params, signal },
+    options,
+  );
+};
+
+export const getListModuleDraftsQueryKey = (
+  orgId: string,
+  moduleId: string,
+  params?: ListModuleDraftsParams,
+) => {
+  return [`/orgs/${orgId}/modules/${moduleId}/drafts`, ...(params ? [params] : [])] as const;
+};
+
+export const getListModuleDraftsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listModuleDrafts>>,
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+>(
+  orgId: string,
+  moduleId: string,
+  params?: ListModuleDraftsParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listModuleDrafts>>, TError, TData>>;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListModuleDraftsQueryKey(orgId, moduleId, params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listModuleDrafts>>> = ({ signal }) =>
+    listModuleDrafts(orgId, moduleId, params, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: orgId !== null && orgId !== undefined && moduleId !== null && moduleId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof listModuleDrafts>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type ListModuleDraftsQueryResult = NonNullable<Awaited<ReturnType<typeof listModuleDrafts>>>;
+export type ListModuleDraftsQueryError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+export function useListModuleDrafts<
+  TData = Awaited<ReturnType<typeof listModuleDrafts>>,
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+>(
+  orgId: string,
+  moduleId: string,
+  params: undefined | ListModuleDraftsParams,
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof listModuleDrafts>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listModuleDrafts>>,
+          TError,
+          Awaited<ReturnType<typeof listModuleDrafts>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useListModuleDrafts<
+  TData = Awaited<ReturnType<typeof listModuleDrafts>>,
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+>(
+  orgId: string,
+  moduleId: string,
+  params?: ListModuleDraftsParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listModuleDrafts>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listModuleDrafts>>,
+          TError,
+          Awaited<ReturnType<typeof listModuleDrafts>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useListModuleDrafts<
+  TData = Awaited<ReturnType<typeof listModuleDrafts>>,
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+>(
+  orgId: string,
+  moduleId: string,
+  params?: ListModuleDraftsParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listModuleDrafts>>, TError, TData>>;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary List retained authoring Drafts of a Module
+ */
+
+/**
+ *
+ */
+export function useListModuleDrafts<
+  TData = Awaited<ReturnType<typeof listModuleDrafts>>,
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+>(
+  orgId: string,
+  moduleId: string,
+  params?: ListModuleDraftsParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listModuleDrafts>>, TError, TData>>;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getListModuleDraftsQueryOptions(orgId, moduleId, params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+/**
+ * @summary Create an editable Module Draft without publishing a Version
+ */
+export const createModuleDraft = (
+  orgId: string,
+  moduleId: string,
+  moduleDraftCreateBody: ModuleDraftCreateBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleDraft>(
+    {
+      url: `/orgs/${orgId}/modules/${moduleId}/drafts`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: moduleDraftCreateBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getCreateModuleDraftMutationKey = () => ['createModuleDraft'] as const;
+
+export const getCreateModuleDraftMutationOptions = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createModuleDraft>>,
+    TError,
+    CreateModuleDraftMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createModuleDraft>>,
+  TError,
+  CreateModuleDraftMutationVariables,
+  TContext
+> => {
+  const mutationKey = getCreateModuleDraftMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createModuleDraft>>,
+    CreateModuleDraftMutationVariables
+  > = (props) => {
+    const { orgId, moduleId, data } = props ?? {};
+
+    return createModuleDraft(orgId, moduleId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateModuleDraftMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createModuleDraft>>
+>;
+export type CreateModuleDraftMutationBody = ModuleDraftCreateBody;
+export type CreateModuleDraftMutationError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+export type CreateModuleDraftMutationVariables = {
+  orgId: string;
+  moduleId: string;
+  data: ModuleDraftCreateBody;
+};
+
+/**
+ * @summary Create an editable Module Draft without publishing a Version
+ */
+export const useCreateModuleDraft = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createModuleDraft>>,
+      TError,
+      CreateModuleDraftMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof createModuleDraft>>,
+  TError,
+  CreateModuleDraftMutationVariables,
+  TContext
+> => {
+  return useMutation(getCreateModuleDraftMutationOptions(options), queryClient);
+};
+/**
+ * @summary Read a Module Draft
+ */
+export const getModuleDraft = (
+  orgId: string,
+  moduleId: string,
+  draftId: string,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleDraft>(
+    { url: `/orgs/${orgId}/modules/${moduleId}/drafts/${draftId}`, method: 'GET', signal },
+    options,
+  );
+};
+
+export const getGetModuleDraftQueryKey = (orgId: string, moduleId: string, draftId: string) => {
+  return [`/orgs/${orgId}/modules/${moduleId}/drafts/${draftId}`] as const;
+};
+
+export const getGetModuleDraftQueryOptions = <
+  TData = Awaited<ReturnType<typeof getModuleDraft>>,
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+>(
+  orgId: string,
+  moduleId: string,
+  draftId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getModuleDraft>>, TError, TData>>;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetModuleDraftQueryKey(orgId, moduleId, draftId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getModuleDraft>>> = ({ signal }) =>
+    getModuleDraft(orgId, moduleId, draftId, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled:
+      orgId !== null &&
+      orgId !== undefined &&
+      moduleId !== null &&
+      moduleId !== undefined &&
+      draftId !== null &&
+      draftId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof getModuleDraft>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type GetModuleDraftQueryResult = NonNullable<Awaited<ReturnType<typeof getModuleDraft>>>;
+export type GetModuleDraftQueryError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+export function useGetModuleDraft<
+  TData = Awaited<ReturnType<typeof getModuleDraft>>,
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+>(
+  orgId: string,
+  moduleId: string,
+  draftId: string,
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getModuleDraft>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getModuleDraft>>,
+          TError,
+          Awaited<ReturnType<typeof getModuleDraft>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetModuleDraft<
+  TData = Awaited<ReturnType<typeof getModuleDraft>>,
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+>(
+  orgId: string,
+  moduleId: string,
+  draftId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getModuleDraft>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getModuleDraft>>,
+          TError,
+          Awaited<ReturnType<typeof getModuleDraft>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetModuleDraft<
+  TData = Awaited<ReturnType<typeof getModuleDraft>>,
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+>(
+  orgId: string,
+  moduleId: string,
+  draftId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getModuleDraft>>, TError, TData>>;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary Read a Module Draft
+ */
+
+/**
+ *
+ */
+export function useGetModuleDraft<
+  TData = Awaited<ReturnType<typeof getModuleDraft>>,
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+>(
+  orgId: string,
+  moduleId: string,
+  draftId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getModuleDraft>>, TError, TData>>;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetModuleDraftQueryOptions(orgId, moduleId, draftId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+/**
+ * @summary Save a new authoring revision with optimistic concurrency
+ */
+export const updateModuleDraft = (
+  orgId: string,
+  moduleId: string,
+  draftId: string,
+  moduleDraftUpdateBody: ModuleDraftUpdateBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleDraft>(
+    {
+      url: `/orgs/${orgId}/modules/${moduleId}/drafts/${draftId}`,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      data: moduleDraftUpdateBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getUpdateModuleDraftMutationKey = () => ['updateModuleDraft'] as const;
+
+export const getUpdateModuleDraftMutationOptions = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateModuleDraft>>,
+    TError,
+    UpdateModuleDraftMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateModuleDraft>>,
+  TError,
+  UpdateModuleDraftMutationVariables,
+  TContext
+> => {
+  const mutationKey = getUpdateModuleDraftMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateModuleDraft>>,
+    UpdateModuleDraftMutationVariables
+  > = (props) => {
+    const { orgId, moduleId, draftId, data } = props ?? {};
+
+    return updateModuleDraft(orgId, moduleId, draftId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateModuleDraftMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateModuleDraft>>
+>;
+export type UpdateModuleDraftMutationBody = ModuleDraftUpdateBody;
+export type UpdateModuleDraftMutationError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+export type UpdateModuleDraftMutationVariables = {
+  orgId: string;
+  moduleId: string;
+  draftId: string;
+  data: ModuleDraftUpdateBody;
+};
+
+/**
+ * @summary Save a new authoring revision with optimistic concurrency
+ */
+export const useUpdateModuleDraft = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateModuleDraft>>,
+      TError,
+      UpdateModuleDraftMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateModuleDraft>>,
+  TError,
+  UpdateModuleDraftMutationVariables,
+  TContext
+> => {
+  return useMutation(getUpdateModuleDraftMutationOptions(options), queryClient);
+};
+/**
+ * @summary Read an immutable authoring revision
+ */
+export const getModuleDraftRevision = (
+  orgId: string,
+  moduleId: string,
+  draftId: string,
+  draftRevision: number,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleDraftRevision>(
+    {
+      url: `/orgs/${orgId}/modules/${moduleId}/drafts/${draftId}/revisions/${draftRevision}`,
+      method: 'GET',
+      signal,
+    },
+    options,
+  );
+};
+
+export const getGetModuleDraftRevisionQueryKey = (
+  orgId: string,
+  moduleId: string,
+  draftId: string,
+  draftRevision: number,
+) => {
+  return [
+    `/orgs/${orgId}/modules/${moduleId}/drafts/${draftId}/revisions/${draftRevision}`,
+  ] as const;
+};
+
+export const getGetModuleDraftRevisionQueryOptions = <
+  TData = Awaited<ReturnType<typeof getModuleDraftRevision>>,
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+>(
+  orgId: string,
+  moduleId: string,
+  draftId: string,
+  draftRevision: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getModuleDraftRevision>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetModuleDraftRevisionQueryKey(orgId, moduleId, draftId, draftRevision);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getModuleDraftRevision>>> = ({ signal }) =>
+    getModuleDraftRevision(orgId, moduleId, draftId, draftRevision, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled:
+      orgId !== null &&
+      orgId !== undefined &&
+      moduleId !== null &&
+      moduleId !== undefined &&
+      draftId !== null &&
+      draftId !== undefined &&
+      draftRevision !== null &&
+      draftRevision !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof getModuleDraftRevision>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type GetModuleDraftRevisionQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getModuleDraftRevision>>
+>;
+export type GetModuleDraftRevisionQueryError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+export function useGetModuleDraftRevision<
+  TData = Awaited<ReturnType<typeof getModuleDraftRevision>>,
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+>(
+  orgId: string,
+  moduleId: string,
+  draftId: string,
+  draftRevision: number,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getModuleDraftRevision>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getModuleDraftRevision>>,
+          TError,
+          Awaited<ReturnType<typeof getModuleDraftRevision>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetModuleDraftRevision<
+  TData = Awaited<ReturnType<typeof getModuleDraftRevision>>,
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+>(
+  orgId: string,
+  moduleId: string,
+  draftId: string,
+  draftRevision: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getModuleDraftRevision>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getModuleDraftRevision>>,
+          TError,
+          Awaited<ReturnType<typeof getModuleDraftRevision>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetModuleDraftRevision<
+  TData = Awaited<ReturnType<typeof getModuleDraftRevision>>,
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+>(
+  orgId: string,
+  moduleId: string,
+  draftId: string,
+  draftRevision: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getModuleDraftRevision>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary Read an immutable authoring revision
+ */
+
+/**
+ *
+ */
+export function useGetModuleDraftRevision<
+  TData = Awaited<ReturnType<typeof getModuleDraftRevision>>,
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+>(
+  orgId: string,
+  moduleId: string,
+  draftId: string,
+  draftRevision: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getModuleDraftRevision>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetModuleDraftRevisionQueryOptions(
+    orgId,
+    moduleId,
+    draftId,
+    draftRevision,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+/**
+ * @summary Capture one reviewed immutable Draft test definition without executing it
+ */
+export const captureModuleDraftTestSnapshot = (
+  orgId: string,
+  projectId: string,
+  envId: string,
+  moduleId: string,
+  draftId: string,
+  moduleDraftTestCaptureBody: ModuleDraftTestCaptureBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleDraftTestSnapshot>(
+    {
+      url: `/orgs/${orgId}/projects/${projectId}/envs/${envId}/modules/${moduleId}/drafts/${draftId}/test-snapshots`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: moduleDraftTestCaptureBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getCaptureModuleDraftTestSnapshotMutationKey = () =>
+  ['captureModuleDraftTestSnapshot'] as const;
+
+export const getCaptureModuleDraftTestSnapshotMutationOptions = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof captureModuleDraftTestSnapshot>>,
+    TError,
+    CaptureModuleDraftTestSnapshotMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof captureModuleDraftTestSnapshot>>,
+  TError,
+  CaptureModuleDraftTestSnapshotMutationVariables,
+  TContext
+> => {
+  const mutationKey = getCaptureModuleDraftTestSnapshotMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof captureModuleDraftTestSnapshot>>,
+    CaptureModuleDraftTestSnapshotMutationVariables
+  > = (props) => {
+    const { orgId, projectId, envId, moduleId, draftId, data } = props ?? {};
+
+    return captureModuleDraftTestSnapshot(
+      orgId,
+      projectId,
+      envId,
+      moduleId,
+      draftId,
+      data,
+      requestOptions,
+    );
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CaptureModuleDraftTestSnapshotMutationResult = NonNullable<
+  Awaited<ReturnType<typeof captureModuleDraftTestSnapshot>>
+>;
+export type CaptureModuleDraftTestSnapshotMutationBody = ModuleDraftTestCaptureBody;
+export type CaptureModuleDraftTestSnapshotMutationError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+export type CaptureModuleDraftTestSnapshotMutationVariables = {
+  orgId: string;
+  projectId: string;
+  envId: string;
+  moduleId: string;
+  draftId: string;
+  data: ModuleDraftTestCaptureBody;
+};
+
+/**
+ * @summary Capture one reviewed immutable Draft test definition without executing it
+ */
+export const useCaptureModuleDraftTestSnapshot = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof captureModuleDraftTestSnapshot>>,
+      TError,
+      CaptureModuleDraftTestSnapshotMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof captureModuleDraftTestSnapshot>>,
+  TError,
+  CaptureModuleDraftTestSnapshotMutationVariables,
+  TContext
+> => {
+  return useMutation(getCaptureModuleDraftTestSnapshotMutationOptions(options), queryClient);
+};
+/**
+ * @summary Read an immutable Draft test definition in its exact Environment scope
+ */
+export const getModuleDraftTestSnapshot = (
+  orgId: string,
+  projectId: string,
+  envId: string,
+  moduleId: string,
+  snapshotId: string,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleDraftTestSnapshot>(
+    {
+      url: `/orgs/${orgId}/projects/${projectId}/envs/${envId}/modules/${moduleId}/draft-test-snapshots/${snapshotId}`,
+      method: 'GET',
+      signal,
+    },
+    options,
+  );
+};
+
+export const getGetModuleDraftTestSnapshotQueryKey = (
+  orgId: string,
+  projectId: string,
+  envId: string,
+  moduleId: string,
+  snapshotId: string,
+) => {
+  return [
+    `/orgs/${orgId}/projects/${projectId}/envs/${envId}/modules/${moduleId}/draft-test-snapshots/${snapshotId}`,
+  ] as const;
+};
+
+export const getGetModuleDraftTestSnapshotQueryOptions = <
+  TData = Awaited<ReturnType<typeof getModuleDraftTestSnapshot>>,
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+>(
+  orgId: string,
+  projectId: string,
+  envId: string,
+  moduleId: string,
+  snapshotId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getModuleDraftTestSnapshot>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetModuleDraftTestSnapshotQueryKey(orgId, projectId, envId, moduleId, snapshotId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getModuleDraftTestSnapshot>>> = ({
+    signal,
+  }) =>
+    getModuleDraftTestSnapshot(
+      orgId,
+      projectId,
+      envId,
+      moduleId,
+      snapshotId,
+      requestOptions,
+      signal,
+    );
+
+  return {
+    queryKey,
+    queryFn,
+    enabled:
+      orgId !== null &&
+      orgId !== undefined &&
+      projectId !== null &&
+      projectId !== undefined &&
+      envId !== null &&
+      envId !== undefined &&
+      moduleId !== null &&
+      moduleId !== undefined &&
+      snapshotId !== null &&
+      snapshotId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof getModuleDraftTestSnapshot>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type GetModuleDraftTestSnapshotQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getModuleDraftTestSnapshot>>
+>;
+export type GetModuleDraftTestSnapshotQueryError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+
+export function useGetModuleDraftTestSnapshot<
+  TData = Awaited<ReturnType<typeof getModuleDraftTestSnapshot>>,
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+>(
+  orgId: string,
+  projectId: string,
+  envId: string,
+  moduleId: string,
+  snapshotId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getModuleDraftTestSnapshot>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getModuleDraftTestSnapshot>>,
+          TError,
+          Awaited<ReturnType<typeof getModuleDraftTestSnapshot>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetModuleDraftTestSnapshot<
+  TData = Awaited<ReturnType<typeof getModuleDraftTestSnapshot>>,
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+>(
+  orgId: string,
+  projectId: string,
+  envId: string,
+  moduleId: string,
+  snapshotId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getModuleDraftTestSnapshot>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getModuleDraftTestSnapshot>>,
+          TError,
+          Awaited<ReturnType<typeof getModuleDraftTestSnapshot>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetModuleDraftTestSnapshot<
+  TData = Awaited<ReturnType<typeof getModuleDraftTestSnapshot>>,
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+>(
+  orgId: string,
+  projectId: string,
+  envId: string,
+  moduleId: string,
+  snapshotId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getModuleDraftTestSnapshot>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary Read an immutable Draft test definition in its exact Environment scope
+ */
+
+/**
+ *
+ */
+export function useGetModuleDraftTestSnapshot<
+  TData = Awaited<ReturnType<typeof getModuleDraftTestSnapshot>>,
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+>(
+  orgId: string,
+  projectId: string,
+  envId: string,
+  moduleId: string,
+  snapshotId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getModuleDraftTestSnapshot>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetModuleDraftTestSnapshotQueryOptions(
+    orgId,
+    projectId,
+    envId,
+    moduleId,
+    snapshotId,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+/**
+ * @summary Publish exactly the reviewed stored Draft revision as Proposed
+ */
+export const publishModuleDraft = (
+  orgId: string,
+  moduleId: string,
+  draftId: string,
+  moduleReasonedCommand: ModuleReasonedCommand,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleDraftPublication>(
+    {
+      url: `/orgs/${orgId}/modules/${moduleId}/drafts/${draftId}/publish`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: moduleReasonedCommand,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getPublishModuleDraftMutationKey = () => ['publishModuleDraft'] as const;
+
+export const getPublishModuleDraftMutationOptions = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof publishModuleDraft>>,
+    TError,
+    PublishModuleDraftMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof publishModuleDraft>>,
+  TError,
+  PublishModuleDraftMutationVariables,
+  TContext
+> => {
+  const mutationKey = getPublishModuleDraftMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof publishModuleDraft>>,
+    PublishModuleDraftMutationVariables
+  > = (props) => {
+    const { orgId, moduleId, draftId, data } = props ?? {};
+
+    return publishModuleDraft(orgId, moduleId, draftId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PublishModuleDraftMutationResult = NonNullable<
+  Awaited<ReturnType<typeof publishModuleDraft>>
+>;
+export type PublishModuleDraftMutationBody = ModuleReasonedCommand;
+export type PublishModuleDraftMutationError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+export type PublishModuleDraftMutationVariables = {
+  orgId: string;
+  moduleId: string;
+  draftId: string;
+  data: ModuleReasonedCommand;
+};
+
+/**
+ * @summary Publish exactly the reviewed stored Draft revision as Proposed
+ */
+export const usePublishModuleDraft = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof publishModuleDraft>>,
+      TError,
+      PublishModuleDraftMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof publishModuleDraft>>,
+  TError,
+  PublishModuleDraftMutationVariables,
+  TContext
+> => {
+  return useMutation(getPublishModuleDraftMutationOptions(options), queryClient);
+};
+/**
+ * @summary Discard an open Draft while retaining its authoring history
+ */
+export const discardModuleDraft = (
+  orgId: string,
+  moduleId: string,
+  draftId: string,
+  moduleReasonedCommand: ModuleReasonedCommand,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ModuleDraft>(
+    {
+      url: `/orgs/${orgId}/modules/${moduleId}/drafts/${draftId}/discard`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: moduleReasonedCommand,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getDiscardModuleDraftMutationKey = () => ['discardModuleDraft'] as const;
+
+export const getDiscardModuleDraftMutationOptions = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof discardModuleDraft>>,
+    TError,
+    DiscardModuleDraftMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof discardModuleDraft>>,
+  TError,
+  DiscardModuleDraftMutationVariables,
+  TContext
+> => {
+  const mutationKey = getDiscardModuleDraftMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof discardModuleDraft>>,
+    DiscardModuleDraftMutationVariables
+  > = (props) => {
+    const { orgId, moduleId, draftId, data } = props ?? {};
+
+    return discardModuleDraft(orgId, moduleId, draftId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DiscardModuleDraftMutationResult = NonNullable<
+  Awaited<ReturnType<typeof discardModuleDraft>>
+>;
+export type DiscardModuleDraftMutationBody = ModuleReasonedCommand;
+export type DiscardModuleDraftMutationError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+export type DiscardModuleDraftMutationVariables = {
+  orgId: string;
+  moduleId: string;
+  draftId: string;
+  data: ModuleReasonedCommand;
+};
+
+/**
+ * @summary Discard an open Draft while retaining its authoring history
+ */
+export const useDiscardModuleDraft = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof discardModuleDraft>>,
+      TError,
+      DiscardModuleDraftMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof discardModuleDraft>>,
+  TError,
+  DiscardModuleDraftMutationVariables,
+  TContext
+> => {
+  return useMutation(getDiscardModuleDraftMutationOptions(options), queryClient);
+};
+/**
+ * @summary Publish an explicit interface-bound Module Version through a capability-specific route
+ */
+export const publishModuleVersionWithInterface = (
+  orgId: string,
+  moduleId: string,
+  moduleVersionPublishBody: ModuleVersionPublishBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<CoreModuleVersion>(
+    {
+      url: `/orgs/${orgId}/modules/${moduleId}/version-publications`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: moduleVersionPublishBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getPublishModuleVersionWithInterfaceMutationKey = () =>
+  ['publishModuleVersionWithInterface'] as const;
+
+export const getPublishModuleVersionWithInterfaceMutationOptions = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof publishModuleVersionWithInterface>>,
+    TError,
+    PublishModuleVersionWithInterfaceMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof publishModuleVersionWithInterface>>,
+  TError,
+  PublishModuleVersionWithInterfaceMutationVariables,
+  TContext
+> => {
+  const mutationKey = getPublishModuleVersionWithInterfaceMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof publishModuleVersionWithInterface>>,
+    PublishModuleVersionWithInterfaceMutationVariables
+  > = (props) => {
+    const { orgId, moduleId, data } = props ?? {};
+
+    return publishModuleVersionWithInterface(orgId, moduleId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PublishModuleVersionWithInterfaceMutationResult = NonNullable<
+  Awaited<ReturnType<typeof publishModuleVersionWithInterface>>
+>;
+export type PublishModuleVersionWithInterfaceMutationBody = ModuleVersionPublishBody;
+export type PublishModuleVersionWithInterfaceMutationError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+export type PublishModuleVersionWithInterfaceMutationVariables = {
+  orgId: string;
+  moduleId: string;
+  data: ModuleVersionPublishBody;
+};
+
+/**
+ * @summary Publish an explicit interface-bound Module Version through a capability-specific route
+ */
+export const usePublishModuleVersionWithInterface = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof publishModuleVersionWithInterface>>,
+      TError,
+      PublishModuleVersionWithInterfaceMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof publishModuleVersionWithInterface>>,
+  TError,
+  PublishModuleVersionWithInterfaceMutationVariables,
+  TContext
+> => {
+  return useMutation(getPublishModuleVersionWithInterfaceMutationOptions(options), queryClient);
+};
+/**
+ * @summary Atomically publish a stable successor and deprecate the exact Proposed prerelease
+ */
+export const publishStableModuleVersionSuccessorWithInterface = (
+  orgId: string,
+  moduleId: string,
+  moduleVersionId: string,
+  stableModuleVersionSuccessorBody: StableModuleVersionSuccessorBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<StableModuleVersionSuccessorResult>(
+    {
+      url: `/orgs/${orgId}/modules/${moduleId}/versions/${moduleVersionId}/successor-publications`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: stableModuleVersionSuccessorBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getPublishStableModuleVersionSuccessorWithInterfaceMutationKey = () =>
+  ['publishStableModuleVersionSuccessorWithInterface'] as const;
+
+export const getPublishStableModuleVersionSuccessorWithInterfaceMutationOptions = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof publishStableModuleVersionSuccessorWithInterface>>,
+    TError,
+    PublishStableModuleVersionSuccessorWithInterfaceMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof publishStableModuleVersionSuccessorWithInterface>>,
+  TError,
+  PublishStableModuleVersionSuccessorWithInterfaceMutationVariables,
+  TContext
+> => {
+  const mutationKey = getPublishStableModuleVersionSuccessorWithInterfaceMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof publishStableModuleVersionSuccessorWithInterface>>,
+    PublishStableModuleVersionSuccessorWithInterfaceMutationVariables
+  > = (props) => {
+    const { orgId, moduleId, moduleVersionId, data } = props ?? {};
+
+    return publishStableModuleVersionSuccessorWithInterface(
+      orgId,
+      moduleId,
+      moduleVersionId,
+      data,
+      requestOptions,
+    );
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PublishStableModuleVersionSuccessorWithInterfaceMutationResult = NonNullable<
+  Awaited<ReturnType<typeof publishStableModuleVersionSuccessorWithInterface>>
+>;
+export type PublishStableModuleVersionSuccessorWithInterfaceMutationBody =
+  StableModuleVersionSuccessorBody;
+export type PublishStableModuleVersionSuccessorWithInterfaceMutationError = ErrorType<
+  N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+>;
+export type PublishStableModuleVersionSuccessorWithInterfaceMutationVariables = {
+  orgId: string;
+  moduleId: string;
+  moduleVersionId: string;
+  data: StableModuleVersionSuccessorBody;
+};
+
+/**
+ * @summary Atomically publish a stable successor and deprecate the exact Proposed prerelease
+ */
+export const usePublishStableModuleVersionSuccessorWithInterface = <
+  TError = ErrorType<
+    N400BadRequestResponse | N403ForbiddenResponse | N404NotFoundResponse | N409ConflictResponse
+  >,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof publishStableModuleVersionSuccessorWithInterface>>,
+      TError,
+      PublishStableModuleVersionSuccessorWithInterfaceMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof publishStableModuleVersionSuccessorWithInterface>>,
+  TError,
+  PublishStableModuleVersionSuccessorWithInterfaceMutationVariables,
+  TContext
+> => {
+  return useMutation(
+    getPublishStableModuleVersionSuccessorWithInterfaceMutationOptions(options),
     queryClient,
   );
 };

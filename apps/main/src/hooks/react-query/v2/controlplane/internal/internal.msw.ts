@@ -714,6 +714,11 @@ export const getGenerateInternalModuleCatalogueResponseMock = (
           },
         },
         ...{
+          resource_type_version: faker.helpers.arrayElement([
+            faker.number.int({ min: 1 }),
+            undefined,
+          ]),
+          resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
           output_schema: faker.helpers.arrayElement([{}, undefined]),
           module_params: {
             [faker.string.alphanumeric(5)]: {
@@ -807,6 +812,11 @@ export const getGenerateInternalModuleCatalogueResponseMock200 = (
           },
         },
         ...{
+          resource_type_version: faker.helpers.arrayElement([
+            faker.number.int({ min: 1 }),
+            undefined,
+          ]),
+          resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
           output_schema: faker.helpers.arrayElement([{}, undefined]),
           module_params: {
             [faker.string.alphanumeric(5)]: {

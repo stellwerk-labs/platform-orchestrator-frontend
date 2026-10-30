@@ -195,6 +195,8 @@ export function useListModuleRulesInOrg<
 }
 
 /**
+ * A Module without a Default requires both project_id and env_id, so first-implementation tests cannot introduce an unresolved global Rule that blocks other Environments. Rules never implicitly select a Draft. Publish a Default before creating broader Rules.
+ *
  * @summary Create a new module rule in the org
  */
 export const createModuleRuleInOrg = (

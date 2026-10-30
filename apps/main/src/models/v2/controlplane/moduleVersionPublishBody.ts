@@ -10,6 +10,12 @@ import type { ModuleVersionPublishBodyModuleParams } from './moduleVersionPublis
 import type { ModuleVersionPublishBodyProviderMapping } from './moduleVersionPublishBodyProviderMapping.ts';
 
 export interface ModuleVersionPublishBody {
+  /**
+   * Exact Resource Type interface version. Omission retains version 1 and never selects latest.
+   *
+   * @minimum 1
+   */
+  resource_type_version?: number;
   output_schema?: ModuleOutputSchema;
   /** @pattern ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$ */
   semantic_version: string;

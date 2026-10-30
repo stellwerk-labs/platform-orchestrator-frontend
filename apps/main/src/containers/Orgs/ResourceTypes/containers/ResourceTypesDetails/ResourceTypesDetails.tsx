@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Flex, Input, message, Modal, Spin, Tabs, Tag } from 'antd';
 import React, { useRef, useState } from 'react';
-import { Outlet, useNavigate, useParams } from 'react-router';
+import { Outlet, useMatch, useNavigate, useParams } from 'react-router';
 
 import { ErrorPage } from '@src/components/shared/ErrorPage/ErrorPage';
 import { PageHeader } from '@src/components/shared/PageHeader/PageHeader';
@@ -20,6 +20,7 @@ export const ResourceTypesDetails = () => {
   // router
   const { orgId, resourceTypeId } = useParams<keyof MatchParams>() as MatchParams;
   const navigate = useNavigate();
+  const tab = useMatch('/orgs/:orgId/resource-types/:resourceTypeId/:tab/*');
   const queryClient = useQueryClient();
   const [messageApi, messageContext] = message.useMessage();
   const [catalogueModalOpen, setCatalogueModalOpen] = useState(false);
@@ -102,12 +103,14 @@ export const ResourceTypesDetails = () => {
         />
       )}
       <Tabs
+        activeKey={tab?.params.tab ?? 'schema'}
         onChange={(key) => navigate(key)}
         items={[
           {
-            label: 'Schema',
+            label: 'Schema (interface 1)',
             key: 'schema',
           },
+          { label: 'Interface versions', key: 'versions' },
         ]}
       />
       <Outlet />

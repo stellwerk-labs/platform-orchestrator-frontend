@@ -36,6 +36,7 @@ import type {
   ListDeploymentQueueItemsParams,
   ListDeploymentsParams,
   ListLastDeploymentsParams,
+  ModuleTestDeploymentCreateBody,
   N400BadRequestResponse,
   N404NotFoundResponse,
   N409ConflictResponse,
@@ -2053,3 +2054,118 @@ export function useListDeploymentResourceNodes<
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+/**
+ * Deploy and rollback requests mutate the Environment and run one at a time. A request that finds the Environment
+ * busy waits in the Environment's deployment queue and the response is 202 with the queue item, unless it sets
+ * `when_busy` to `reject`: then it fails with 409 and the error code `environment_busy`. Requests authorized by an
+ * organization token cannot wait and always get that 409. Queued requests are promoted strictly in order and
+ * resolved against the Environment state at promotion.
+ *
+ * Plan-only requests and dry runs are never queued and ignore `when_busy`, `queue_ttl_seconds` and
+ * `halt_on_failure`. A dry run is answered while Deployments run or wait. A plan-only request starts while
+ * requests wait in the queue, but not while a deploy, rollback, destroy or another plan runs, because their Runners
+ * would contend for the Environment's state lock; it then fails with 409 `environment_busy`. Either response
+ * carries `pending_changes` when Deployments that run or wait will change the Environment first, so the plan or
+ * diff may still change.
+ *
+ * Conflicts carry a stable error code: `environment_busy`, `deployment_queue_full`, `outcome_unreconciled` (a failed
+ * plugin-dispatched Deployment awaits acknowledgement of its outcome), `environment_deleting` and
+ * `deployment_base_changed`. Other conflicts keep the code `HTTP-409`.
+ *
+ * @summary Create a new deployment in the target project and environment.
+ */
+export const createModuleTestDeployment = (
+  orgId: string,
+  moduleTestDeploymentCreateBody: ModuleTestDeploymentCreateBody,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<DeploymentDryRun | Deployment | DeploymentQueueItem>(
+    {
+      url: `/orgs/${orgId}/module-test-deployments`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: moduleTestDeploymentCreateBody,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getCreateModuleTestDeploymentMutationKey = () =>
+  ['createModuleTestDeployment'] as const;
+
+export const getCreateModuleTestDeploymentMutationOptions = <
+  TError = ErrorType<N400BadRequestResponse | N409ConflictResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createModuleTestDeployment>>,
+    TError,
+    CreateModuleTestDeploymentMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createModuleTestDeployment>>,
+  TError,
+  CreateModuleTestDeploymentMutationVariables,
+  TContext
+> => {
+  const mutationKey = getCreateModuleTestDeploymentMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createModuleTestDeployment>>,
+    CreateModuleTestDeploymentMutationVariables
+  > = (props) => {
+    const { orgId, data } = props ?? {};
+
+    return createModuleTestDeployment(orgId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateModuleTestDeploymentMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createModuleTestDeployment>>
+>;
+export type CreateModuleTestDeploymentMutationBody = ModuleTestDeploymentCreateBody;
+export type CreateModuleTestDeploymentMutationError = ErrorType<
+  N400BadRequestResponse | N409ConflictResponse
+>;
+export type CreateModuleTestDeploymentMutationVariables = {
+  orgId: string;
+  data: ModuleTestDeploymentCreateBody;
+};
+
+/**
+ * @summary Create a new deployment in the target project and environment.
+ */
+export const useCreateModuleTestDeployment = <
+  TError = ErrorType<N400BadRequestResponse | N409ConflictResponse>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createModuleTestDeployment>>,
+      TError,
+      CreateModuleTestDeploymentMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof createModuleTestDeployment>>,
+  TError,
+  CreateModuleTestDeploymentMutationVariables,
+  TContext
+> => {
+  return useMutation(getCreateModuleTestDeploymentMutationOptions(options), queryClient);
+};
