@@ -7,6 +7,14 @@ import type { ModuleVerificationStatus } from './moduleVerificationStatus.ts';
 import type { ModuleVersionSemanticStatus } from './moduleVersionSemanticStatus.ts';
 
 export interface CoreModuleVersion {
+  /**
+   * Exact immutable Resource Type interface version, distinct from resource_version concurrency metadata.
+   *
+   * @minimum 1
+   */
+  resource_type_version?: number;
+  /** Immutable identity of the exact Resource Type interface. */
+  resource_type_version_uuid?: string;
   org_id: string;
   module_uuid: string;
   module_slug: string;

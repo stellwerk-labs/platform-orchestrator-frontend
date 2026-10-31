@@ -229,6 +229,20 @@ describe('Module Version history error states', () => {
 });
 
 describe('Module Version comparison', () => {
+  it('keeps the exact interface when cloning a published definition', () => {
+    const detail = {
+      version: { semantic_version: '1.0.0' },
+      definition: { module_source: 'inline', resource_type_version: 2 },
+    } as CoreModuleVersionDetail;
+    expect(publicationBodyFromDetail(detail).resource_type_version).toBe(2);
+    expect(
+      publicationBodyFromDetail({
+        ...detail,
+        definition: { ...detail.definition, resource_type_version: undefined },
+      }),
+    ).not.toHaveProperty('resource_type_version');
+  });
+
   it('preserves an explicit empty output declaration and does not invent a digest', () => {
     const detail = {
       version: { semantic_version: '1.0.0', artifact_digest: '', source_revision: 'release-one' },

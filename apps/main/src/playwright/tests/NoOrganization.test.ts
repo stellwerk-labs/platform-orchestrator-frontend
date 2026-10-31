@@ -4,7 +4,6 @@ import {
   getCreateOrganizationResponseMock,
 } from '@src/hooks/react-query/v2/controlplane/organization/organization.msw';
 import { getListProjectsMockHandler } from '@src/hooks/react-query/v2/controlplane/project/project.msw';
-import { getListSandboxesMockHandler } from '@src/hooks/react-query/v2/controlplane/sandboxes/sandboxes.msw';
 import {
   getGetCurrentUserMockHandler,
   getGetCurrentUserResponseMock,
@@ -35,7 +34,6 @@ test('auto-creates an organization when user has none and redirects to it', asyn
       return createdOrg;
     }),
     getListProjectsMockHandler(),
-    getListSandboxesMockHandler({ items: [] }),
   );
 
   await page.goto('/');

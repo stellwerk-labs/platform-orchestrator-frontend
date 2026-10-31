@@ -11,6 +11,7 @@ import { ProvidersList } from '@src/containers/Orgs/Providers/containers/Provide
 import { Providers } from '@src/containers/Orgs/Providers/Providers';
 import { ResourceTypes } from '@src/containers/Orgs/ResourceTypes/containers/ResourceTypes';
 import { ResourceTypeSchema } from '@src/containers/Orgs/ResourceTypes/containers/ResourceTypesDetails/containers/ResourceTypeSchema';
+import { ResourceTypeVersions } from '@src/containers/Orgs/ResourceTypes/containers/ResourceTypesDetails/containers/ResourceTypeVersions';
 import { ResourceTypesDetails } from '@src/containers/Orgs/ResourceTypes/containers/ResourceTypesDetails/ResourceTypesDetails';
 import { Roles } from '@src/containers/Orgs/Roles/Roles';
 import { RunnerConfiguration } from '@src/containers/Orgs/Runners/containers/RunnerDetails/components/RunnerConfiguration';
@@ -66,6 +67,7 @@ export const orgRoutes: RouteObject[] = [
         path: 'schema',
         element: <ResourceTypeSchema />,
       },
+      { path: 'versions', element: <ResourceTypeVersions /> },
     ],
     handle: {
       crumbs: (match: UIMatch) => [

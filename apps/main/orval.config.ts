@@ -30,6 +30,14 @@ const defaultOutputs: Omit<OutputOptions, 'target' | 'schemas'> = {
           }),
         },
       },
+      createModuleTestDeployment: {
+        mock: {
+          data: () => ({
+            runner_id: 'mock-runner',
+            diff: { changes: [], num_added: 0, num_changed: 0, num_removed: 0 },
+          }),
+        },
+      },
     },
     mutator: {
       path: './src/custom-instance.ts',

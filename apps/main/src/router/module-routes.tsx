@@ -1,6 +1,7 @@
 import { Navigate, RouteObject, UIMatch } from 'react-router';
 
 import { ModuleConfiguration } from '@src/containers/Orgs/Modules/containers/ModuleDetails/containers/ModuleConfiguration';
+import { ModuleDrafts } from '@src/containers/Orgs/Modules/containers/ModuleDetails/containers/ModuleDrafts';
 import { ModulePins } from '@src/containers/Orgs/Modules/containers/ModuleDetails/containers/ModulePins';
 import { ModuleRules } from '@src/containers/Orgs/Modules/containers/ModuleDetails/containers/ModuleRules/ModuleRules';
 import { ModuleVersions } from '@src/containers/Orgs/Modules/containers/ModuleDetails/containers/ModuleVersions';
@@ -43,6 +44,7 @@ export const moduleRoutes: RouteObject[] = [
         path: 'configuration',
         element: <ModuleConfiguration />,
       },
+      { path: 'drafts', element: <ModuleDrafts /> },
       {
         path: 'versions',
         element: <ModuleVersions />,

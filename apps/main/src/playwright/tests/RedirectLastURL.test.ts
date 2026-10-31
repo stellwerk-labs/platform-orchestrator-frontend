@@ -1,5 +1,4 @@
 import { getListProjectsMockHandler } from '@src/hooks/react-query/v2/controlplane/project/project.msw';
-import { getListSandboxesMockHandler } from '@src/hooks/react-query/v2/controlplane/sandboxes/sandboxes.msw';
 import { getGetInvitationMockHandler } from '@src/hooks/react-query/v2/iam/invitation/invitation.msw';
 import {
   getGetCurrentUserMockHandler,
@@ -51,7 +50,6 @@ test('should not save last visited url if the route does not exist', async ({ pa
       dismissed_prompts: ['welcome-page'],
     }),
     getListProjectsMockHandler(),
-    getListSandboxesMockHandler({ items: [] }),
   );
 
   // Navigate to a non-existent route (will be handled by wildcard)

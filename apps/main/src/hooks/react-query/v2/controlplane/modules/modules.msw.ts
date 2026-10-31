@@ -13,6 +13,11 @@ import type {
   EnvironmentModuleVersionPin,
   Module,
   ModuleCatalogueEntry,
+  ModuleDraft,
+  ModuleDraftPage,
+  ModuleDraftPublication,
+  ModuleDraftRevision,
+  ModuleDraftTestSnapshot,
   ModulePage,
   ModuleVersionComparison,
   ModuleVersionLifecycleEvent,
@@ -105,6 +110,8 @@ export const getCreateModuleResponseMock = (): Module => ({
     },
   },
   ...{
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
     output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_params: {
       [faker.string.alphanumeric(5)]: {
@@ -157,6 +164,8 @@ export const getCreateModuleResponseMock201 = (): Module => ({
     },
   },
   ...{
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
     output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_params: {
       [faker.string.alphanumeric(5)]: {
@@ -227,6 +236,8 @@ export const getGetModuleResponseMock = (): Module => ({
     },
   },
   ...{
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
     output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_params: {
       [faker.string.alphanumeric(5)]: {
@@ -279,6 +290,8 @@ export const getGetModuleResponseMock200 = (): Module => ({
     },
   },
   ...{
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
     output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_params: {
       [faker.string.alphanumeric(5)]: {
@@ -340,6 +353,8 @@ export const getUpdateModuleResponseMock = (): Module => ({
     },
   },
   ...{
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
     output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_params: {
       [faker.string.alphanumeric(5)]: {
@@ -392,6 +407,8 @@ export const getUpdateModuleResponseMock200 = (): Module => ({
     },
   },
   ...{
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
     output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_params: {
       [faker.string.alphanumeric(5)]: {
@@ -488,6 +505,11 @@ export const getListModuleVersionsResponseMock = (
         ...{ created_at: '2023-01-01T00:00:00Z' },
       },
       ...{
+        resource_type_version: faker.helpers.arrayElement([
+          faker.number.int({ min: 1 }),
+          undefined,
+        ]),
+        resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
         output_schema: faker.helpers.arrayElement([{}, undefined]),
         module_params: {
           [faker.string.alphanumeric(5)]: {
@@ -524,6 +546,11 @@ export const getListModuleVersionsResponseMock = (
     },
     ...{
       version: {
+        resource_type_version: faker.helpers.arrayElement([
+          faker.number.int({ min: 1 }),
+          undefined,
+        ]),
+        resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
         org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
         module_uuid: faker.string.uuid(),
         module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -558,6 +585,11 @@ export const getListModuleVersionsResponseMock = (
           ...{ created_at: '2023-01-01T00:00:00Z' },
         },
         ...{
+          resource_type_version: faker.helpers.arrayElement([
+            faker.number.int({ min: 1 }),
+            undefined,
+          ]),
+          resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
           output_schema: faker.helpers.arrayElement([{}, undefined]),
           module_params: {
             [faker.string.alphanumeric(5)]: {
@@ -614,6 +646,11 @@ export const getListModuleVersionsResponseMock200 = (
         ...{ created_at: '2023-01-01T00:00:00Z' },
       },
       ...{
+        resource_type_version: faker.helpers.arrayElement([
+          faker.number.int({ min: 1 }),
+          undefined,
+        ]),
+        resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
         output_schema: faker.helpers.arrayElement([{}, undefined]),
         module_params: {
           [faker.string.alphanumeric(5)]: {
@@ -650,6 +687,11 @@ export const getListModuleVersionsResponseMock200 = (
     },
     ...{
       version: {
+        resource_type_version: faker.helpers.arrayElement([
+          faker.number.int({ min: 1 }),
+          undefined,
+        ]),
+        resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
         org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
         module_uuid: faker.string.uuid(),
         module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -684,6 +726,11 @@ export const getListModuleVersionsResponseMock200 = (
           ...{ created_at: '2023-01-01T00:00:00Z' },
         },
         ...{
+          resource_type_version: faker.helpers.arrayElement([
+            faker.number.int({ min: 1 }),
+            undefined,
+          ]),
+          resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
           output_schema: faker.helpers.arrayElement([{}, undefined]),
           module_params: {
             [faker.string.alphanumeric(5)]: {
@@ -736,6 +783,8 @@ export const getListModuleVersionsResponseMock404 = (
 export const getPublishModuleVersionResponseMock = (
   overrideResponse: Partial<Extract<CoreModuleVersion, object>> = {},
 ): CoreModuleVersion => ({
+  resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+  resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
   org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
   module_uuid: faker.string.uuid(),
   module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -763,6 +812,8 @@ export const getPublishModuleVersionResponseMock = (
 export const getPublishModuleVersionResponseMock201 = (
   overrideResponse: Partial<Extract<CoreModuleVersion, object>> = {},
 ): CoreModuleVersion => ({
+  resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+  resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
   org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
   module_uuid: faker.string.uuid(),
   module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -836,6 +887,8 @@ export const getGetModuleVersionResponseMock = (): CoreModuleVersionDetail => ({
       ...{ created_at: '2023-01-01T00:00:00Z' },
     },
     ...{
+      resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+      resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
       output_schema: faker.helpers.arrayElement([{}, undefined]),
       module_params: {
         [faker.string.alphanumeric(5)]: {
@@ -872,6 +925,8 @@ export const getGetModuleVersionResponseMock = (): CoreModuleVersionDetail => ({
   },
   ...{
     version: {
+      resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+      resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
       org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
       module_uuid: faker.string.uuid(),
       module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -906,6 +961,11 @@ export const getGetModuleVersionResponseMock = (): CoreModuleVersionDetail => ({
         ...{ created_at: '2023-01-01T00:00:00Z' },
       },
       ...{
+        resource_type_version: faker.helpers.arrayElement([
+          faker.number.int({ min: 1 }),
+          undefined,
+        ]),
+        resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
         output_schema: faker.helpers.arrayElement([{}, undefined]),
         module_params: {
           [faker.string.alphanumeric(5)]: {
@@ -956,6 +1016,8 @@ export const getGetModuleVersionResponseMock200 = (): CoreModuleVersionDetail =>
       ...{ created_at: '2023-01-01T00:00:00Z' },
     },
     ...{
+      resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+      resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
       output_schema: faker.helpers.arrayElement([{}, undefined]),
       module_params: {
         [faker.string.alphanumeric(5)]: {
@@ -992,6 +1054,8 @@ export const getGetModuleVersionResponseMock200 = (): CoreModuleVersionDetail =>
   },
   ...{
     version: {
+      resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+      resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
       org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
       module_uuid: faker.string.uuid(),
       module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -1026,6 +1090,11 @@ export const getGetModuleVersionResponseMock200 = (): CoreModuleVersionDetail =>
         ...{ created_at: '2023-01-01T00:00:00Z' },
       },
       ...{
+        resource_type_version: faker.helpers.arrayElement([
+          faker.number.int({ min: 1 }),
+          undefined,
+        ]),
+        resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
         output_schema: faker.helpers.arrayElement([{}, undefined]),
         module_params: {
           [faker.string.alphanumeric(5)]: {
@@ -1411,6 +1480,8 @@ export const getPublishStableModuleVersionSuccessorResponseMock = (
   overrideResponse: Partial<Extract<StableModuleVersionSuccessorResult, object>> = {},
 ): StableModuleVersionSuccessorResult => ({
   prerelease: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
     org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
     module_uuid: faker.string.uuid(),
     module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -1434,6 +1505,8 @@ export const getPublishStableModuleVersionSuccessorResponseMock = (
     created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
   },
   stable: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
     org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
     module_uuid: faker.string.uuid(),
     module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -1464,6 +1537,8 @@ export const getPublishStableModuleVersionSuccessorResponseMock201 = (
   overrideResponse: Partial<Extract<StableModuleVersionSuccessorResult, object>> = {},
 ): StableModuleVersionSuccessorResult => ({
   prerelease: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
     org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
     module_uuid: faker.string.uuid(),
     module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -1487,6 +1562,8 @@ export const getPublishStableModuleVersionSuccessorResponseMock201 = (
     created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
   },
   stable: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
     org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
     module_uuid: faker.string.uuid(),
     module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -1555,6 +1632,8 @@ export const getCompareModuleVersionsResponseMock = (
   from_version_uuid: faker.string.uuid(),
   to_version_uuid: faker.string.uuid(),
   before: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
     output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_source: faker.string.alpha({ length: { min: 10, max: 20 } }),
     module_source_code: faker.helpers.arrayElement([
@@ -1596,6 +1675,8 @@ export const getCompareModuleVersionsResponseMock = (
     })),
   },
   after: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
     output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_source: faker.string.alpha({ length: { min: 10, max: 20 } }),
     module_source_code: faker.helpers.arrayElement([
@@ -1700,6 +1781,8 @@ export const getCompareModuleVersionsResponseMock200 = (
   from_version_uuid: faker.string.uuid(),
   to_version_uuid: faker.string.uuid(),
   before: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
     output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_source: faker.string.alpha({ length: { min: 10, max: 20 } }),
     module_source_code: faker.helpers.arrayElement([
@@ -1741,6 +1824,8 @@ export const getCompareModuleVersionsResponseMock200 = (
     })),
   },
   after: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
     output_schema: faker.helpers.arrayElement([{}, undefined]),
     module_source: faker.string.alpha({ length: { min: 10, max: 20 } }),
     module_source_code: faker.helpers.arrayElement([
@@ -1949,6 +2034,8 @@ export const getTransactModuleVersionLifecyclesResponseMock = (
   correlation_id: faker.string.uuid(),
   versions: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
     () => ({
+      resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+      resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
       org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
       module_uuid: faker.string.uuid(),
       module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -1981,6 +2068,8 @@ export const getTransactModuleVersionLifecyclesResponseMock200 = (
   correlation_id: faker.string.uuid(),
   versions: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
     () => ({
+      resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+      resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
       org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
       module_uuid: faker.string.uuid(),
       module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -2142,6 +2231,8 @@ export const getChangeModuleCatalogueStatusResponseMock409 = (
 export const getTransitionModuleVersionResponseMock = (
   overrideResponse: Partial<Extract<CoreModuleVersion, object>> = {},
 ): CoreModuleVersion => ({
+  resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+  resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
   org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
   module_uuid: faker.string.uuid(),
   module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -2169,6 +2260,8 @@ export const getTransitionModuleVersionResponseMock = (
 export const getTransitionModuleVersionResponseMock200 = (
   overrideResponse: Partial<Extract<CoreModuleVersion, object>> = {},
 ): CoreModuleVersion => ({
+  resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+  resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
   org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
   module_uuid: faker.string.uuid(),
   module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -3027,6 +3120,1988 @@ export const getExecuteEnvironmentModuleVersionPinBulkOperationResponseMock404 =
 });
 
 export const getExecuteEnvironmentModuleVersionPinBulkOperationResponseMock409 = (
+  overrideResponse: Partial<Extract<N409ConflictResponse, object>> = {},
+): N409ConflictResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getListModuleDraftsResponseMock = (
+  overrideResponse: Partial<Extract<ModuleDraftPage, object>> = {},
+): ModuleDraftPage => ({
+  items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    id: faker.string.uuid(),
+    org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_uuid: faker.string.uuid(),
+    module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    resource_version: faker.number.int({ min: 1 }),
+    definition: {
+      resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+      output_schema: faker.helpers.arrayElement([{}, undefined]),
+      semantic_version: faker.helpers.fromRegExp(
+        '^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$',
+      ),
+      artifact_digest: faker.helpers.arrayElement([
+        faker.helpers.fromRegExp('^sha256:[a-f0-9]{64}$'),
+        undefined,
+      ]),
+      source_revision: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 500 } }),
+        undefined,
+      ]),
+      release_notes: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 10000 } }),
+        undefined,
+      ]),
+      description: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 2000 } }),
+        undefined,
+      ]),
+      module_source: faker.string.alpha({ length: { min: 2, max: 200 } }),
+      module_source_code: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 20 } }),
+        undefined,
+      ]),
+      module_params: {
+        [faker.string.alphanumeric(5)]: {
+          type: 'string',
+          is_optional: false,
+          description: 'The input string value',
+        },
+      },
+      module_inputs: {},
+      provider_mapping: {
+        [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      },
+      dependencies: {
+        [faker.string.alphanumeric(5)]: {
+          type: 'postgres',
+          class: 'classic',
+          id: 'standard.common-postgres',
+          params: faker.helpers.arrayElement([{}, undefined]),
+        },
+      },
+      coprovisioned: Array.from(
+        { length: faker.number.int({ min: 1, max: 20 }) },
+        (_, i) => i + 1,
+      ).map(() => ({
+        type: 'postgres',
+        class: 'classic',
+        id: 'standard.common-postgres',
+        params: faker.helpers.arrayElement([{}, undefined]),
+        is_dependent_on_current: false,
+        copy_dependents_from_current: false,
+      })),
+    },
+    status: faker.helpers.arrayElement(['open', 'published', 'discarded'] as const),
+    published_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+    created_by: faker.string.uuid(),
+    updated_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+    updated_by: faker.string.uuid(),
+  })),
+  next_page_token: undefined,
+  ...overrideResponse,
+});
+
+export const getListModuleDraftsResponseMock200 = (
+  overrideResponse: Partial<Extract<ModuleDraftPage, object>> = {},
+): ModuleDraftPage => ({
+  items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    id: faker.string.uuid(),
+    org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_uuid: faker.string.uuid(),
+    module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    resource_version: faker.number.int({ min: 1 }),
+    definition: {
+      resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+      output_schema: faker.helpers.arrayElement([{}, undefined]),
+      semantic_version: faker.helpers.fromRegExp(
+        '^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$',
+      ),
+      artifact_digest: faker.helpers.arrayElement([
+        faker.helpers.fromRegExp('^sha256:[a-f0-9]{64}$'),
+        undefined,
+      ]),
+      source_revision: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 500 } }),
+        undefined,
+      ]),
+      release_notes: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 10000 } }),
+        undefined,
+      ]),
+      description: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 2000 } }),
+        undefined,
+      ]),
+      module_source: faker.string.alpha({ length: { min: 2, max: 200 } }),
+      module_source_code: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 20 } }),
+        undefined,
+      ]),
+      module_params: {
+        [faker.string.alphanumeric(5)]: {
+          type: 'string',
+          is_optional: false,
+          description: 'The input string value',
+        },
+      },
+      module_inputs: {},
+      provider_mapping: {
+        [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      },
+      dependencies: {
+        [faker.string.alphanumeric(5)]: {
+          type: 'postgres',
+          class: 'classic',
+          id: 'standard.common-postgres',
+          params: faker.helpers.arrayElement([{}, undefined]),
+        },
+      },
+      coprovisioned: Array.from(
+        { length: faker.number.int({ min: 1, max: 20 }) },
+        (_, i) => i + 1,
+      ).map(() => ({
+        type: 'postgres',
+        class: 'classic',
+        id: 'standard.common-postgres',
+        params: faker.helpers.arrayElement([{}, undefined]),
+        is_dependent_on_current: false,
+        copy_dependents_from_current: false,
+      })),
+    },
+    status: faker.helpers.arrayElement(['open', 'published', 'discarded'] as const),
+    published_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+    created_by: faker.string.uuid(),
+    updated_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+    updated_by: faker.string.uuid(),
+  })),
+  next_page_token: undefined,
+  ...overrideResponse,
+});
+
+export const getListModuleDraftsResponseMock400 = (
+  overrideResponse: Partial<Extract<N400BadRequestResponse, object>> = {},
+): N400BadRequestResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getListModuleDraftsResponseMock403 = (
+  overrideResponse: Partial<Extract<N403ForbiddenResponse, object>> = {},
+): N403ForbiddenResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getListModuleDraftsResponseMock404 = (
+  overrideResponse: Partial<Extract<N404NotFoundResponse, object>> = {},
+): N404NotFoundResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getListModuleDraftsResponseMock409 = (
+  overrideResponse: Partial<Extract<N409ConflictResponse, object>> = {},
+): N409ConflictResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getCreateModuleDraftResponseMock = (
+  overrideResponse: Partial<Extract<ModuleDraft, object>> = {},
+): ModuleDraft => ({
+  id: faker.string.uuid(),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  resource_version: faker.number.int({ min: 1 }),
+  definition: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
+    semantic_version: faker.helpers.fromRegExp(
+      '^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$',
+    ),
+    artifact_digest: faker.helpers.arrayElement([
+      faker.helpers.fromRegExp('^sha256:[a-f0-9]{64}$'),
+      undefined,
+    ]),
+    source_revision: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 500 } }),
+      undefined,
+    ]),
+    release_notes: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 10000 } }),
+      undefined,
+    ]),
+    description: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 2000 } }),
+      undefined,
+    ]),
+    module_source: faker.string.alpha({ length: { min: 2, max: 200 } }),
+    module_source_code: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    module_params: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'string',
+        is_optional: false,
+        description: 'The input string value',
+      },
+    },
+    module_inputs: {},
+    provider_mapping: {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    dependencies: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'postgres',
+        class: 'classic',
+        id: 'standard.common-postgres',
+        params: faker.helpers.arrayElement([{}, undefined]),
+      },
+    },
+    coprovisioned: Array.from(
+      { length: faker.number.int({ min: 1, max: 20 }) },
+      (_, i) => i + 1,
+    ).map(() => ({
+      type: 'postgres',
+      class: 'classic',
+      id: 'standard.common-postgres',
+      params: faker.helpers.arrayElement([{}, undefined]),
+      is_dependent_on_current: false,
+      copy_dependents_from_current: false,
+    })),
+  },
+  status: faker.helpers.arrayElement(['open', 'published', 'discarded'] as const),
+  published_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  created_by: faker.string.uuid(),
+  updated_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  updated_by: faker.string.uuid(),
+  ...overrideResponse,
+});
+
+export const getCreateModuleDraftResponseMock201 = (
+  overrideResponse: Partial<Extract<ModuleDraft, object>> = {},
+): ModuleDraft => ({
+  id: faker.string.uuid(),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  resource_version: faker.number.int({ min: 1 }),
+  definition: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
+    semantic_version: faker.helpers.fromRegExp(
+      '^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$',
+    ),
+    artifact_digest: faker.helpers.arrayElement([
+      faker.helpers.fromRegExp('^sha256:[a-f0-9]{64}$'),
+      undefined,
+    ]),
+    source_revision: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 500 } }),
+      undefined,
+    ]),
+    release_notes: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 10000 } }),
+      undefined,
+    ]),
+    description: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 2000 } }),
+      undefined,
+    ]),
+    module_source: faker.string.alpha({ length: { min: 2, max: 200 } }),
+    module_source_code: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    module_params: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'string',
+        is_optional: false,
+        description: 'The input string value',
+      },
+    },
+    module_inputs: {},
+    provider_mapping: {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    dependencies: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'postgres',
+        class: 'classic',
+        id: 'standard.common-postgres',
+        params: faker.helpers.arrayElement([{}, undefined]),
+      },
+    },
+    coprovisioned: Array.from(
+      { length: faker.number.int({ min: 1, max: 20 }) },
+      (_, i) => i + 1,
+    ).map(() => ({
+      type: 'postgres',
+      class: 'classic',
+      id: 'standard.common-postgres',
+      params: faker.helpers.arrayElement([{}, undefined]),
+      is_dependent_on_current: false,
+      copy_dependents_from_current: false,
+    })),
+  },
+  status: faker.helpers.arrayElement(['open', 'published', 'discarded'] as const),
+  published_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  created_by: faker.string.uuid(),
+  updated_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  updated_by: faker.string.uuid(),
+  ...overrideResponse,
+});
+
+export const getCreateModuleDraftResponseMock400 = (
+  overrideResponse: Partial<Extract<N400BadRequestResponse, object>> = {},
+): N400BadRequestResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getCreateModuleDraftResponseMock403 = (
+  overrideResponse: Partial<Extract<N403ForbiddenResponse, object>> = {},
+): N403ForbiddenResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getCreateModuleDraftResponseMock404 = (
+  overrideResponse: Partial<Extract<N404NotFoundResponse, object>> = {},
+): N404NotFoundResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getCreateModuleDraftResponseMock409 = (
+  overrideResponse: Partial<Extract<N409ConflictResponse, object>> = {},
+): N409ConflictResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getGetModuleDraftResponseMock = (
+  overrideResponse: Partial<Extract<ModuleDraft, object>> = {},
+): ModuleDraft => ({
+  id: faker.string.uuid(),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  resource_version: faker.number.int({ min: 1 }),
+  definition: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
+    semantic_version: faker.helpers.fromRegExp(
+      '^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$',
+    ),
+    artifact_digest: faker.helpers.arrayElement([
+      faker.helpers.fromRegExp('^sha256:[a-f0-9]{64}$'),
+      undefined,
+    ]),
+    source_revision: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 500 } }),
+      undefined,
+    ]),
+    release_notes: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 10000 } }),
+      undefined,
+    ]),
+    description: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 2000 } }),
+      undefined,
+    ]),
+    module_source: faker.string.alpha({ length: { min: 2, max: 200 } }),
+    module_source_code: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    module_params: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'string',
+        is_optional: false,
+        description: 'The input string value',
+      },
+    },
+    module_inputs: {},
+    provider_mapping: {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    dependencies: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'postgres',
+        class: 'classic',
+        id: 'standard.common-postgres',
+        params: faker.helpers.arrayElement([{}, undefined]),
+      },
+    },
+    coprovisioned: Array.from(
+      { length: faker.number.int({ min: 1, max: 20 }) },
+      (_, i) => i + 1,
+    ).map(() => ({
+      type: 'postgres',
+      class: 'classic',
+      id: 'standard.common-postgres',
+      params: faker.helpers.arrayElement([{}, undefined]),
+      is_dependent_on_current: false,
+      copy_dependents_from_current: false,
+    })),
+  },
+  status: faker.helpers.arrayElement(['open', 'published', 'discarded'] as const),
+  published_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  created_by: faker.string.uuid(),
+  updated_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  updated_by: faker.string.uuid(),
+  ...overrideResponse,
+});
+
+export const getGetModuleDraftResponseMock200 = (
+  overrideResponse: Partial<Extract<ModuleDraft, object>> = {},
+): ModuleDraft => ({
+  id: faker.string.uuid(),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  resource_version: faker.number.int({ min: 1 }),
+  definition: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
+    semantic_version: faker.helpers.fromRegExp(
+      '^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$',
+    ),
+    artifact_digest: faker.helpers.arrayElement([
+      faker.helpers.fromRegExp('^sha256:[a-f0-9]{64}$'),
+      undefined,
+    ]),
+    source_revision: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 500 } }),
+      undefined,
+    ]),
+    release_notes: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 10000 } }),
+      undefined,
+    ]),
+    description: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 2000 } }),
+      undefined,
+    ]),
+    module_source: faker.string.alpha({ length: { min: 2, max: 200 } }),
+    module_source_code: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    module_params: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'string',
+        is_optional: false,
+        description: 'The input string value',
+      },
+    },
+    module_inputs: {},
+    provider_mapping: {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    dependencies: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'postgres',
+        class: 'classic',
+        id: 'standard.common-postgres',
+        params: faker.helpers.arrayElement([{}, undefined]),
+      },
+    },
+    coprovisioned: Array.from(
+      { length: faker.number.int({ min: 1, max: 20 }) },
+      (_, i) => i + 1,
+    ).map(() => ({
+      type: 'postgres',
+      class: 'classic',
+      id: 'standard.common-postgres',
+      params: faker.helpers.arrayElement([{}, undefined]),
+      is_dependent_on_current: false,
+      copy_dependents_from_current: false,
+    })),
+  },
+  status: faker.helpers.arrayElement(['open', 'published', 'discarded'] as const),
+  published_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  created_by: faker.string.uuid(),
+  updated_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  updated_by: faker.string.uuid(),
+  ...overrideResponse,
+});
+
+export const getGetModuleDraftResponseMock400 = (
+  overrideResponse: Partial<Extract<N400BadRequestResponse, object>> = {},
+): N400BadRequestResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getGetModuleDraftResponseMock403 = (
+  overrideResponse: Partial<Extract<N403ForbiddenResponse, object>> = {},
+): N403ForbiddenResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getGetModuleDraftResponseMock404 = (
+  overrideResponse: Partial<Extract<N404NotFoundResponse, object>> = {},
+): N404NotFoundResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getGetModuleDraftResponseMock409 = (
+  overrideResponse: Partial<Extract<N409ConflictResponse, object>> = {},
+): N409ConflictResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getUpdateModuleDraftResponseMock = (
+  overrideResponse: Partial<Extract<ModuleDraft, object>> = {},
+): ModuleDraft => ({
+  id: faker.string.uuid(),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  resource_version: faker.number.int({ min: 1 }),
+  definition: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
+    semantic_version: faker.helpers.fromRegExp(
+      '^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$',
+    ),
+    artifact_digest: faker.helpers.arrayElement([
+      faker.helpers.fromRegExp('^sha256:[a-f0-9]{64}$'),
+      undefined,
+    ]),
+    source_revision: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 500 } }),
+      undefined,
+    ]),
+    release_notes: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 10000 } }),
+      undefined,
+    ]),
+    description: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 2000 } }),
+      undefined,
+    ]),
+    module_source: faker.string.alpha({ length: { min: 2, max: 200 } }),
+    module_source_code: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    module_params: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'string',
+        is_optional: false,
+        description: 'The input string value',
+      },
+    },
+    module_inputs: {},
+    provider_mapping: {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    dependencies: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'postgres',
+        class: 'classic',
+        id: 'standard.common-postgres',
+        params: faker.helpers.arrayElement([{}, undefined]),
+      },
+    },
+    coprovisioned: Array.from(
+      { length: faker.number.int({ min: 1, max: 20 }) },
+      (_, i) => i + 1,
+    ).map(() => ({
+      type: 'postgres',
+      class: 'classic',
+      id: 'standard.common-postgres',
+      params: faker.helpers.arrayElement([{}, undefined]),
+      is_dependent_on_current: false,
+      copy_dependents_from_current: false,
+    })),
+  },
+  status: faker.helpers.arrayElement(['open', 'published', 'discarded'] as const),
+  published_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  created_by: faker.string.uuid(),
+  updated_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  updated_by: faker.string.uuid(),
+  ...overrideResponse,
+});
+
+export const getUpdateModuleDraftResponseMock200 = (
+  overrideResponse: Partial<Extract<ModuleDraft, object>> = {},
+): ModuleDraft => ({
+  id: faker.string.uuid(),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  resource_version: faker.number.int({ min: 1 }),
+  definition: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
+    semantic_version: faker.helpers.fromRegExp(
+      '^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$',
+    ),
+    artifact_digest: faker.helpers.arrayElement([
+      faker.helpers.fromRegExp('^sha256:[a-f0-9]{64}$'),
+      undefined,
+    ]),
+    source_revision: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 500 } }),
+      undefined,
+    ]),
+    release_notes: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 10000 } }),
+      undefined,
+    ]),
+    description: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 2000 } }),
+      undefined,
+    ]),
+    module_source: faker.string.alpha({ length: { min: 2, max: 200 } }),
+    module_source_code: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    module_params: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'string',
+        is_optional: false,
+        description: 'The input string value',
+      },
+    },
+    module_inputs: {},
+    provider_mapping: {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    dependencies: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'postgres',
+        class: 'classic',
+        id: 'standard.common-postgres',
+        params: faker.helpers.arrayElement([{}, undefined]),
+      },
+    },
+    coprovisioned: Array.from(
+      { length: faker.number.int({ min: 1, max: 20 }) },
+      (_, i) => i + 1,
+    ).map(() => ({
+      type: 'postgres',
+      class: 'classic',
+      id: 'standard.common-postgres',
+      params: faker.helpers.arrayElement([{}, undefined]),
+      is_dependent_on_current: false,
+      copy_dependents_from_current: false,
+    })),
+  },
+  status: faker.helpers.arrayElement(['open', 'published', 'discarded'] as const),
+  published_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  created_by: faker.string.uuid(),
+  updated_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  updated_by: faker.string.uuid(),
+  ...overrideResponse,
+});
+
+export const getUpdateModuleDraftResponseMock400 = (
+  overrideResponse: Partial<Extract<N400BadRequestResponse, object>> = {},
+): N400BadRequestResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getUpdateModuleDraftResponseMock403 = (
+  overrideResponse: Partial<Extract<N403ForbiddenResponse, object>> = {},
+): N403ForbiddenResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getUpdateModuleDraftResponseMock404 = (
+  overrideResponse: Partial<Extract<N404NotFoundResponse, object>> = {},
+): N404NotFoundResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getUpdateModuleDraftResponseMock409 = (
+  overrideResponse: Partial<Extract<N409ConflictResponse, object>> = {},
+): N409ConflictResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getGetModuleDraftRevisionResponseMock = (
+  overrideResponse: Partial<Extract<ModuleDraftRevision, object>> = {},
+): ModuleDraftRevision => ({
+  draft_id: faker.string.uuid(),
+  resource_version: faker.number.int({ min: 1 }),
+  definition: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
+    semantic_version: faker.helpers.fromRegExp(
+      '^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$',
+    ),
+    artifact_digest: faker.helpers.arrayElement([
+      faker.helpers.fromRegExp('^sha256:[a-f0-9]{64}$'),
+      undefined,
+    ]),
+    source_revision: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 500 } }),
+      undefined,
+    ]),
+    release_notes: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 10000 } }),
+      undefined,
+    ]),
+    description: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 2000 } }),
+      undefined,
+    ]),
+    module_source: faker.string.alpha({ length: { min: 2, max: 200 } }),
+    module_source_code: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    module_params: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'string',
+        is_optional: false,
+        description: 'The input string value',
+      },
+    },
+    module_inputs: {},
+    provider_mapping: {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    dependencies: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'postgres',
+        class: 'classic',
+        id: 'standard.common-postgres',
+        params: faker.helpers.arrayElement([{}, undefined]),
+      },
+    },
+    coprovisioned: Array.from(
+      { length: faker.number.int({ min: 1, max: 20 }) },
+      (_, i) => i + 1,
+    ).map(() => ({
+      type: 'postgres',
+      class: 'classic',
+      id: 'standard.common-postgres',
+      params: faker.helpers.arrayElement([{}, undefined]),
+      is_dependent_on_current: false,
+      copy_dependents_from_current: false,
+    })),
+  },
+  status: faker.helpers.arrayElement(['open', 'published', 'discarded'] as const),
+  published_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  actor: faker.string.uuid(),
+  reason: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ...overrideResponse,
+});
+
+export const getGetModuleDraftRevisionResponseMock200 = (
+  overrideResponse: Partial<Extract<ModuleDraftRevision, object>> = {},
+): ModuleDraftRevision => ({
+  draft_id: faker.string.uuid(),
+  resource_version: faker.number.int({ min: 1 }),
+  definition: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
+    semantic_version: faker.helpers.fromRegExp(
+      '^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$',
+    ),
+    artifact_digest: faker.helpers.arrayElement([
+      faker.helpers.fromRegExp('^sha256:[a-f0-9]{64}$'),
+      undefined,
+    ]),
+    source_revision: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 500 } }),
+      undefined,
+    ]),
+    release_notes: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 10000 } }),
+      undefined,
+    ]),
+    description: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 2000 } }),
+      undefined,
+    ]),
+    module_source: faker.string.alpha({ length: { min: 2, max: 200 } }),
+    module_source_code: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    module_params: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'string',
+        is_optional: false,
+        description: 'The input string value',
+      },
+    },
+    module_inputs: {},
+    provider_mapping: {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    dependencies: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'postgres',
+        class: 'classic',
+        id: 'standard.common-postgres',
+        params: faker.helpers.arrayElement([{}, undefined]),
+      },
+    },
+    coprovisioned: Array.from(
+      { length: faker.number.int({ min: 1, max: 20 }) },
+      (_, i) => i + 1,
+    ).map(() => ({
+      type: 'postgres',
+      class: 'classic',
+      id: 'standard.common-postgres',
+      params: faker.helpers.arrayElement([{}, undefined]),
+      is_dependent_on_current: false,
+      copy_dependents_from_current: false,
+    })),
+  },
+  status: faker.helpers.arrayElement(['open', 'published', 'discarded'] as const),
+  published_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  actor: faker.string.uuid(),
+  reason: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ...overrideResponse,
+});
+
+export const getGetModuleDraftRevisionResponseMock400 = (
+  overrideResponse: Partial<Extract<N400BadRequestResponse, object>> = {},
+): N400BadRequestResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getGetModuleDraftRevisionResponseMock403 = (
+  overrideResponse: Partial<Extract<N403ForbiddenResponse, object>> = {},
+): N403ForbiddenResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getGetModuleDraftRevisionResponseMock404 = (
+  overrideResponse: Partial<Extract<N404NotFoundResponse, object>> = {},
+): N404NotFoundResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getGetModuleDraftRevisionResponseMock409 = (
+  overrideResponse: Partial<Extract<N409ConflictResponse, object>> = {},
+): N409ConflictResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getCaptureModuleDraftTestSnapshotResponseMock = (
+  overrideResponse: Partial<Extract<ModuleDraftTestSnapshot, object>> = {},
+): ModuleDraftTestSnapshot => ({
+  id: faker.string.uuid(),
+  provenance: faker.helpers.arrayElement(['draft_test'] as const),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  draft_id: faker.string.uuid(),
+  draft_revision: faker.number.int({ min: 1 }),
+  resource_type_version_uuid: faker.string.uuid(),
+  resource_type_version: faker.number.int({ min: 1 }),
+  project_uuid: faker.string.uuid(),
+  environment_uuid: faker.string.uuid(),
+  definition: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
+    semantic_version: faker.helpers.fromRegExp(
+      '^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$',
+    ),
+    artifact_digest: faker.helpers.arrayElement([
+      faker.helpers.fromRegExp('^sha256:[a-f0-9]{64}$'),
+      undefined,
+    ]),
+    source_revision: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 500 } }),
+      undefined,
+    ]),
+    release_notes: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 10000 } }),
+      undefined,
+    ]),
+    description: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 2000 } }),
+      undefined,
+    ]),
+    module_source: faker.string.alpha({ length: { min: 2, max: 200 } }),
+    module_source_code: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    module_params: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'string',
+        is_optional: false,
+        description: 'The input string value',
+      },
+    },
+    module_inputs: {},
+    provider_mapping: {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    dependencies: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'postgres',
+        class: 'classic',
+        id: 'standard.common-postgres',
+        params: faker.helpers.arrayElement([{}, undefined]),
+      },
+    },
+    coprovisioned: Array.from(
+      { length: faker.number.int({ min: 1, max: 20 }) },
+      (_, i) => i + 1,
+    ).map(() => ({
+      type: 'postgres',
+      class: 'classic',
+      id: 'standard.common-postgres',
+      params: faker.helpers.arrayElement([{}, undefined]),
+      is_dependent_on_current: false,
+      copy_dependents_from_current: false,
+    })),
+  },
+  captured_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  captured_by: faker.string.uuid(),
+  reason: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ...overrideResponse,
+});
+
+export const getCaptureModuleDraftTestSnapshotResponseMock201 = (
+  overrideResponse: Partial<Extract<ModuleDraftTestSnapshot, object>> = {},
+): ModuleDraftTestSnapshot => ({
+  id: faker.string.uuid(),
+  provenance: faker.helpers.arrayElement(['draft_test'] as const),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  draft_id: faker.string.uuid(),
+  draft_revision: faker.number.int({ min: 1 }),
+  resource_type_version_uuid: faker.string.uuid(),
+  resource_type_version: faker.number.int({ min: 1 }),
+  project_uuid: faker.string.uuid(),
+  environment_uuid: faker.string.uuid(),
+  definition: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
+    semantic_version: faker.helpers.fromRegExp(
+      '^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$',
+    ),
+    artifact_digest: faker.helpers.arrayElement([
+      faker.helpers.fromRegExp('^sha256:[a-f0-9]{64}$'),
+      undefined,
+    ]),
+    source_revision: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 500 } }),
+      undefined,
+    ]),
+    release_notes: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 10000 } }),
+      undefined,
+    ]),
+    description: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 2000 } }),
+      undefined,
+    ]),
+    module_source: faker.string.alpha({ length: { min: 2, max: 200 } }),
+    module_source_code: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    module_params: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'string',
+        is_optional: false,
+        description: 'The input string value',
+      },
+    },
+    module_inputs: {},
+    provider_mapping: {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    dependencies: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'postgres',
+        class: 'classic',
+        id: 'standard.common-postgres',
+        params: faker.helpers.arrayElement([{}, undefined]),
+      },
+    },
+    coprovisioned: Array.from(
+      { length: faker.number.int({ min: 1, max: 20 }) },
+      (_, i) => i + 1,
+    ).map(() => ({
+      type: 'postgres',
+      class: 'classic',
+      id: 'standard.common-postgres',
+      params: faker.helpers.arrayElement([{}, undefined]),
+      is_dependent_on_current: false,
+      copy_dependents_from_current: false,
+    })),
+  },
+  captured_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  captured_by: faker.string.uuid(),
+  reason: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ...overrideResponse,
+});
+
+export const getCaptureModuleDraftTestSnapshotResponseMock400 = (
+  overrideResponse: Partial<Extract<N400BadRequestResponse, object>> = {},
+): N400BadRequestResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getCaptureModuleDraftTestSnapshotResponseMock403 = (
+  overrideResponse: Partial<Extract<N403ForbiddenResponse, object>> = {},
+): N403ForbiddenResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getCaptureModuleDraftTestSnapshotResponseMock404 = (
+  overrideResponse: Partial<Extract<N404NotFoundResponse, object>> = {},
+): N404NotFoundResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getCaptureModuleDraftTestSnapshotResponseMock409 = (
+  overrideResponse: Partial<Extract<N409ConflictResponse, object>> = {},
+): N409ConflictResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getGetModuleDraftTestSnapshotResponseMock = (
+  overrideResponse: Partial<Extract<ModuleDraftTestSnapshot, object>> = {},
+): ModuleDraftTestSnapshot => ({
+  id: faker.string.uuid(),
+  provenance: faker.helpers.arrayElement(['draft_test'] as const),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  draft_id: faker.string.uuid(),
+  draft_revision: faker.number.int({ min: 1 }),
+  resource_type_version_uuid: faker.string.uuid(),
+  resource_type_version: faker.number.int({ min: 1 }),
+  project_uuid: faker.string.uuid(),
+  environment_uuid: faker.string.uuid(),
+  definition: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
+    semantic_version: faker.helpers.fromRegExp(
+      '^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$',
+    ),
+    artifact_digest: faker.helpers.arrayElement([
+      faker.helpers.fromRegExp('^sha256:[a-f0-9]{64}$'),
+      undefined,
+    ]),
+    source_revision: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 500 } }),
+      undefined,
+    ]),
+    release_notes: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 10000 } }),
+      undefined,
+    ]),
+    description: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 2000 } }),
+      undefined,
+    ]),
+    module_source: faker.string.alpha({ length: { min: 2, max: 200 } }),
+    module_source_code: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    module_params: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'string',
+        is_optional: false,
+        description: 'The input string value',
+      },
+    },
+    module_inputs: {},
+    provider_mapping: {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    dependencies: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'postgres',
+        class: 'classic',
+        id: 'standard.common-postgres',
+        params: faker.helpers.arrayElement([{}, undefined]),
+      },
+    },
+    coprovisioned: Array.from(
+      { length: faker.number.int({ min: 1, max: 20 }) },
+      (_, i) => i + 1,
+    ).map(() => ({
+      type: 'postgres',
+      class: 'classic',
+      id: 'standard.common-postgres',
+      params: faker.helpers.arrayElement([{}, undefined]),
+      is_dependent_on_current: false,
+      copy_dependents_from_current: false,
+    })),
+  },
+  captured_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  captured_by: faker.string.uuid(),
+  reason: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ...overrideResponse,
+});
+
+export const getGetModuleDraftTestSnapshotResponseMock200 = (
+  overrideResponse: Partial<Extract<ModuleDraftTestSnapshot, object>> = {},
+): ModuleDraftTestSnapshot => ({
+  id: faker.string.uuid(),
+  provenance: faker.helpers.arrayElement(['draft_test'] as const),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  draft_id: faker.string.uuid(),
+  draft_revision: faker.number.int({ min: 1 }),
+  resource_type_version_uuid: faker.string.uuid(),
+  resource_type_version: faker.number.int({ min: 1 }),
+  project_uuid: faker.string.uuid(),
+  environment_uuid: faker.string.uuid(),
+  definition: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
+    semantic_version: faker.helpers.fromRegExp(
+      '^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$',
+    ),
+    artifact_digest: faker.helpers.arrayElement([
+      faker.helpers.fromRegExp('^sha256:[a-f0-9]{64}$'),
+      undefined,
+    ]),
+    source_revision: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 500 } }),
+      undefined,
+    ]),
+    release_notes: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 10000 } }),
+      undefined,
+    ]),
+    description: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 2000 } }),
+      undefined,
+    ]),
+    module_source: faker.string.alpha({ length: { min: 2, max: 200 } }),
+    module_source_code: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    module_params: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'string',
+        is_optional: false,
+        description: 'The input string value',
+      },
+    },
+    module_inputs: {},
+    provider_mapping: {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    dependencies: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'postgres',
+        class: 'classic',
+        id: 'standard.common-postgres',
+        params: faker.helpers.arrayElement([{}, undefined]),
+      },
+    },
+    coprovisioned: Array.from(
+      { length: faker.number.int({ min: 1, max: 20 }) },
+      (_, i) => i + 1,
+    ).map(() => ({
+      type: 'postgres',
+      class: 'classic',
+      id: 'standard.common-postgres',
+      params: faker.helpers.arrayElement([{}, undefined]),
+      is_dependent_on_current: false,
+      copy_dependents_from_current: false,
+    })),
+  },
+  captured_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  captured_by: faker.string.uuid(),
+  reason: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ...overrideResponse,
+});
+
+export const getGetModuleDraftTestSnapshotResponseMock400 = (
+  overrideResponse: Partial<Extract<N400BadRequestResponse, object>> = {},
+): N400BadRequestResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getGetModuleDraftTestSnapshotResponseMock403 = (
+  overrideResponse: Partial<Extract<N403ForbiddenResponse, object>> = {},
+): N403ForbiddenResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getGetModuleDraftTestSnapshotResponseMock404 = (
+  overrideResponse: Partial<Extract<N404NotFoundResponse, object>> = {},
+): N404NotFoundResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getGetModuleDraftTestSnapshotResponseMock409 = (
+  overrideResponse: Partial<Extract<N409ConflictResponse, object>> = {},
+): N409ConflictResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPublishModuleDraftResponseMock = (
+  overrideResponse: Partial<Extract<ModuleDraftPublication, object>> = {},
+): ModuleDraftPublication => ({
+  draft: {
+    id: faker.string.uuid(),
+    org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_uuid: faker.string.uuid(),
+    module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    resource_version: faker.number.int({ min: 1 }),
+    definition: {
+      resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+      output_schema: faker.helpers.arrayElement([{}, undefined]),
+      semantic_version: faker.helpers.fromRegExp(
+        '^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$',
+      ),
+      artifact_digest: faker.helpers.arrayElement([
+        faker.helpers.fromRegExp('^sha256:[a-f0-9]{64}$'),
+        undefined,
+      ]),
+      source_revision: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 500 } }),
+        undefined,
+      ]),
+      release_notes: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 10000 } }),
+        undefined,
+      ]),
+      description: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 2000 } }),
+        undefined,
+      ]),
+      module_source: faker.string.alpha({ length: { min: 2, max: 200 } }),
+      module_source_code: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 20 } }),
+        undefined,
+      ]),
+      module_params: {
+        [faker.string.alphanumeric(5)]: {
+          type: 'string',
+          is_optional: false,
+          description: 'The input string value',
+        },
+      },
+      module_inputs: {},
+      provider_mapping: {
+        [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      },
+      dependencies: {
+        [faker.string.alphanumeric(5)]: {
+          type: 'postgres',
+          class: 'classic',
+          id: 'standard.common-postgres',
+          params: faker.helpers.arrayElement([{}, undefined]),
+        },
+      },
+      coprovisioned: Array.from(
+        { length: faker.number.int({ min: 1, max: 20 }) },
+        (_, i) => i + 1,
+      ).map(() => ({
+        type: 'postgres',
+        class: 'classic',
+        id: 'standard.common-postgres',
+        params: faker.helpers.arrayElement([{}, undefined]),
+        is_dependent_on_current: false,
+        copy_dependents_from_current: false,
+      })),
+    },
+    status: faker.helpers.arrayElement(['open', 'published', 'discarded'] as const),
+    published_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+    created_by: faker.string.uuid(),
+    updated_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+    updated_by: faker.string.uuid(),
+  },
+  version: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_uuid: faker.string.uuid(),
+    module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    uuid: faker.string.uuid(),
+    semantic_version: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    opaque_version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    migration_generation: faker.helpers.arrayElement(['v0', 'v1', 'managed'] as const),
+    artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    verification_status: faker.helpers.arrayElement(Object.values(ModuleVerificationStatus)),
+    lifecycle_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+    source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    release_notes: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    resource_version: faker.number.int({ min: 1 }),
+    published_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  },
+  ...overrideResponse,
+});
+
+export const getPublishModuleDraftResponseMock201 = (
+  overrideResponse: Partial<Extract<ModuleDraftPublication, object>> = {},
+): ModuleDraftPublication => ({
+  draft: {
+    id: faker.string.uuid(),
+    org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_uuid: faker.string.uuid(),
+    module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    resource_version: faker.number.int({ min: 1 }),
+    definition: {
+      resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+      output_schema: faker.helpers.arrayElement([{}, undefined]),
+      semantic_version: faker.helpers.fromRegExp(
+        '^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$',
+      ),
+      artifact_digest: faker.helpers.arrayElement([
+        faker.helpers.fromRegExp('^sha256:[a-f0-9]{64}$'),
+        undefined,
+      ]),
+      source_revision: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 500 } }),
+        undefined,
+      ]),
+      release_notes: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 10000 } }),
+        undefined,
+      ]),
+      description: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 2000 } }),
+        undefined,
+      ]),
+      module_source: faker.string.alpha({ length: { min: 2, max: 200 } }),
+      module_source_code: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 20 } }),
+        undefined,
+      ]),
+      module_params: {
+        [faker.string.alphanumeric(5)]: {
+          type: 'string',
+          is_optional: false,
+          description: 'The input string value',
+        },
+      },
+      module_inputs: {},
+      provider_mapping: {
+        [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      },
+      dependencies: {
+        [faker.string.alphanumeric(5)]: {
+          type: 'postgres',
+          class: 'classic',
+          id: 'standard.common-postgres',
+          params: faker.helpers.arrayElement([{}, undefined]),
+        },
+      },
+      coprovisioned: Array.from(
+        { length: faker.number.int({ min: 1, max: 20 }) },
+        (_, i) => i + 1,
+      ).map(() => ({
+        type: 'postgres',
+        class: 'classic',
+        id: 'standard.common-postgres',
+        params: faker.helpers.arrayElement([{}, undefined]),
+        is_dependent_on_current: false,
+        copy_dependents_from_current: false,
+      })),
+    },
+    status: faker.helpers.arrayElement(['open', 'published', 'discarded'] as const),
+    published_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+    created_by: faker.string.uuid(),
+    updated_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+    updated_by: faker.string.uuid(),
+  },
+  version: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_uuid: faker.string.uuid(),
+    module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    uuid: faker.string.uuid(),
+    semantic_version: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    opaque_version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    migration_generation: faker.helpers.arrayElement(['v0', 'v1', 'managed'] as const),
+    artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    verification_status: faker.helpers.arrayElement(Object.values(ModuleVerificationStatus)),
+    lifecycle_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+    source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    release_notes: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    resource_version: faker.number.int({ min: 1 }),
+    published_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  },
+  ...overrideResponse,
+});
+
+export const getPublishModuleDraftResponseMock400 = (
+  overrideResponse: Partial<Extract<N400BadRequestResponse, object>> = {},
+): N400BadRequestResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPublishModuleDraftResponseMock403 = (
+  overrideResponse: Partial<Extract<N403ForbiddenResponse, object>> = {},
+): N403ForbiddenResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPublishModuleDraftResponseMock404 = (
+  overrideResponse: Partial<Extract<N404NotFoundResponse, object>> = {},
+): N404NotFoundResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPublishModuleDraftResponseMock409 = (
+  overrideResponse: Partial<Extract<N409ConflictResponse, object>> = {},
+): N409ConflictResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getDiscardModuleDraftResponseMock = (
+  overrideResponse: Partial<Extract<ModuleDraft, object>> = {},
+): ModuleDraft => ({
+  id: faker.string.uuid(),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  resource_version: faker.number.int({ min: 1 }),
+  definition: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
+    semantic_version: faker.helpers.fromRegExp(
+      '^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$',
+    ),
+    artifact_digest: faker.helpers.arrayElement([
+      faker.helpers.fromRegExp('^sha256:[a-f0-9]{64}$'),
+      undefined,
+    ]),
+    source_revision: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 500 } }),
+      undefined,
+    ]),
+    release_notes: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 10000 } }),
+      undefined,
+    ]),
+    description: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 2000 } }),
+      undefined,
+    ]),
+    module_source: faker.string.alpha({ length: { min: 2, max: 200 } }),
+    module_source_code: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    module_params: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'string',
+        is_optional: false,
+        description: 'The input string value',
+      },
+    },
+    module_inputs: {},
+    provider_mapping: {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    dependencies: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'postgres',
+        class: 'classic',
+        id: 'standard.common-postgres',
+        params: faker.helpers.arrayElement([{}, undefined]),
+      },
+    },
+    coprovisioned: Array.from(
+      { length: faker.number.int({ min: 1, max: 20 }) },
+      (_, i) => i + 1,
+    ).map(() => ({
+      type: 'postgres',
+      class: 'classic',
+      id: 'standard.common-postgres',
+      params: faker.helpers.arrayElement([{}, undefined]),
+      is_dependent_on_current: false,
+      copy_dependents_from_current: false,
+    })),
+  },
+  status: faker.helpers.arrayElement(['open', 'published', 'discarded'] as const),
+  published_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  created_by: faker.string.uuid(),
+  updated_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  updated_by: faker.string.uuid(),
+  ...overrideResponse,
+});
+
+export const getDiscardModuleDraftResponseMock200 = (
+  overrideResponse: Partial<Extract<ModuleDraft, object>> = {},
+): ModuleDraft => ({
+  id: faker.string.uuid(),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  resource_version: faker.number.int({ min: 1 }),
+  definition: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    output_schema: faker.helpers.arrayElement([{}, undefined]),
+    semantic_version: faker.helpers.fromRegExp(
+      '^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$',
+    ),
+    artifact_digest: faker.helpers.arrayElement([
+      faker.helpers.fromRegExp('^sha256:[a-f0-9]{64}$'),
+      undefined,
+    ]),
+    source_revision: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 500 } }),
+      undefined,
+    ]),
+    release_notes: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 10000 } }),
+      undefined,
+    ]),
+    description: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 2000 } }),
+      undefined,
+    ]),
+    module_source: faker.string.alpha({ length: { min: 2, max: 200 } }),
+    module_source_code: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    module_params: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'string',
+        is_optional: false,
+        description: 'The input string value',
+      },
+    },
+    module_inputs: {},
+    provider_mapping: {
+      [faker.string.alphanumeric(5)]: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    },
+    dependencies: {
+      [faker.string.alphanumeric(5)]: {
+        type: 'postgres',
+        class: 'classic',
+        id: 'standard.common-postgres',
+        params: faker.helpers.arrayElement([{}, undefined]),
+      },
+    },
+    coprovisioned: Array.from(
+      { length: faker.number.int({ min: 1, max: 20 }) },
+      (_, i) => i + 1,
+    ).map(() => ({
+      type: 'postgres',
+      class: 'classic',
+      id: 'standard.common-postgres',
+      params: faker.helpers.arrayElement([{}, undefined]),
+      is_dependent_on_current: false,
+      copy_dependents_from_current: false,
+    })),
+  },
+  status: faker.helpers.arrayElement(['open', 'published', 'discarded'] as const),
+  published_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  created_by: faker.string.uuid(),
+  updated_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  updated_by: faker.string.uuid(),
+  ...overrideResponse,
+});
+
+export const getDiscardModuleDraftResponseMock400 = (
+  overrideResponse: Partial<Extract<N400BadRequestResponse, object>> = {},
+): N400BadRequestResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getDiscardModuleDraftResponseMock403 = (
+  overrideResponse: Partial<Extract<N403ForbiddenResponse, object>> = {},
+): N403ForbiddenResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getDiscardModuleDraftResponseMock404 = (
+  overrideResponse: Partial<Extract<N404NotFoundResponse, object>> = {},
+): N404NotFoundResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getDiscardModuleDraftResponseMock409 = (
+  overrideResponse: Partial<Extract<N409ConflictResponse, object>> = {},
+): N409ConflictResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPublishModuleVersionWithInterfaceResponseMock = (
+  overrideResponse: Partial<Extract<CoreModuleVersion, object>> = {},
+): CoreModuleVersion => ({
+  resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+  resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  uuid: faker.string.uuid(),
+  semantic_version: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  opaque_version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  migration_generation: faker.helpers.arrayElement(['v0', 'v1', 'managed'] as const),
+  artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  verification_status: faker.helpers.arrayElement(Object.values(ModuleVerificationStatus)),
+  lifecycle_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+  source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  release_notes: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  resource_version: faker.number.int({ min: 1 }),
+  published_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  ...overrideResponse,
+});
+
+export const getPublishModuleVersionWithInterfaceResponseMock201 = (
+  overrideResponse: Partial<Extract<CoreModuleVersion, object>> = {},
+): CoreModuleVersion => ({
+  resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+  resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  module_uuid: faker.string.uuid(),
+  module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  uuid: faker.string.uuid(),
+  semantic_version: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  opaque_version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  migration_generation: faker.helpers.arrayElement(['v0', 'v1', 'managed'] as const),
+  artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  verification_status: faker.helpers.arrayElement(Object.values(ModuleVerificationStatus)),
+  lifecycle_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+  source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  release_notes: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  resource_version: faker.number.int({ min: 1 }),
+  published_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  ...overrideResponse,
+});
+
+export const getPublishModuleVersionWithInterfaceResponseMock400 = (
+  overrideResponse: Partial<Extract<N400BadRequestResponse, object>> = {},
+): N400BadRequestResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPublishModuleVersionWithInterfaceResponseMock403 = (
+  overrideResponse: Partial<Extract<N403ForbiddenResponse, object>> = {},
+): N403ForbiddenResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPublishModuleVersionWithInterfaceResponseMock404 = (
+  overrideResponse: Partial<Extract<N404NotFoundResponse, object>> = {},
+): N404NotFoundResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPublishModuleVersionWithInterfaceResponseMock409 = (
+  overrideResponse: Partial<Extract<N409ConflictResponse, object>> = {},
+): N409ConflictResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPublishStableModuleVersionSuccessorWithInterfaceResponseMock = (
+  overrideResponse: Partial<Extract<StableModuleVersionSuccessorResult, object>> = {},
+): StableModuleVersionSuccessorResult => ({
+  prerelease: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_uuid: faker.string.uuid(),
+    module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    uuid: faker.string.uuid(),
+    semantic_version: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    opaque_version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    migration_generation: faker.helpers.arrayElement(['v0', 'v1', 'managed'] as const),
+    artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    verification_status: faker.helpers.arrayElement(Object.values(ModuleVerificationStatus)),
+    lifecycle_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+    source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    release_notes: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    resource_version: faker.number.int({ min: 1 }),
+    published_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  },
+  stable: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_uuid: faker.string.uuid(),
+    module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    uuid: faker.string.uuid(),
+    semantic_version: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    opaque_version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    migration_generation: faker.helpers.arrayElement(['v0', 'v1', 'managed'] as const),
+    artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    verification_status: faker.helpers.arrayElement(Object.values(ModuleVerificationStatus)),
+    lifecycle_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+    source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    release_notes: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    resource_version: faker.number.int({ min: 1 }),
+    published_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  },
+  correlation_id: faker.string.uuid(),
+  ...overrideResponse,
+});
+
+export const getPublishStableModuleVersionSuccessorWithInterfaceResponseMock201 = (
+  overrideResponse: Partial<Extract<StableModuleVersionSuccessorResult, object>> = {},
+): StableModuleVersionSuccessorResult => ({
+  prerelease: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_uuid: faker.string.uuid(),
+    module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    uuid: faker.string.uuid(),
+    semantic_version: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    opaque_version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    migration_generation: faker.helpers.arrayElement(['v0', 'v1', 'managed'] as const),
+    artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    verification_status: faker.helpers.arrayElement(Object.values(ModuleVerificationStatus)),
+    lifecycle_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+    source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    release_notes: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    resource_version: faker.number.int({ min: 1 }),
+    published_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  },
+  stable: {
+    resource_type_version: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    resource_type_version_uuid: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    module_uuid: faker.string.uuid(),
+    module_slug: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    uuid: faker.string.uuid(),
+    semantic_version: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    opaque_version_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    migration_generation: faker.helpers.arrayElement(['v0', 'v1', 'managed'] as const),
+    artifact_digest: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    verification_status: faker.helpers.arrayElement(Object.values(ModuleVerificationStatus)),
+    lifecycle_status: faker.helpers.arrayElement(Object.values(ModuleVersionSemanticStatus)),
+    source_revision: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    release_notes: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+    resource_version: faker.number.int({ min: 1 }),
+    published_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  },
+  correlation_id: faker.string.uuid(),
+  ...overrideResponse,
+});
+
+export const getPublishStableModuleVersionSuccessorWithInterfaceResponseMock400 = (
+  overrideResponse: Partial<Extract<N400BadRequestResponse, object>> = {},
+): N400BadRequestResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPublishStableModuleVersionSuccessorWithInterfaceResponseMock403 = (
+  overrideResponse: Partial<Extract<N403ForbiddenResponse, object>> = {},
+): N403ForbiddenResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPublishStableModuleVersionSuccessorWithInterfaceResponseMock404 = (
+  overrideResponse: Partial<Extract<N404NotFoundResponse, object>> = {},
+): N404NotFoundResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPublishStableModuleVersionSuccessorWithInterfaceResponseMock409 = (
   overrideResponse: Partial<Extract<N409ConflictResponse, object>> = {},
 ): N409ConflictResponse => ({
   error: 'API-000',
@@ -6050,6 +8125,1582 @@ export const getExecuteEnvironmentModuleVersionPinBulkOperationMockHandler409 = 
     options,
   );
 };
+
+export const getListModuleDraftsMockHandler = (
+  overrideResponse?:
+    | ModuleDraftPage
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ModuleDraftPage> | ModuleDraftPage),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getListModuleDraftsResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getListModuleDraftsMockHandler200 = (
+  overrideResponse?:
+    | ModuleDraftPage
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ModuleDraftPage> | ModuleDraftPage),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getListModuleDraftsResponseMock200(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getListModuleDraftsMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getListModuleDraftsResponseMock400(),
+        { status: 400 },
+      );
+    },
+    options,
+  );
+};
+
+export const getListModuleDraftsMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getListModuleDraftsResponseMock403(),
+        { status: 403 },
+      );
+    },
+    options,
+  );
+};
+
+export const getListModuleDraftsMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getListModuleDraftsResponseMock404(),
+        { status: 404 },
+      );
+    },
+    options,
+  );
+};
+
+export const getListModuleDraftsMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getListModuleDraftsResponseMock409(),
+        { status: 409 },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateModuleDraftMockHandler = (
+  overrideResponse?:
+    | ModuleDraft
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ModuleDraft> | ModuleDraft),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getCreateModuleDraftResponseMock(),
+        { status: 201 },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateModuleDraftMockHandler201 = (
+  overrideResponse?:
+    | ModuleDraft
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ModuleDraft> | ModuleDraft),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getCreateModuleDraftResponseMock201(),
+        { status: 201 },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateModuleDraftMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getCreateModuleDraftResponseMock400(),
+        { status: 400 },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateModuleDraftMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getCreateModuleDraftResponseMock403(),
+        { status: 403 },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateModuleDraftMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getCreateModuleDraftResponseMock404(),
+        { status: 404 },
+      );
+    },
+    options,
+  );
+};
+
+export const getCreateModuleDraftMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getCreateModuleDraftResponseMock409(),
+        { status: 409 },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleDraftMockHandler = (
+  overrideResponse?:
+    | ModuleDraft
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ModuleDraft> | ModuleDraft),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetModuleDraftResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleDraftMockHandler200 = (
+  overrideResponse?:
+    | ModuleDraft
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ModuleDraft> | ModuleDraft),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetModuleDraftResponseMock200(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleDraftMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetModuleDraftResponseMock400(),
+        { status: 400 },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleDraftMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetModuleDraftResponseMock403(),
+        { status: 403 },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleDraftMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetModuleDraftResponseMock404(),
+        { status: 404 },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleDraftMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetModuleDraftResponseMock409(),
+        { status: 409 },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpdateModuleDraftMockHandler = (
+  overrideResponse?:
+    | ModuleDraft
+    | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<ModuleDraft> | ModuleDraft),
+  options?: RequestHandlerOptions,
+) => {
+  return http.put(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId',
+    async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getUpdateModuleDraftResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpdateModuleDraftMockHandler200 = (
+  overrideResponse?:
+    | ModuleDraft
+    | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<ModuleDraft> | ModuleDraft),
+  options?: RequestHandlerOptions,
+) => {
+  return http.put(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId',
+    async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getUpdateModuleDraftResponseMock200(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpdateModuleDraftMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.put>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.put(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId',
+    async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getUpdateModuleDraftResponseMock400(),
+        { status: 400 },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpdateModuleDraftMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.put>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.put(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId',
+    async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getUpdateModuleDraftResponseMock403(),
+        { status: 403 },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpdateModuleDraftMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.put>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.put(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId',
+    async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getUpdateModuleDraftResponseMock404(),
+        { status: 404 },
+      );
+    },
+    options,
+  );
+};
+
+export const getUpdateModuleDraftMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.put>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.put(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId',
+    async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getUpdateModuleDraftResponseMock409(),
+        { status: 409 },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleDraftRevisionMockHandler = (
+  overrideResponse?:
+    | ModuleDraftRevision
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ModuleDraftRevision> | ModuleDraftRevision),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId/revisions/:draftRevision',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetModuleDraftRevisionResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleDraftRevisionMockHandler200 = (
+  overrideResponse?:
+    | ModuleDraftRevision
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ModuleDraftRevision> | ModuleDraftRevision),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId/revisions/:draftRevision',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetModuleDraftRevisionResponseMock200(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleDraftRevisionMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId/revisions/:draftRevision',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetModuleDraftRevisionResponseMock400(),
+        { status: 400 },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleDraftRevisionMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId/revisions/:draftRevision',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetModuleDraftRevisionResponseMock403(),
+        { status: 403 },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleDraftRevisionMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId/revisions/:draftRevision',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetModuleDraftRevisionResponseMock404(),
+        { status: 404 },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleDraftRevisionMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId/revisions/:draftRevision',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetModuleDraftRevisionResponseMock409(),
+        { status: 409 },
+      );
+    },
+    options,
+  );
+};
+
+export const getCaptureModuleDraftTestSnapshotMockHandler = (
+  overrideResponse?:
+    | ModuleDraftTestSnapshot
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ModuleDraftTestSnapshot> | ModuleDraftTestSnapshot),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/projects/:projectId/envs/:envId/modules/:moduleId/drafts/:draftId/test-snapshots',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getCaptureModuleDraftTestSnapshotResponseMock(),
+        { status: 201 },
+      );
+    },
+    options,
+  );
+};
+
+export const getCaptureModuleDraftTestSnapshotMockHandler201 = (
+  overrideResponse?:
+    | ModuleDraftTestSnapshot
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ModuleDraftTestSnapshot> | ModuleDraftTestSnapshot),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/projects/:projectId/envs/:envId/modules/:moduleId/drafts/:draftId/test-snapshots',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getCaptureModuleDraftTestSnapshotResponseMock201(),
+        { status: 201 },
+      );
+    },
+    options,
+  );
+};
+
+export const getCaptureModuleDraftTestSnapshotMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/projects/:projectId/envs/:envId/modules/:moduleId/drafts/:draftId/test-snapshots',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getCaptureModuleDraftTestSnapshotResponseMock400(),
+        { status: 400 },
+      );
+    },
+    options,
+  );
+};
+
+export const getCaptureModuleDraftTestSnapshotMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/projects/:projectId/envs/:envId/modules/:moduleId/drafts/:draftId/test-snapshots',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getCaptureModuleDraftTestSnapshotResponseMock403(),
+        { status: 403 },
+      );
+    },
+    options,
+  );
+};
+
+export const getCaptureModuleDraftTestSnapshotMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/projects/:projectId/envs/:envId/modules/:moduleId/drafts/:draftId/test-snapshots',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getCaptureModuleDraftTestSnapshotResponseMock404(),
+        { status: 404 },
+      );
+    },
+    options,
+  );
+};
+
+export const getCaptureModuleDraftTestSnapshotMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/projects/:projectId/envs/:envId/modules/:moduleId/drafts/:draftId/test-snapshots',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getCaptureModuleDraftTestSnapshotResponseMock409(),
+        { status: 409 },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleDraftTestSnapshotMockHandler = (
+  overrideResponse?:
+    | ModuleDraftTestSnapshot
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ModuleDraftTestSnapshot> | ModuleDraftTestSnapshot),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/projects/:projectId/envs/:envId/modules/:moduleId/draft-test-snapshots/:snapshotId',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetModuleDraftTestSnapshotResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleDraftTestSnapshotMockHandler200 = (
+  overrideResponse?:
+    | ModuleDraftTestSnapshot
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ModuleDraftTestSnapshot> | ModuleDraftTestSnapshot),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/projects/:projectId/envs/:envId/modules/:moduleId/draft-test-snapshots/:snapshotId',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetModuleDraftTestSnapshotResponseMock200(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleDraftTestSnapshotMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/projects/:projectId/envs/:envId/modules/:moduleId/draft-test-snapshots/:snapshotId',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetModuleDraftTestSnapshotResponseMock400(),
+        { status: 400 },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleDraftTestSnapshotMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/projects/:projectId/envs/:envId/modules/:moduleId/draft-test-snapshots/:snapshotId',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetModuleDraftTestSnapshotResponseMock403(),
+        { status: 403 },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleDraftTestSnapshotMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/projects/:projectId/envs/:envId/modules/:moduleId/draft-test-snapshots/:snapshotId',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetModuleDraftTestSnapshotResponseMock404(),
+        { status: 404 },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetModuleDraftTestSnapshotMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/projects/:projectId/envs/:envId/modules/:moduleId/draft-test-snapshots/:snapshotId',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetModuleDraftTestSnapshotResponseMock409(),
+        { status: 409 },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishModuleDraftMockHandler = (
+  overrideResponse?:
+    | ModuleDraftPublication
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ModuleDraftPublication> | ModuleDraftPublication),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId/publish',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPublishModuleDraftResponseMock(),
+        { status: 201 },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishModuleDraftMockHandler201 = (
+  overrideResponse?:
+    | ModuleDraftPublication
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ModuleDraftPublication> | ModuleDraftPublication),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId/publish',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPublishModuleDraftResponseMock201(),
+        { status: 201 },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishModuleDraftMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId/publish',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPublishModuleDraftResponseMock400(),
+        { status: 400 },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishModuleDraftMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId/publish',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPublishModuleDraftResponseMock403(),
+        { status: 403 },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishModuleDraftMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId/publish',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPublishModuleDraftResponseMock404(),
+        { status: 404 },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishModuleDraftMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId/publish',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPublishModuleDraftResponseMock409(),
+        { status: 409 },
+      );
+    },
+    options,
+  );
+};
+
+export const getDiscardModuleDraftMockHandler = (
+  overrideResponse?:
+    | ModuleDraft
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ModuleDraft> | ModuleDraft),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId/discard',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getDiscardModuleDraftResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getDiscardModuleDraftMockHandler200 = (
+  overrideResponse?:
+    | ModuleDraft
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ModuleDraft> | ModuleDraft),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId/discard',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getDiscardModuleDraftResponseMock200(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getDiscardModuleDraftMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId/discard',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getDiscardModuleDraftResponseMock400(),
+        { status: 400 },
+      );
+    },
+    options,
+  );
+};
+
+export const getDiscardModuleDraftMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId/discard',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getDiscardModuleDraftResponseMock403(),
+        { status: 403 },
+      );
+    },
+    options,
+  );
+};
+
+export const getDiscardModuleDraftMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId/discard',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getDiscardModuleDraftResponseMock404(),
+        { status: 404 },
+      );
+    },
+    options,
+  );
+};
+
+export const getDiscardModuleDraftMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/drafts/:draftId/discard',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getDiscardModuleDraftResponseMock409(),
+        { status: 409 },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishModuleVersionWithInterfaceMockHandler = (
+  overrideResponse?:
+    | CoreModuleVersion
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<CoreModuleVersion> | CoreModuleVersion),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/version-publications',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPublishModuleVersionWithInterfaceResponseMock(),
+        { status: 201 },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishModuleVersionWithInterfaceMockHandler201 = (
+  overrideResponse?:
+    | CoreModuleVersion
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<CoreModuleVersion> | CoreModuleVersion),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/version-publications',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPublishModuleVersionWithInterfaceResponseMock201(),
+        { status: 201 },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishModuleVersionWithInterfaceMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/version-publications',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPublishModuleVersionWithInterfaceResponseMock400(),
+        { status: 400 },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishModuleVersionWithInterfaceMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/version-publications',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPublishModuleVersionWithInterfaceResponseMock403(),
+        { status: 403 },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishModuleVersionWithInterfaceMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/version-publications',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPublishModuleVersionWithInterfaceResponseMock404(),
+        { status: 404 },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishModuleVersionWithInterfaceMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/version-publications',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPublishModuleVersionWithInterfaceResponseMock409(),
+        { status: 409 },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishStableModuleVersionSuccessorWithInterfaceMockHandler = (
+  overrideResponse?:
+    | StableModuleVersionSuccessorResult
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<StableModuleVersionSuccessorResult> | StableModuleVersionSuccessorResult),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/successor-publications',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPublishStableModuleVersionSuccessorWithInterfaceResponseMock(),
+        { status: 201 },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishStableModuleVersionSuccessorWithInterfaceMockHandler201 = (
+  overrideResponse?:
+    | StableModuleVersionSuccessorResult
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<StableModuleVersionSuccessorResult> | StableModuleVersionSuccessorResult),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/successor-publications',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPublishStableModuleVersionSuccessorWithInterfaceResponseMock201(),
+        { status: 201 },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishStableModuleVersionSuccessorWithInterfaceMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/successor-publications',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPublishStableModuleVersionSuccessorWithInterfaceResponseMock400(),
+        { status: 400 },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishStableModuleVersionSuccessorWithInterfaceMockHandler403 = (
+  overrideResponse?:
+    | N403ForbiddenResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N403ForbiddenResponse> | N403ForbiddenResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/successor-publications',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPublishStableModuleVersionSuccessorWithInterfaceResponseMock403(),
+        { status: 403 },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishStableModuleVersionSuccessorWithInterfaceMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/successor-publications',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPublishStableModuleVersionSuccessorWithInterfaceResponseMock404(),
+        { status: 404 },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishStableModuleVersionSuccessorWithInterfaceMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/modules/:moduleId/versions/:moduleVersionId/successor-publications',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPublishStableModuleVersionSuccessorWithInterfaceResponseMock409(),
+        { status: 409 },
+      );
+    },
+    options,
+  );
+};
 export const getModulesMock = () => [
   getListModulesMockHandler(),
   getCreateModuleMockHandler(),
@@ -6078,4 +9729,15 @@ export const getModulesMock = () => [
   getAppendEnvironmentModuleVersionPinNoteMockHandler(),
   getPreviewEnvironmentModuleVersionPinBulkOperationMockHandler(),
   getExecuteEnvironmentModuleVersionPinBulkOperationMockHandler(),
+  getListModuleDraftsMockHandler(),
+  getCreateModuleDraftMockHandler(),
+  getGetModuleDraftMockHandler(),
+  getUpdateModuleDraftMockHandler(),
+  getGetModuleDraftRevisionMockHandler(),
+  getCaptureModuleDraftTestSnapshotMockHandler(),
+  getGetModuleDraftTestSnapshotMockHandler(),
+  getPublishModuleDraftMockHandler(),
+  getDiscardModuleDraftMockHandler(),
+  getPublishModuleVersionWithInterfaceMockHandler(),
+  getPublishStableModuleVersionSuccessorWithInterfaceMockHandler(),
 ];

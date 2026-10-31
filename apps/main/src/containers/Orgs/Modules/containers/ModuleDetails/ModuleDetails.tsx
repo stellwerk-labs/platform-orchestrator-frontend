@@ -83,6 +83,7 @@ export const ModuleDetails = () => {
         onChange={(key) => navigate(key)}
         items={[
           { label: 'Definition', key: 'configuration' },
+          { label: 'Drafts', key: 'drafts' },
           { label: 'Versions', key: 'versions' },
           { label: 'Environment Pins', key: 'pins' },
           { label: 'Rules', key: 'rules' },

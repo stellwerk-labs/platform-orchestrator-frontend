@@ -8,22 +8,22 @@ paths:
       operationId: getPluginCapability
       summary: Discover an installed plugin and its availability for this organization.
       tags: [Plugin]
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - name: pluginId
           in: path
           required: true
           description: Immutable, reverse-DNS plugin identity.
-          schema: { type: string, pattern: '^[a-z0-9]+(?:[.-][a-z0-9]+)+$' }
+          schema: {type: string, pattern: '^[a-z0-9]+(?:[.-][a-z0-9]+)+$'}
       responses:
         '200':
           description: The plugin capability state. An unknown plugin is represented as not_installed.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/PluginCapability' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
+              schema: {$ref: '#/components/schemas/PluginCapability'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
   /plugin-packages:
     get:
       operationId: listPluginPackages
@@ -1066,30 +1066,30 @@ paths:
       operationId: changeResourceTypeCatalogueStatus
       summary: Archive or unarchive an immutable resource type identity
       tags: [ResourceType]
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - $ref: '#/components/parameters/resourceTypeIdPathParam'
         - name: catalogueAction
           in: path
           required: true
-          schema: { type: string, enum: [archive, unarchive] }
+          schema: {type: string, enum: [archive, unarchive]}
         - $ref: '#/components/parameters/idempotencyKeyHeader'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/ModuleReasonedCommand' }
+            schema: {$ref: '#/components/schemas/ModuleReasonedCommand'}
       responses:
         '200':
           description: Resource type catalogue status changed.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/ResourceType' }
-        '400': { $ref: '#/components/responses/400BadRequest' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
-        '409': { $ref: '#/components/responses/409Conflict' }
+              schema: {$ref: '#/components/schemas/ResourceType'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
   /orgs/{orgId}/module-providers:
     get:
       operationId: listModuleProviders
@@ -1460,9 +1460,7 @@ paths:
         - Modules
       summary: Create a Module with an initial immutable Proposed version
       description: >-
-        Compatibility authoring endpoint. Requires semantic_version and a complete definition;
-        external sources may declare an optional artifact_digest. This does not promote the version.
-        New clients should create a catalogue entry, publish a version, and promote explicitly.
+        Compatibility authoring endpoint. Requires semantic_version and a complete definition; external sources may declare an optional artifact_digest. This does not promote the version. New clients should create a catalogue entry, publish a version, and promote explicitly.
       security:
         - userIdHeader: []
       parameters:
@@ -1510,8 +1508,7 @@ paths:
         - Modules
       summary: Publish a new immutable Proposed version for an existing Module
       description: >-
-        Compatibility authoring endpoint, not an in-place mutation or Default update.
-        Requires a new semantic_version. Prefer publishModuleVersion and explicit lifecycle commands.
+        Compatibility authoring endpoint, not an in-place mutation or Default update. Requires a new semantic_version. Prefer publishModuleVersion and explicit lifecycle commands.
       security:
         - userIdHeader: []
       parameters:
@@ -1542,9 +1539,7 @@ paths:
         - Modules
       summary: Delete an unused empty Module catalogue entry
       description: >-
-        Requires module.archive. Published versions are never deleted. A 409 response with
-        error module_history_retained directs clients to reasoned catalogue archival.
-        Other 409 responses represent usage or deletion blockers and must not be treated as success.
+        Requires module.archive. Published versions are never deleted. A 409 response with error module_history_retained directs clients to reasoned catalogue archival. Other 409 responses represent usage or deletion blockers and must not be treated as success.
       security:
         - userIdHeader: []
       parameters:
@@ -1572,10 +1567,10 @@ paths:
         - $ref: '#/components/parameters/pageTokenQueryParam'
         - name: include_deprecated
           in: query
-          schema: { type: boolean, default: false }
+          schema: {type: boolean, default: false}
         - name: include_defective
           in: query
-          schema: { type: boolean, default: false }
+          schema: {type: boolean, default: false}
       responses:
         '200':
           description: Successful list response
@@ -1589,7 +1584,7 @@ paths:
       operationId: publishModuleVersion
       tags: [Modules]
       summary: Publish a complete immutable Proposed Module Version
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - $ref: '#/components/parameters/moduleIdPathParam'
@@ -1598,17 +1593,17 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/ModuleVersionPublishBody' }
+            schema: {$ref: '#/components/schemas/ModuleVersionPublishBody'}
       responses:
         '201':
           description: Immutable Proposed version published.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/CoreModuleVersion' }
-        '400': { $ref: '#/components/responses/400BadRequest' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
-        '409': { $ref: '#/components/responses/409Conflict' }
+              schema: {$ref: '#/components/schemas/CoreModuleVersion'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
   /orgs/{orgId}/modules/{moduleId}/versions/{moduleVersionId}:
     get:
       operationId: getModuleVersion
@@ -1634,7 +1629,7 @@ paths:
     get:
       operationId: getModuleCatalogueEntry
       tags: [Modules]
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - $ref: '#/components/parameters/moduleIdPathParam'
@@ -1643,13 +1638,13 @@ paths:
           description: Stable Module catalogue identity and metadata.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/ModuleCatalogueEntry' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
+              schema: {$ref: '#/components/schemas/ModuleCatalogueEntry'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
     patch:
       operationId: updateModuleCatalogueEntry
       tags: [Modules]
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - $ref: '#/components/parameters/moduleIdPathParam'
@@ -1657,28 +1652,28 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/ModuleCatalogueUpdateBody' }
+            schema: {$ref: '#/components/schemas/ModuleCatalogueUpdateBody'}
       responses:
         '200':
           description: Catalogue metadata updated without publishing a version.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/ModuleCatalogueEntry' }
-        '400': { $ref: '#/components/responses/400BadRequest' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
-        '409': { $ref: '#/components/responses/409Conflict' }
+              schema: {$ref: '#/components/schemas/ModuleCatalogueEntry'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
   /orgs/{orgId}/module-catalogue:
     get:
       operationId: listModuleCatalogueEntries
       tags: [Modules]
       summary: List stable Module identities, including empty shells
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - name: include_archived
           in: query
-          schema: { type: boolean, default: false }
+          schema: {type: boolean, default: false}
       responses:
         '200':
           description: Module catalogue identities and mutable metadata.
@@ -1686,13 +1681,13 @@ paths:
             application/json:
               schema:
                 type: array
-                items: { $ref: '#/components/schemas/ModuleCatalogueEntry' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
+                items: {$ref: '#/components/schemas/ModuleCatalogueEntry'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
     post:
       operationId: createModuleCatalogueEntry
       tags: [Modules]
       summary: Create an empty stable Module identity without publishing a version
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - $ref: '#/components/parameters/idempotencyKeyHeader'
@@ -1700,23 +1695,23 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/ModuleCatalogueCreateBody' }
+            schema: {$ref: '#/components/schemas/ModuleCatalogueCreateBody'}
       responses:
         '201':
           description: Empty Module shell created.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/ModuleCatalogueEntry' }
-        '400': { $ref: '#/components/responses/400BadRequest' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
-        '409': { $ref: '#/components/responses/409Conflict' }
+              schema: {$ref: '#/components/schemas/ModuleCatalogueEntry'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
   /orgs/{orgId}/modules/{moduleId}/versions/{moduleVersionId}/stable-successor:
     post:
       operationId: publishStableModuleVersionSuccessor
       tags: [Modules]
       summary: Atomically publish a stable successor and deprecate the exact Proposed prerelease
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - $ref: '#/components/parameters/moduleIdPathParam'
@@ -1726,23 +1721,23 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/StableModuleVersionSuccessorBody' }
+            schema: {$ref: '#/components/schemas/StableModuleVersionSuccessorBody'}
       responses:
         '201':
           description: Stable Proposed successor and deprecated prerelease committed atomically.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/StableModuleVersionSuccessorResult' }
-        '400': { $ref: '#/components/responses/400BadRequest' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
-        '409': { $ref: '#/components/responses/409Conflict' }
+              schema: {$ref: '#/components/schemas/StableModuleVersionSuccessorResult'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
   /orgs/{orgId}/modules/{moduleId}/versions/{moduleVersionId}/compare/{otherModuleVersionId}:
     get:
       operationId: compareModuleVersions
       tags: [Modules]
       summary: Structurally compare two immutable versions of one Module
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - $ref: '#/components/parameters/moduleIdPathParam'
@@ -1750,21 +1745,21 @@ paths:
         - name: otherModuleVersionId
           in: path
           required: true
-          schema: { type: string }
+          schema: {type: string}
       responses:
         '200':
           description: Deterministic structural comparison.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/ModuleVersionComparison' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
+              schema: {$ref: '#/components/schemas/ModuleVersionComparison'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
   /orgs/{orgId}/modules/{moduleId}/versions/{moduleVersionId}/usage:
     get:
       operationId: getModuleVersionUsage
       tags: [Modules]
       summary: Inspect observed Environment adoption and Pin usage for one immutable Module Version
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - $ref: '#/components/parameters/moduleIdPathParam'
@@ -1774,15 +1769,15 @@ paths:
           description: Observational usage derived from the latest trustworthy Deployment snapshots.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/ModuleVersionUsage' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
+              schema: {$ref: '#/components/schemas/ModuleVersionUsage'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
   /orgs/{orgId}/module-version-lifecycle-transactions:
     post:
       operationId: transactModuleVersionLifecycles
       tags: [Modules]
       summary: Apply lifecycle changes across Modules in one atomic Core transaction
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - $ref: '#/components/parameters/idempotencyKeyHeader'
@@ -1790,50 +1785,50 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/ModuleVersionLifecycleTransactionBody' }
+            schema: {$ref: '#/components/schemas/ModuleVersionLifecycleTransactionBody'}
       responses:
         '200':
           description: Every transition committed atomically.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/ModuleVersionLifecycleTransactionResult' }
-        '400': { $ref: '#/components/responses/400BadRequest' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
-        '409': { $ref: '#/components/responses/409Conflict' }
+              schema: {$ref: '#/components/schemas/ModuleVersionLifecycleTransactionResult'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
   /orgs/{orgId}/modules/{moduleId}/catalogue/actions/{catalogueAction}:
     post:
       operationId: changeModuleCatalogueStatus
       tags: [Modules]
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - $ref: '#/components/parameters/moduleIdPathParam'
         - name: catalogueAction
           in: path
           required: true
-          schema: { type: string, enum: [archive, unarchive] }
+          schema: {type: string, enum: [archive, unarchive]}
         - $ref: '#/components/parameters/idempotencyKeyHeader'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/ModuleReasonedCommand' }
+            schema: {$ref: '#/components/schemas/ModuleReasonedCommand'}
       responses:
         '200':
           description: Catalogue state changed atomically.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/ModuleCatalogueEntry' }
-        '400': { $ref: '#/components/responses/400BadRequest' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
-        '409': { $ref: '#/components/responses/409Conflict' }
+              schema: {$ref: '#/components/schemas/ModuleCatalogueEntry'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
   /orgs/{orgId}/modules/{moduleId}/versions/{moduleVersionId}/actions/{lifecycleAction}:
     post:
       operationId: transitionModuleVersion
       tags: [Modules]
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - $ref: '#/components/parameters/moduleIdPathParam'
@@ -1854,22 +1849,22 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/ModuleReasonedCommand' }
+            schema: {$ref: '#/components/schemas/ModuleReasonedCommand'}
       responses:
         '200':
           description: Lifecycle transition committed with an append-only event.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/CoreModuleVersion' }
-        '400': { $ref: '#/components/responses/400BadRequest' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
-        '409': { $ref: '#/components/responses/409Conflict' }
+              schema: {$ref: '#/components/schemas/CoreModuleVersion'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
   /orgs/{orgId}/modules/{moduleId}/versions/{moduleVersionId}/events:
     get:
       operationId: listModuleVersionLifecycleEvents
       tags: [Modules]
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - $ref: '#/components/parameters/moduleIdPathParam'
@@ -1881,25 +1876,25 @@ paths:
             application/json:
               schema:
                 type: array
-                items: { $ref: '#/components/schemas/ModuleVersionLifecycleEvent' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
+                items: {$ref: '#/components/schemas/ModuleVersionLifecycleEvent'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
   /orgs/{orgId}/module-version-pins:
     get:
       operationId: listEnvironmentModuleVersionPins
       tags: [Modules]
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - name: environment_uuid
           in: query
-          schema: { type: string, format: uuid }
+          schema: {type: string, format: uuid}
         - name: module_uuid
           in: query
-          schema: { type: string, format: uuid }
+          schema: {type: string, format: uuid}
         - name: include_removed
           in: query
-          schema: { type: boolean, default: false }
+          schema: {type: boolean, default: false}
       responses:
         '200':
           description: Exact Environment Module Version Pins.
@@ -1907,12 +1902,12 @@ paths:
             application/json:
               schema:
                 type: array
-                items: { $ref: '#/components/schemas/EnvironmentModuleVersionPin' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
+                items: {$ref: '#/components/schemas/EnvironmentModuleVersionPin'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
     post:
       operationId: createEnvironmentModuleVersionPin
       tags: [Modules]
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - $ref: '#/components/parameters/idempotencyKeyHeader'
@@ -1920,78 +1915,78 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/EnvironmentModuleVersionPinCreateBody' }
+            schema: {$ref: '#/components/schemas/EnvironmentModuleVersionPinCreateBody'}
       responses:
         '201':
           description: Exact active version pinned.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/EnvironmentModuleVersionPin' }
-        '400': { $ref: '#/components/responses/400BadRequest' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
-        '409': { $ref: '#/components/responses/409Conflict' }
+              schema: {$ref: '#/components/schemas/EnvironmentModuleVersionPin'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
   /orgs/{orgId}/module-version-pins/{pinId}/actions/{pinAction}:
     post:
       operationId: transitionEnvironmentModuleVersionPin
       tags: [Modules]
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - name: pinId
           in: path
           required: true
-          schema: { type: string, format: uuid }
+          schema: {type: string, format: uuid}
         - name: pinAction
           in: path
           required: true
-          schema: { type: string, enum: [unpin, discard] }
+          schema: {type: string, enum: [unpin, discard]}
         - $ref: '#/components/parameters/idempotencyKeyHeader'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/ModuleReasonedCommand' }
+            schema: {$ref: '#/components/schemas/ModuleReasonedCommand'}
       responses:
         '200':
           description: Pin transition committed.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/EnvironmentModuleVersionPin' }
-        '400': { $ref: '#/components/responses/400BadRequest' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
-        '409': { $ref: '#/components/responses/409Conflict' }
+              schema: {$ref: '#/components/schemas/EnvironmentModuleVersionPin'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
   /orgs/{orgId}/module-version-pins/{pinId}:
     get:
       operationId: getEnvironmentModuleVersionPin
       tags: [Modules]
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - name: pinId
           in: path
           required: true
-          schema: { type: string, format: uuid }
+          schema: {type: string, format: uuid}
       responses:
         '200':
           description: Exact Pin state and immutable activation boundary.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/EnvironmentModuleVersionPin' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
+              schema: {$ref: '#/components/schemas/EnvironmentModuleVersionPin'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
   /orgs/{orgId}/module-version-pins/{pinId}/events:
     get:
       operationId: listEnvironmentModuleVersionPinEvents
       tags: [Modules]
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - name: pinId
           in: path
           required: true
-          schema: { type: string, format: uuid }
+          schema: {type: string, format: uuid}
       responses:
         '200':
           description: Append-only Pin lifecycle history.
@@ -1999,63 +1994,63 @@ paths:
             application/json:
               schema:
                 type: array
-                items: { $ref: '#/components/schemas/ModuleVersionPinEvent' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
+                items: {$ref: '#/components/schemas/ModuleVersionPinEvent'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
   /orgs/{orgId}/module-version-pins/{pinId}/notes:
     post:
       operationId: appendEnvironmentModuleVersionPinNote
       tags: [Modules]
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - name: pinId
           in: path
           required: true
-          schema: { type: string, format: uuid }
+          schema: {type: string, format: uuid}
         - $ref: '#/components/parameters/idempotencyKeyHeader'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/ModuleVersionPinNoteBody' }
+            schema: {$ref: '#/components/schemas/ModuleVersionPinNoteBody'}
       responses:
         '201':
           description: Append-only note recorded without changing Pin state or activation boundary.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/ModuleVersionPinEvent' }
-        '400': { $ref: '#/components/responses/400BadRequest' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
-        '409': { $ref: '#/components/responses/409Conflict' }
+              schema: {$ref: '#/components/schemas/ModuleVersionPinEvent'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
   /orgs/{orgId}/module-version-pins/bulk-preview:
     post:
       operationId: previewEnvironmentModuleVersionPinBulkOperation
       tags: [Modules]
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/ModuleVersionPinBulkPreviewBody' }
+            schema: {$ref: '#/components/schemas/ModuleVersionPinBulkPreviewBody'}
       responses:
         '200':
           description: Frozen exact Environment decisions; no Pin was changed.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/ModuleVersionPinBulkPreview' }
-        '400': { $ref: '#/components/responses/400BadRequest' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
-        '409': { $ref: '#/components/responses/409Conflict' }
+              schema: {$ref: '#/components/schemas/ModuleVersionPinBulkPreview'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
   /orgs/{orgId}/module-version-pins/bulk:
     post:
       operationId: executeEnvironmentModuleVersionPinBulkOperation
       tags: [Modules]
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - $ref: '#/components/parameters/idempotencyKeyHeader'
@@ -2063,55 +2058,55 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/ModuleVersionPinBulkCommandBody' }
+            schema: {$ref: '#/components/schemas/ModuleVersionPinBulkCommandBody'}
       responses:
         '200':
           description: Every materialised Environment Pin changed atomically.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/ModuleVersionPinBulkResult' }
-        '400': { $ref: '#/components/responses/400BadRequest' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
-        '409': { $ref: '#/components/responses/409Conflict' }
+              schema: {$ref: '#/components/schemas/ModuleVersionPinBulkResult'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
   /internal/orgs/{orgId}/module-version-pins/{pinId}/actions/override:
     post:
       operationId: beginEnvironmentModuleVersionPinOverride
       tags: [internal, Modules]
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - name: pinId
           in: path
           required: true
-          schema: { type: string, format: uuid }
+          schema: {type: string, format: uuid}
         - $ref: '#/components/parameters/idempotencyKeyHeader'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/ModuleVersionPinOverrideBody' }
+            schema: {$ref: '#/components/schemas/ModuleVersionPinOverrideBody'}
       responses:
         '200':
           description: Pin is operation-locked in override_pending.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/EnvironmentModuleVersionPin' }
-        '400': { $ref: '#/components/responses/400BadRequest' }
-        '404': { $ref: '#/components/responses/404NotFound' }
-        '409': { $ref: '#/components/responses/409Conflict' }
+              schema: {$ref: '#/components/schemas/EnvironmentModuleVersionPin'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
   /internal/orgs/{orgId}/modules/{moduleId}/operation-reservations:
     get:
       operationId: listModuleOperationReservations
       tags: [internal, Modules]
       summary: List add-on reservations that exclusively protect a Module operation
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - $ref: '#/components/parameters/moduleIdPathParam'
         - name: include_released
           in: query
-          schema: { type: boolean, default: false }
+          schema: {type: boolean, default: false}
       responses:
         '200':
           description: Module operation reservations.
@@ -2119,14 +2114,14 @@ paths:
             application/json:
               schema:
                 type: array
-                items: { $ref: '#/components/schemas/ModuleOperationReservation' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
+                items: {$ref: '#/components/schemas/ModuleOperationReservation'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
     post:
       operationId: acquireModuleOperationReservation
       tags: [internal, Modules]
       summary: Acquire the Module's exclusive add-on operation reservation
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - $ref: '#/components/parameters/moduleIdPathParam'
@@ -2135,61 +2130,61 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/ModuleOperationReservationAcquireBody' }
+            schema: {$ref: '#/components/schemas/ModuleOperationReservationAcquireBody'}
       responses:
         '201':
           description: Exclusive reservation acquired or replayed.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/ModuleOperationReservation' }
-        '400': { $ref: '#/components/responses/400BadRequest' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
-        '409': { $ref: '#/components/responses/409Conflict' }
+              schema: {$ref: '#/components/schemas/ModuleOperationReservation'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
   /internal/orgs/{orgId}/modules/{moduleId}/operation-reservations/{reservationId}/actions/release:
     post:
       operationId: releaseModuleOperationReservation
       tags: [internal, Modules]
       summary: Release an exact add-on operation reservation
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - $ref: '#/components/parameters/moduleIdPathParam'
         - name: reservationId
           in: path
           required: true
-          schema: { type: string, format: uuid }
+          schema: {type: string, format: uuid}
         - $ref: '#/components/parameters/idempotencyKeyHeader'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/ModuleReasonedCommand' }
+            schema: {$ref: '#/components/schemas/ModuleReasonedCommand'}
       responses:
         '200':
           description: Reservation released or replayed.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/ModuleOperationReservation' }
-        '400': { $ref: '#/components/responses/400BadRequest' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
-        '409': { $ref: '#/components/responses/409Conflict' }
+              schema: {$ref: '#/components/schemas/ModuleOperationReservation'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
   /internal/orgs/{orgId}/modules/{moduleId}/extension-contributions:
     get:
       operationId: listModuleExtensionContributions
       tags: [internal, Modules]
       summary: List namespaced related resources and contextual actions registered by add-ons
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - $ref: '#/components/parameters/moduleIdPathParam'
         - name: include_draft
           in: query
-          schema: { type: boolean, default: false }
+          schema: {type: boolean, default: false}
         - name: include_terminal
           in: query
-          schema: { type: boolean, default: false }
+          schema: {type: boolean, default: false}
       responses:
         '200':
           description: Registered extension contributions.
@@ -2197,14 +2192,14 @@ paths:
             application/json:
               schema:
                 type: array
-                items: { $ref: '#/components/schemas/ModuleExtensionContribution' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
+                items: {$ref: '#/components/schemas/ModuleExtensionContribution'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
     post:
       operationId: upsertModuleExtensionContribution
       tags: [internal, Modules]
       summary: Register or update a namespaced related resource or contextual action
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - $ref: '#/components/parameters/moduleIdPathParam'
@@ -2213,69 +2208,69 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/ModuleExtensionContributionUpsertBody' }
+            schema: {$ref: '#/components/schemas/ModuleExtensionContributionUpsertBody'}
       responses:
         '200':
           description: Contribution registered or updated.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/ModuleExtensionContribution' }
-        '400': { $ref: '#/components/responses/400BadRequest' }
-        '403': { $ref: '#/components/responses/403Forbidden' }
-        '404': { $ref: '#/components/responses/404NotFound' }
-        '409': { $ref: '#/components/responses/409Conflict' }
+              schema: {$ref: '#/components/schemas/ModuleExtensionContribution'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
   /internal/orgs/{orgId}/module-version-pins/{pinId}/actions/reconcile-override:
     post:
       operationId: reconcileEnvironmentModuleVersionPinOverride
       tags: [internal, Modules]
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - name: pinId
           in: path
           required: true
-          schema: { type: string, format: uuid }
+          schema: {type: string, format: uuid}
         - $ref: '#/components/parameters/idempotencyKeyHeader'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/ModuleVersionPinOverrideReconcileBody' }
+            schema: {$ref: '#/components/schemas/ModuleVersionPinOverrideReconcileBody'}
       responses:
         '200':
           description: Authoritative Deployment outcome reconciled.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/EnvironmentModuleVersionPin' }
-        '400': { $ref: '#/components/responses/400BadRequest' }
-        '404': { $ref: '#/components/responses/404NotFound' }
-        '409': { $ref: '#/components/responses/409Conflict' }
+              schema: {$ref: '#/components/schemas/EnvironmentModuleVersionPin'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
   /internal/orgs/{orgId}/module-version-pins/{pinId}/actions/restore-after-rollback:
     post:
       operationId: restoreEnvironmentModuleVersionPinAfterRollback
       tags: [internal, Modules]
-      security: [{ userIdHeader: [] }]
+      security: [{userIdHeader: []}]
       parameters:
         - $ref: '#/components/parameters/orgIdPathParam'
         - name: pinId
           in: path
           required: true
-          schema: { type: string, format: uuid }
+          schema: {type: string, format: uuid}
         - $ref: '#/components/parameters/idempotencyKeyHeader'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/ModuleVersionPinRollbackRestoreBody' }
+            schema: {$ref: '#/components/schemas/ModuleVersionPinRollbackRestoreBody'}
       responses:
         '200':
           description: Exact previously pinned Version restored by the owning operation.
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/EnvironmentModuleVersionPin' }
-        '400': { $ref: '#/components/responses/400BadRequest' }
-        '404': { $ref: '#/components/responses/404NotFound' }
-        '409': { $ref: '#/components/responses/409Conflict' }
+              schema: {$ref: '#/components/schemas/EnvironmentModuleVersionPin'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
   /orgs/{orgId}/module-rules:
     get:
       operationId: listModuleRulesInOrg
@@ -2324,6 +2319,8 @@ paths:
       tags:
         - Rules
       summary: Create a new module rule in the org
+      description: >-
+        A Module without a Default requires both project_id and env_id, so first-implementation tests cannot introduce an unresolved global Rule that blocks other Environments. Rules never implicitly select a Draft. Publish a Default before creating broader Rules.
       security:
         - userIdHeader: []
       parameters:
@@ -2397,17 +2394,17 @@ paths:
         - name: X-Stellwerk-Rollback
           in: header
           required: false
-          schema: { type: boolean, default: false }
+          schema: {type: boolean, default: false}
           description: Internal audited exception allowing retained Deprecated or Defective artifacts during rollback.
         - name: X-Stellwerk-Module-Operation-Id
           in: header
           required: false
-          schema: { type: string, format: uuid }
+          schema: {type: string, format: uuid}
           description: Exact add-on operation allowed to consume its own override-pending Pin target.
         - name: X-Stellwerk-Module-Operation-Planning
           in: header
           required: false
-          schema: { type: boolean, default: false }
+          schema: {type: boolean, default: false}
           description: Internal dry-run compilation for an add-on Module operation. It does not mutate or override Core Pins.
         - name: X-Stellwerk-Restricted-Version-Confirmations
           in: header
@@ -2416,7 +2413,7 @@ paths:
           explode: false
           schema:
             type: array
-            items: { type: string, format: uuid }
+            items: {type: string, format: uuid}
           description: Exact Defective Module Version UUIDs confirmed by an authorised deployment caller.
         - name: X-Stellwerk-Active-Module-Versions
           in: header
@@ -2425,7 +2422,7 @@ paths:
           explode: false
           schema:
             type: array
-            items: { type: string }
+            items: {type: string}
           description: Exact Module coordinates observed in the Environment's last graph. This evidence permits an archived Module to carry forward only the version already active there.
       requestBody:
         required: true
@@ -2444,6 +2441,365 @@ paths:
           $ref: '#/components/responses/404NotFound'
         '409':
           $ref: '#/components/responses/409Conflict'
+  /orgs/{orgId}/resource-types/{typeId}/versions:
+    get:
+      operationId: listResourceTypeVersions
+      summary: List immutable Resource Type interface versions
+      tags: [ResourceType]
+      security: [{userIdHeader: []}]
+      parameters:
+        - $ref: '#/components/parameters/orgIdPathParam'
+        - $ref: '#/components/parameters/resourceTypeIdPathParam'
+        - $ref: '#/components/parameters/pageTokenQueryParam'
+        - name: per_page
+          in: query
+          schema: {type: integer, minimum: 1, maximum: 100, default: 50}
+      responses:
+        '200':
+          description: Immutable interfaces in ascending version order.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items: {type: array, items: {$ref: '#/components/schemas/ResourceTypeVersion'}}
+                  next_page_token: {type: string}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+    post:
+      operationId: publishResourceTypeVersion
+      summary: Publish an immutable interface without changing previous contracts
+      tags: [ResourceType]
+      security: [{userIdHeader: []}]
+      parameters:
+        - $ref: '#/components/parameters/orgIdPathParam'
+        - $ref: '#/components/parameters/resourceTypeIdPathParam'
+        - $ref: '#/components/parameters/idempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ResourceTypeVersionPublishBody'}
+      responses:
+        '201':
+          description: New immutable interface; existing Modules and deployments unchanged.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ResourceTypeVersion'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '409': {$ref: '#/components/responses/409Conflict'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+  /orgs/{orgId}/resource-types/{typeId}/versions/{resourceTypeVersion}:
+    get:
+      operationId: getResourceTypeVersion
+      summary: Read an exact immutable Resource Type interface
+      tags: [ResourceType]
+      security: [{userIdHeader: []}]
+      parameters:
+        - $ref: '#/components/parameters/orgIdPathParam'
+        - $ref: '#/components/parameters/resourceTypeIdPathParam'
+        - name: resourceTypeVersion
+          in: path
+          required: true
+          schema: {type: integer, format: int64, minimum: 1}
+      responses:
+        '200':
+          description: Exact immutable interface.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ResourceTypeVersion'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+  /orgs/{orgId}/modules/{moduleId}/drafts:
+    get:
+      operationId: listModuleDrafts
+      tags: [Modules]
+      summary: List retained authoring Drafts of a Module
+      security: [{userIdHeader: []}]
+      parameters:
+        - $ref: '#/components/parameters/orgIdPathParam'
+        - $ref: '#/components/parameters/moduleIdPathParam'
+        - $ref: '#/components/parameters/pageTokenQueryParam'
+        - name: per_page
+          in: query
+          schema: {type: integer, minimum: 1, maximum: 100, default: 50}
+      responses:
+        '200':
+          description: List retained authoring Drafts of a Module.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ModuleDraftPage'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
+    post:
+      operationId: createModuleDraft
+      tags: [Modules]
+      summary: Create an editable Module Draft without publishing a Version
+      security: [{userIdHeader: []}]
+      parameters:
+        - $ref: '#/components/parameters/orgIdPathParam'
+        - $ref: '#/components/parameters/moduleIdPathParam'
+        - $ref: '#/components/parameters/idempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ModuleDraftCreateBody'}
+      responses:
+        '201':
+          description: Create an editable Module Draft without publishing a Version.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ModuleDraft'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
+  /orgs/{orgId}/modules/{moduleId}/drafts/{draftId}:
+    get:
+      operationId: getModuleDraft
+      tags: [Modules]
+      summary: Read a Module Draft
+      security: [{userIdHeader: []}]
+      parameters:
+        - $ref: '#/components/parameters/orgIdPathParam'
+        - $ref: '#/components/parameters/moduleIdPathParam'
+        - name: draftId
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+      responses:
+        '200':
+          description: Read a Module Draft.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ModuleDraft'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
+    put:
+      operationId: updateModuleDraft
+      tags: [Modules]
+      summary: Save a new authoring revision with optimistic concurrency
+      security: [{userIdHeader: []}]
+      parameters:
+        - $ref: '#/components/parameters/orgIdPathParam'
+        - $ref: '#/components/parameters/moduleIdPathParam'
+        - name: draftId
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+        - $ref: '#/components/parameters/idempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ModuleDraftUpdateBody'}
+      responses:
+        '200':
+          description: Save a new authoring revision with optimistic concurrency.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ModuleDraft'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
+  /orgs/{orgId}/modules/{moduleId}/drafts/{draftId}/revisions/{draftRevision}:
+    get:
+      operationId: getModuleDraftRevision
+      tags: [Modules]
+      summary: Read an immutable authoring revision
+      security: [{userIdHeader: []}]
+      parameters:
+        - $ref: '#/components/parameters/orgIdPathParam'
+        - $ref: '#/components/parameters/moduleIdPathParam'
+        - name: draftId
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+        - name: draftRevision
+          in: path
+          required: true
+          schema: {type: integer, format: int64, minimum: 1}
+      responses:
+        '200':
+          description: Read an immutable authoring revision.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ModuleDraftRevision'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
+  /orgs/{orgId}/projects/{projectId}/envs/{envId}/modules/{moduleId}/drafts/{draftId}/test-snapshots:
+    post:
+      operationId: captureModuleDraftTestSnapshot
+      summary: Capture one reviewed immutable Draft test definition without executing it
+      tags: [Modules]
+      security: [{userIdHeader: []}]
+      parameters:
+        - $ref: '#/components/parameters/orgIdPathParam'
+        - $ref: '#/components/parameters/projectIdPathParam'
+        - $ref: '#/components/parameters/envIdPathParam'
+        - $ref: '#/components/parameters/moduleIdPathParam'
+        - name: draftId
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+        - $ref: '#/components/parameters/idempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ModuleDraftTestCaptureBody'}
+      responses:
+        '201':
+          description: Immutable scoped test material captured. No Deployment or successful test is implied.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ModuleDraftTestSnapshot'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
+  /orgs/{orgId}/projects/{projectId}/envs/{envId}/modules/{moduleId}/draft-test-snapshots/{snapshotId}:
+    get:
+      operationId: getModuleDraftTestSnapshot
+      summary: Read an immutable Draft test definition in its exact Environment scope
+      tags: [Modules]
+      security: [{userIdHeader: []}]
+      parameters:
+        - $ref: '#/components/parameters/orgIdPathParam'
+        - $ref: '#/components/parameters/projectIdPathParam'
+        - $ref: '#/components/parameters/envIdPathParam'
+        - $ref: '#/components/parameters/moduleIdPathParam'
+        - name: snapshotId
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+      responses:
+        '200':
+          description: Retained immutable test material, distinct from published Versions and execution results.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ModuleDraftTestSnapshot'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
+  /orgs/{orgId}/modules/{moduleId}/drafts/{draftId}/publish:
+    post:
+      operationId: publishModuleDraft
+      tags: [Modules]
+      summary: Publish exactly the reviewed stored Draft revision as Proposed
+      security: [{userIdHeader: []}]
+      parameters:
+        - $ref: '#/components/parameters/orgIdPathParam'
+        - $ref: '#/components/parameters/moduleIdPathParam'
+        - name: draftId
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+        - $ref: '#/components/parameters/idempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ModuleReasonedCommand'}
+      responses:
+        '201':
+          description: Publish exactly the reviewed stored Draft revision as Proposed.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ModuleDraftPublication'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
+  /orgs/{orgId}/modules/{moduleId}/drafts/{draftId}/discard:
+    post:
+      operationId: discardModuleDraft
+      tags: [Modules]
+      summary: Discard an open Draft while retaining its authoring history
+      security: [{userIdHeader: []}]
+      parameters:
+        - $ref: '#/components/parameters/orgIdPathParam'
+        - $ref: '#/components/parameters/moduleIdPathParam'
+        - name: draftId
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+        - $ref: '#/components/parameters/idempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ModuleReasonedCommand'}
+      responses:
+        '200':
+          description: Discard an open Draft while retaining its authoring history.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ModuleDraft'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
+  /orgs/{orgId}/modules/{moduleId}/version-publications:
+    post:
+      operationId: publishModuleVersionWithInterface
+      tags: [Modules]
+      summary: Publish an explicit interface-bound Module Version through a capability-specific route
+      security: [{userIdHeader: []}]
+      parameters:
+        - $ref: '#/components/parameters/orgIdPathParam'
+        - $ref: '#/components/parameters/moduleIdPathParam'
+        - $ref: '#/components/parameters/idempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ModuleVersionPublishBody'}
+      responses:
+        '201':
+          description: Immutable Proposed version published.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/CoreModuleVersion'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
+  /orgs/{orgId}/modules/{moduleId}/versions/{moduleVersionId}/successor-publications:
+    post:
+      operationId: publishStableModuleVersionSuccessorWithInterface
+      tags: [Modules]
+      summary: Atomically publish a stable successor and deprecate the exact Proposed prerelease
+      security: [{userIdHeader: []}]
+      parameters:
+        - $ref: '#/components/parameters/orgIdPathParam'
+        - $ref: '#/components/parameters/moduleIdPathParam'
+        - $ref: '#/components/parameters/moduleVersionIdPathParam'
+        - $ref: '#/components/parameters/idempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/StableModuleVersionSuccessorBody'}
+      responses:
+        '201':
+          description: Stable Proposed successor and deprecated prerelease committed atomically.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/StableModuleVersionSuccessorResult'}
+        '400': {$ref: '#/components/responses/400BadRequest'}
+        '403': {$ref: '#/components/responses/403Forbidden'}
+        '404': {$ref: '#/components/responses/404NotFound'}
+        '409': {$ref: '#/components/responses/409Conflict'}
 components:
   securitySchemes:
     userIdHeader:
@@ -2470,7 +2826,7 @@ components:
       in: header
       required: true
       description: Stable caller-generated key used to deduplicate command retries.
-      schema: { type: string, minLength: 8, maxLength: 200 }
+      schema: {type: string, minLength: 8, maxLength: 200}
     projectIdPathParam:
       name: projectId
       in: path
@@ -2657,30 +3013,20 @@ components:
     PluginAvailabilityState:
       type: string
       enum: [available, not_installed, not_enabled, not_entitled, incompatible, unavailable]
-      x-enum-varnames:
-        [
-          PluginAvailabilityStateAvailable,
-          PluginAvailabilityStateNotInstalled,
-          PluginAvailabilityStateNotEnabled,
-          PluginAvailabilityStateNotEntitled,
-          PluginAvailabilityStateIncompatible,
-          PluginAvailabilityStateUnavailable,
-        ]
+      x-enum-varnames: [PluginAvailabilityStateAvailable, PluginAvailabilityStateNotInstalled, PluginAvailabilityStateNotEnabled, PluginAvailabilityStateNotEntitled, PluginAvailabilityStateIncompatible, PluginAvailabilityStateUnavailable]
     PluginCapability:
       type: object
       required: [contract_level, id, display_name, state, capabilities]
       properties:
         contract_level: {$ref: '#/components/schemas/PluginContractLevel'}
-        id: { type: string, description: Immutable reverse-DNS plugin identity. }
-        display_name: { type: string }
-        version:
-          { type: string, description: Immutable installed plugin artifact version when installed. }
-        state: { $ref: '#/components/schemas/PluginAvailabilityState' }
+        id: {type: string, description: Immutable reverse-DNS plugin identity.}
+        display_name: {type: string}
+        version: {type: string, description: Immutable installed plugin artifact version when installed.}
+        state: {$ref: '#/components/schemas/PluginAvailabilityState'}
         capabilities:
           type: array
-          items: { type: string }
-        admin_action:
-          { type: string, description: Scope-safe remediation guidance for an administrator. }
+          items: {type: string}
+        admin_action: {type: string, description: Scope-safe remediation guidance for an administrator.}
         entitlement: {$ref: '#/components/schemas/PluginEntitlementStatus'}
     PluginContractLevel:
       type: string
@@ -3906,6 +4252,15 @@ components:
         - dependencies
         - coprovisioned
       properties:
+        resource_type_version:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Exact immutable Resource Type interface version, distinct from resource_version concurrency metadata.
+        resource_type_version_uuid:
+          type: string
+          format: uuid
+          description: Immutable identity of the exact Resource Type interface.
         output_schema:
           $ref: '#/components/schemas/ModuleOutputSchema'
         module_params:
@@ -4990,13 +5345,7 @@ components:
     ModuleVersionSemanticStatus:
       type: string
       enum: [proposed, default, deprecated, defective]
-      x-enum-varnames:
-        [
-          ModuleVersionSemanticStatusProposed,
-          ModuleVersionSemanticStatusDefault,
-          ModuleVersionSemanticStatusDeprecated,
-          ModuleVersionSemanticStatusDefective,
-        ]
+      x-enum-varnames: [ModuleVersionSemanticStatusProposed, ModuleVersionSemanticStatusDefault, ModuleVersionSemanticStatusDeprecated, ModuleVersionSemanticStatusDefective]
     ModuleCatalogueStatus:
       type: string
       enum: [active, archived]
@@ -5007,81 +5356,65 @@ components:
       x-enum-varnames: [ModuleVerificationStatusUnverified]
     ModuleCatalogueEntry:
       type: object
-      required:
-        [
-          org_id,
-          uuid,
-          slug,
-          display_name,
-          description,
-          resource_type,
-          tags,
-          status,
-          resource_version,
-          managed_default_generation,
-          created_at,
-        ]
+      required: [org_id, uuid, slug, display_name, description, resource_type, tags, status, resource_version, managed_default_generation, created_at]
       properties:
-        org_id: { type: string }
-        uuid: { type: string, format: uuid }
-        slug: { type: string }
-        display_name: { type: string }
-        description: { type: string }
-        resource_type: { type: string }
+        org_id: {type: string}
+        uuid: {type: string, format: uuid}
+        slug: {type: string}
+        display_name: {type: string}
+        description: {type: string}
+        resource_type: {type: string}
         tags:
           type: object
-          additionalProperties: { type: string }
-        status: { $ref: '#/components/schemas/ModuleCatalogueStatus' }
-        resource_version: { type: integer, format: int64, minimum: 1 }
-        current_default_version_uuid: { type: string, format: uuid }
-        previous_default_version_uuid: { type: string, format: uuid }
-        managed_default_generation: { type: integer, format: int64, minimum: 0 }
-        created_at: { type: string, format: date-time }
-        archived_at: { type: string, format: date-time }
-        archived_by: { type: string, format: uuid }
-        archive_reason: { type: string }
+          additionalProperties: {type: string}
+        status: {$ref: '#/components/schemas/ModuleCatalogueStatus'}
+        resource_version: {type: integer, format: int64, minimum: 1}
+        current_default_version_uuid: {type: string, format: uuid}
+        previous_default_version_uuid: {type: string, format: uuid}
+        managed_default_generation: {type: integer, format: int64, minimum: 0}
+        created_at: {type: string, format: date-time}
+        archived_at: {type: string, format: date-time}
+        archived_by: {type: string, format: uuid}
+        archive_reason: {type: string}
     ModuleCatalogueUpdateBody:
       type: object
       required: [display_name, description, tags, expected_resource_version]
       properties:
-        display_name: { type: string, minLength: 1, maxLength: 200 }
-        description: { type: string, maxLength: 2000 }
+        display_name: {type: string, minLength: 1, maxLength: 200}
+        description: {type: string, maxLength: 2000}
         tags:
           type: object
           maxProperties: 50
-          additionalProperties: { type: string, maxLength: 200 }
-        expected_resource_version: { type: integer, format: int64, minimum: 1 }
+          additionalProperties: {type: string, maxLength: 200}
+        expected_resource_version: {type: integer, format: int64, minimum: 1}
     ModuleCatalogueCreateBody:
       type: object
       required: [slug, resource_type]
       properties:
-        slug: { $ref: '#/components/schemas/ModuleId' }
-        display_name: { type: string, minLength: 1, maxLength: 200 }
-        description: { type: string, maxLength: 2000 }
-        resource_type: { type: string, minLength: 2, maxLength: 200 }
+        slug: {$ref: '#/components/schemas/ModuleId'}
+        display_name: {type: string, minLength: 1, maxLength: 200}
+        description: {type: string, maxLength: 2000}
+        resource_type: {type: string, minLength: 2, maxLength: 200}
         tags:
           type: object
           maxProperties: 50
-          additionalProperties: { type: string, maxLength: 200 }
+          additionalProperties: {type: string, maxLength: 200}
     ModuleReasonedCommand:
       type: object
       required: [reason, expected_resource_version]
       properties:
-        reason: { type: string, minLength: 1, maxLength: 2000 }
-        expected_resource_version: { type: integer, format: int64, minimum: 1 }
+        reason: {type: string, minLength: 1, maxLength: 2000}
+        expected_resource_version: {type: integer, format: int64, minimum: 1}
     ModuleVersionPublishBody:
       type: object
-      required:
-        [
-          semantic_version,
-          module_source,
-          module_params,
-          module_inputs,
-          provider_mapping,
-          dependencies,
-          coprovisioned,
-        ]
+      additionalProperties: false
+      required: [semantic_version, module_source, module_params, module_inputs, provider_mapping, dependencies, coprovisioned]
       properties:
+        resource_type_version:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Exact Resource Type interface version. Omission retains version 1 and never selects latest.
         output_schema:
           $ref: '#/components/schemas/ModuleOutputSchema'
         semantic_version:
@@ -5091,14 +5424,14 @@ components:
           type: string
           pattern: '^sha256:[a-f0-9]{64}$'
           description: Optional immutable external artifact digest claim. Omit for inline source. Absence never implies verification.
-        source_revision: { type: string, maxLength: 500 }
-        release_notes: { type: string, maxLength: 10000 }
-        description: { type: string, maxLength: 2000 }
-        module_source: { type: string, minLength: 2, maxLength: 200 }
-        module_source_code: { type: string }
+        source_revision: {type: string, maxLength: 500}
+        release_notes: {type: string, maxLength: 10000}
+        description: {type: string, maxLength: 2000}
+        module_source: {type: string, minLength: 2, maxLength: 200}
+        module_source_code: {type: string}
         module_params:
           type: object
-          additionalProperties: { $ref: '#/components/schemas/ModuleParamItem' }
+          additionalProperties: {$ref: '#/components/schemas/ModuleParamItem'}
         module_inputs:
           type: object
           maxProperties: 20
@@ -5106,78 +5439,73 @@ components:
         provider_mapping:
           type: object
           maxProperties: 20
-          additionalProperties: { type: string }
+          additionalProperties: {type: string}
         dependencies:
           type: object
           maxProperties: 20
-          additionalProperties: { $ref: '#/components/schemas/ModuleDependencyManifest' }
+          additionalProperties: {$ref: '#/components/schemas/ModuleDependencyManifest'}
         coprovisioned:
           type: array
           maxItems: 20
-          items: { $ref: '#/components/schemas/ModuleCoProvisionManifest' }
+          items: {$ref: '#/components/schemas/ModuleCoProvisionManifest'}
     CoreModuleVersion:
       type: object
-      required:
-        [
-          org_id,
-          module_uuid,
-          module_slug,
-          uuid,
-          opaque_version_id,
-          migration_generation,
-          verification_status,
-          lifecycle_status,
-          artifact_digest,
-          source_revision,
-          resource_version,
-          created_at,
-        ]
+      required: [org_id, module_uuid, module_slug, uuid, opaque_version_id, migration_generation, verification_status, lifecycle_status, artifact_digest, source_revision, resource_version, created_at]
       properties:
-        org_id: { type: string }
-        module_uuid: { type: string, format: uuid }
-        module_slug: { type: string }
-        uuid: { type: string, format: uuid }
-        semantic_version: { type: string }
-        opaque_version_id: { type: string }
-        migration_generation: { type: string, enum: [v0, v1, managed] }
-        artifact_digest: { type: string }
-        verification_status: { $ref: '#/components/schemas/ModuleVerificationStatus' }
-        lifecycle_status: { $ref: '#/components/schemas/ModuleVersionSemanticStatus' }
-        source_revision: { type: string }
-        release_notes: { type: string }
-        resource_version: { type: integer, format: int64, minimum: 1 }
-        published_by: { type: string, format: uuid }
-        created_at: { type: string, format: date-time }
+        resource_type_version:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Exact immutable Resource Type interface version, distinct from resource_version concurrency metadata.
+        resource_type_version_uuid:
+          type: string
+          format: uuid
+          description: Immutable identity of the exact Resource Type interface.
+        org_id: {type: string}
+        module_uuid: {type: string, format: uuid}
+        module_slug: {type: string}
+        uuid: {type: string, format: uuid}
+        semantic_version: {type: string}
+        opaque_version_id: {type: string}
+        migration_generation: {type: string, enum: [v0, v1, managed]}
+        artifact_digest: {type: string}
+        verification_status: {$ref: '#/components/schemas/ModuleVerificationStatus'}
+        lifecycle_status: {$ref: '#/components/schemas/ModuleVersionSemanticStatus'}
+        source_revision: {type: string}
+        release_notes: {type: string}
+        resource_version: {type: integer, format: int64, minimum: 1}
+        published_by: {type: string, format: uuid}
+        created_at: {type: string, format: date-time}
     CoreModuleVersionDetail:
       allOf:
         - $ref: '#/components/schemas/ModuleVersion'
         - type: object
           required: [version, definition]
           properties:
-            version: { $ref: '#/components/schemas/CoreModuleVersion' }
-            definition: { $ref: '#/components/schemas/ModuleVersion' }
+            version: {$ref: '#/components/schemas/CoreModuleVersion'}
+            definition: {$ref: '#/components/schemas/ModuleVersion'}
     CoreModuleVersionPage:
       type: object
       required: [items]
       properties:
         items:
           type: array
-          items: { $ref: '#/components/schemas/CoreModuleVersionDetail' }
-        next_page_token: { type: string }
+          items: {$ref: '#/components/schemas/CoreModuleVersionDetail'}
+        next_page_token: {type: string}
     StableModuleVersionSuccessorBody:
       type: object
       required: [expected_prerelease_resource_version, reason, version]
       properties:
-        expected_prerelease_resource_version: { type: integer, format: int64, minimum: 1 }
-        reason: { type: string, minLength: 1, maxLength: 2000 }
-        version: { $ref: '#/components/schemas/ModuleVersionPublishBody' }
+        expected_prerelease_resource_version: {type: integer, format: int64, minimum: 1}
+        reason: {type: string, minLength: 1, maxLength: 2000}
+        version: {$ref: '#/components/schemas/ModuleVersionPublishBody'}
     StableModuleVersionSuccessorResult:
       type: object
       required: [prerelease, stable, correlation_id]
       properties:
-        prerelease: { $ref: '#/components/schemas/CoreModuleVersion' }
-        stable: { $ref: '#/components/schemas/CoreModuleVersion' }
-        correlation_id: { type: string, format: uuid }
+        prerelease: {$ref: '#/components/schemas/CoreModuleVersion'}
+        stable: {$ref: '#/components/schemas/CoreModuleVersion'}
+        correlation_id: {type: string, format: uuid}
     ModuleVersionComparison:
       type: object
       required:
@@ -5205,29 +5533,29 @@ components:
         - coprovisioning_changed
         - output_schema_changed
       properties:
-        from_version_uuid: { type: string, format: uuid }
-        to_version_uuid: { type: string, format: uuid }
-        before: { $ref: '#/components/schemas/ModuleVersionComparisonSnapshot' }
-        after: { $ref: '#/components/schemas/ModuleVersionComparisonSnapshot' }
-        module_source_changed: { type: boolean }
-        module_source_code_changed: { type: boolean }
-        artifact_digest_changed: { type: boolean }
-        source_revision_changed: { type: boolean }
-        resource_type_changed: { type: boolean }
-        added_module_inputs: { type: array, items: { type: string } }
-        removed_module_inputs: { type: array, items: { type: string } }
-        changed_module_inputs: { type: array, items: { type: string } }
-        added_module_params: { type: array, items: { type: string } }
-        removed_module_params: { type: array, items: { type: string } }
-        changed_module_params: { type: array, items: { type: string } }
-        added_provider_mappings: { type: array, items: { type: string } }
-        removed_provider_mappings: { type: array, items: { type: string } }
-        changed_provider_mappings: { type: array, items: { type: string } }
-        added_dependencies: { type: array, items: { type: string } }
-        removed_dependencies: { type: array, items: { type: string } }
-        changed_dependencies: { type: array, items: { type: string } }
-        coprovisioning_changed: { type: boolean }
-        output_schema_changed: { type: boolean }
+        from_version_uuid: {type: string, format: uuid}
+        to_version_uuid: {type: string, format: uuid}
+        before: {$ref: '#/components/schemas/ModuleVersionComparisonSnapshot'}
+        after: {$ref: '#/components/schemas/ModuleVersionComparisonSnapshot'}
+        module_source_changed: {type: boolean}
+        module_source_code_changed: {type: boolean}
+        artifact_digest_changed: {type: boolean}
+        source_revision_changed: {type: boolean}
+        resource_type_changed: {type: boolean}
+        added_module_inputs: {type: array, items: {type: string}}
+        removed_module_inputs: {type: array, items: {type: string}}
+        changed_module_inputs: {type: array, items: {type: string}}
+        added_module_params: {type: array, items: {type: string}}
+        removed_module_params: {type: array, items: {type: string}}
+        changed_module_params: {type: array, items: {type: string}}
+        added_provider_mappings: {type: array, items: {type: string}}
+        removed_provider_mappings: {type: array, items: {type: string}}
+        changed_provider_mappings: {type: array, items: {type: string}}
+        added_dependencies: {type: array, items: {type: string}}
+        removed_dependencies: {type: array, items: {type: string}}
+        changed_dependencies: {type: array, items: {type: string}}
+        coprovisioning_changed: {type: boolean}
+        output_schema_changed: {type: boolean}
     ModuleVersionComparisonSnapshot:
       type: object
       required:
@@ -5242,86 +5570,80 @@ components:
         - dependencies
         - coprovisioned
       properties:
+        resource_type_version:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Exact immutable Resource Type interface version, distinct from resource_version concurrency metadata.
+        resource_type_version_uuid:
+          type: string
+          format: uuid
+          description: Immutable identity of the exact Resource Type interface.
         output_schema:
           $ref: '#/components/schemas/ModuleOutputSchema'
-        module_source: { type: string }
-        module_source_code: { type: string, nullable: true }
-        artifact_digest: { type: string }
-        source_revision: { type: string }
-        resource_type: { type: string }
+        module_source: {type: string}
+        module_source_code: {type: string, nullable: true}
+        artifact_digest: {type: string}
+        source_revision: {type: string}
+        resource_type: {type: string}
         module_inputs:
           type: object
           additionalProperties: true
         module_params:
           type: object
-          additionalProperties: { $ref: '#/components/schemas/ModuleParamItem' }
+          additionalProperties: {$ref: '#/components/schemas/ModuleParamItem'}
         provider_mapping:
           type: object
-          additionalProperties: { type: string }
+          additionalProperties: {type: string}
         dependencies:
           type: object
-          additionalProperties: { $ref: '#/components/schemas/ModuleDependencyManifest' }
+          additionalProperties: {$ref: '#/components/schemas/ModuleDependencyManifest'}
         coprovisioned:
           type: array
-          items: { $ref: '#/components/schemas/ModuleCoProvisionManifest' }
+          items: {$ref: '#/components/schemas/ModuleCoProvisionManifest'}
     ModuleVersionUsageEnvironment:
       type: object
-      required:
-        [project_id, environment_id, environment_uuid, environment_type, deployment_id, observed_at]
+      required: [project_id, environment_id, environment_uuid, environment_type, deployment_id, observed_at]
       properties:
-        project_id: { type: string }
-        environment_id: { type: string }
-        environment_uuid: { type: string, format: uuid }
-        environment_type: { type: string }
-        deployment_id: { type: string, format: uuid }
-        observed_at: { type: string, format: date-time }
+        project_id: {type: string}
+        environment_id: {type: string}
+        environment_uuid: {type: string, format: uuid}
+        environment_type: {type: string}
+        deployment_id: {type: string, format: uuid}
+        observed_at: {type: string, format: date-time}
     ModuleVersionUsage:
       type: object
-      required:
-        [
-          module_uuid,
-          version_uuid,
-          semantic_version,
-          active_environment_count,
-          by_project,
-          by_environment_type,
-          environments,
-          unknown_environments,
-          observed_at,
-          active_pins,
-          override_pending_pins,
-          historical_pins,
-        ]
+      required: [module_uuid, version_uuid, semantic_version, active_environment_count, by_project, by_environment_type, environments, unknown_environments, observed_at, active_pins, override_pending_pins, historical_pins]
       properties:
-        module_uuid: { type: string, format: uuid }
-        version_uuid: { type: string, format: uuid }
-        semantic_version: { type: string }
-        active_environment_count: { type: integer, minimum: 0 }
+        module_uuid: {type: string, format: uuid}
+        version_uuid: {type: string, format: uuid}
+        semantic_version: {type: string}
+        active_environment_count: {type: integer, minimum: 0}
         by_project:
           type: object
-          additionalProperties: { type: integer, minimum: 0 }
+          additionalProperties: {type: integer, minimum: 0}
         by_environment_type:
           type: object
-          additionalProperties: { type: integer, minimum: 0 }
+          additionalProperties: {type: integer, minimum: 0}
         environments:
           type: array
-          items: { $ref: '#/components/schemas/ModuleVersionUsageEnvironment' }
+          items: {$ref: '#/components/schemas/ModuleVersionUsageEnvironment'}
         unknown_environments:
           type: array
-          items: { type: string, format: uuid }
-        observed_at: { type: string, format: date-time }
-        active_pins: { type: integer, minimum: 0 }
-        override_pending_pins: { type: integer, minimum: 0 }
-        historical_pins: { type: integer, minimum: 0 }
+          items: {type: string, format: uuid}
+        observed_at: {type: string, format: date-time}
+        active_pins: {type: integer, minimum: 0}
+        override_pending_pins: {type: integer, minimum: 0}
+        historical_pins: {type: integer, minimum: 0}
     ModuleVersionLifecycleTransactionItem:
       type: object
       required: [module_id, module_version_id, action, expected_resource_version, reason]
       properties:
-        module_id: { $ref: '#/components/schemas/ModuleId' }
-        module_version_id: { type: string, minLength: 1 }
-        action: { type: string, enum: [promote, deprecate, mark-defective, restore] }
-        expected_resource_version: { type: integer, format: int64, minimum: 1 }
-        reason: { type: string, minLength: 1, maxLength: 2000 }
+        module_id: {$ref: '#/components/schemas/ModuleId'}
+        module_version_id: {type: string, minLength: 1}
+        action: {type: string, enum: [promote, deprecate, mark-defective, restore]}
+        expected_resource_version: {type: integer, format: int64, minimum: 1}
+        reason: {type: string, minLength: 1, maxLength: 2000}
     ModuleVersionLifecycleTransactionBody:
       type: object
       required: [transitions]
@@ -5330,135 +5652,96 @@ components:
           type: array
           minItems: 1
           maxItems: 100
-          items: { $ref: '#/components/schemas/ModuleVersionLifecycleTransactionItem' }
+          items: {$ref: '#/components/schemas/ModuleVersionLifecycleTransactionItem'}
     ModuleVersionLifecycleTransactionResult:
       type: object
       required: [correlation_id, versions]
       properties:
-        correlation_id: { type: string, format: uuid }
+        correlation_id: {type: string, format: uuid}
         versions:
           type: array
-          items: { $ref: '#/components/schemas/CoreModuleVersion' }
+          items: {$ref: '#/components/schemas/CoreModuleVersion'}
     ModuleVersionLifecycleEvent:
       type: object
-      required:
-        [
-          sequence,
-          id,
-          module_uuid,
-          version_uuid,
-          to_status,
-          version_resource_version,
-          actor,
-          payload,
-          created_at,
-        ]
+      required: [sequence, id, module_uuid, version_uuid, to_status, version_resource_version, actor, payload, created_at]
       properties:
-        sequence: { type: integer, format: int64 }
-        id: { type: string, format: uuid }
-        module_uuid: { type: string, format: uuid }
-        version_uuid: { type: string, format: uuid }
-        from_status: { $ref: '#/components/schemas/ModuleVersionSemanticStatus' }
-        to_status: { $ref: '#/components/schemas/ModuleVersionSemanticStatus' }
-        version_resource_version: { type: integer, format: int64 }
-        actor: { type: string, format: uuid }
-        reason: { type: string }
-        correlation_id: { type: string, format: uuid }
-        payload: { type: object, additionalProperties: true }
-        created_at: { type: string, format: date-time }
+        sequence: {type: integer, format: int64}
+        id: {type: string, format: uuid}
+        module_uuid: {type: string, format: uuid}
+        version_uuid: {type: string, format: uuid}
+        from_status: {$ref: '#/components/schemas/ModuleVersionSemanticStatus'}
+        to_status: {$ref: '#/components/schemas/ModuleVersionSemanticStatus'}
+        version_resource_version: {type: integer, format: int64}
+        actor: {type: string, format: uuid}
+        reason: {type: string}
+        correlation_id: {type: string, format: uuid}
+        payload: {type: object, additionalProperties: true}
+        created_at: {type: string, format: date-time}
     ModuleVersionPinStatus:
       type: string
       enum: [active, override_pending, overridden, removed]
     EnvironmentModuleVersionPin:
       type: object
-      required:
-        [
-          id,
-          org_id,
-          project_uuid,
-          project_id,
-          environment_uuid,
-          environment_id,
-          module_uuid,
-          version_uuid,
-          status,
-          resource_version,
-          activation_event_id,
-          created_by,
-          created_at,
-          updated_at,
-        ]
+      required: [id, org_id, project_uuid, project_id, environment_uuid, environment_id, module_uuid, version_uuid, status, resource_version, activation_event_id, created_by, created_at, updated_at]
       properties:
-        id: { type: string, format: uuid }
-        org_id: { type: string }
-        project_uuid: { type: string, format: uuid }
-        project_id: { type: string }
-        environment_uuid: { type: string, format: uuid }
-        environment_id: { type: string }
-        module_uuid: { type: string, format: uuid }
-        version_uuid: { type: string, format: uuid }
-        status: { $ref: '#/components/schemas/ModuleVersionPinStatus' }
-        resource_version: { type: integer, format: int64, minimum: 1 }
-        activation_event_id: { type: string, format: uuid }
-        bulk_operation_id: { type: string, format: uuid }
-        override_operation_id: { type: string, format: uuid }
-        override_target_version_uuid: { type: string, format: uuid }
-        override_actor: { type: string, format: uuid }
-        override_reason: { type: string }
-        override_deployment_id: { type: string, format: uuid }
-        created_by: { type: string, format: uuid }
-        created_at: { type: string, format: date-time }
-        updated_at: { type: string, format: date-time }
-        removed_at: { type: string, format: date-time }
+        id: {type: string, format: uuid}
+        org_id: {type: string}
+        project_uuid: {type: string, format: uuid}
+        project_id: {type: string}
+        environment_uuid: {type: string, format: uuid}
+        environment_id: {type: string}
+        module_uuid: {type: string, format: uuid}
+        version_uuid: {type: string, format: uuid}
+        status: {$ref: '#/components/schemas/ModuleVersionPinStatus'}
+        resource_version: {type: integer, format: int64, minimum: 1}
+        activation_event_id: {type: string, format: uuid}
+        bulk_operation_id: {type: string, format: uuid}
+        override_operation_id: {type: string, format: uuid}
+        override_target_version_uuid: {type: string, format: uuid}
+        override_actor: {type: string, format: uuid}
+        override_reason: {type: string}
+        override_deployment_id: {type: string, format: uuid}
+        created_by: {type: string, format: uuid}
+        created_at: {type: string, format: date-time}
+        updated_at: {type: string, format: date-time}
+        removed_at: {type: string, format: date-time}
     EnvironmentModuleVersionPinCreateBody:
       type: object
       required: [project_uuid, environment_uuid, module_uuid, version_uuid, reason]
       properties:
-        project_uuid: { type: string, format: uuid }
-        environment_uuid: { type: string, format: uuid }
-        module_uuid: { type: string, format: uuid }
-        version_uuid: { type: string, format: uuid }
-        reason: { type: string, minLength: 1, maxLength: 2000 }
-        confirm_defective_version_uuid: { type: string, format: uuid }
+        project_uuid: {type: string, format: uuid}
+        environment_uuid: {type: string, format: uuid}
+        module_uuid: {type: string, format: uuid}
+        version_uuid: {type: string, format: uuid}
+        reason: {type: string, minLength: 1, maxLength: 2000}
+        confirm_defective_version_uuid: {type: string, format: uuid}
     ModuleVersionPinEvent:
       type: object
-      required:
-        [
-          sequence,
-          id,
-          pin_id,
-          revision,
-          event_type,
-          to_status,
-          activation_event_id,
-          actor,
-          actor_type,
-          created_at,
-        ]
+      required: [sequence, id, pin_id, revision, event_type, to_status, activation_event_id, actor, actor_type, created_at]
       properties:
-        sequence: { type: integer, format: int64 }
-        id: { type: string, format: uuid }
-        pin_id: { type: string, format: uuid }
-        revision: { type: integer, format: int64, minimum: 1 }
-        event_type: { type: string }
-        from_status: { $ref: '#/components/schemas/ModuleVersionPinStatus' }
-        to_status: { $ref: '#/components/schemas/ModuleVersionPinStatus' }
-        activation_event_id: { type: string, format: uuid }
-        actor: { type: string, format: uuid }
-        actor_type: { type: string }
-        reason: { type: string }
+        sequence: {type: integer, format: int64}
+        id: {type: string, format: uuid}
+        pin_id: {type: string, format: uuid}
+        revision: {type: integer, format: int64, minimum: 1}
+        event_type: {type: string}
+        from_status: {$ref: '#/components/schemas/ModuleVersionPinStatus'}
+        to_status: {$ref: '#/components/schemas/ModuleVersionPinStatus'}
+        activation_event_id: {type: string, format: uuid}
+        actor: {type: string, format: uuid}
+        actor_type: {type: string}
+        reason: {type: string}
         note:
           type: string
           description: Immutable note text, present only when event_type is note_added.
-        operation_id: { type: string, format: uuid }
-        deployment_id: { type: string, format: uuid }
-        bulk_operation_id: { type: string, format: uuid }
-        created_at: { type: string, format: date-time }
+        operation_id: {type: string, format: uuid}
+        deployment_id: {type: string, format: uuid}
+        bulk_operation_id: {type: string, format: uuid}
+        created_at: {type: string, format: date-time}
     ModuleVersionPinNoteBody:
       type: object
       required: [note]
       properties:
-        note: { type: string, minLength: 1, maxLength: 2000 }
+        note: {type: string, minLength: 1, maxLength: 2000}
     ModuleVersionPinBulkAction:
       type: string
       enum: [pin, unpin, discard]
@@ -5466,108 +5749,102 @@ components:
       type: object
       required: [action, module_uuid, environment_uuids]
       properties:
-        action: { $ref: '#/components/schemas/ModuleVersionPinBulkAction' }
-        module_uuid: { type: string, format: uuid }
+        action: {$ref: '#/components/schemas/ModuleVersionPinBulkAction'}
+        module_uuid: {type: string, format: uuid}
         environment_uuids:
           type: array
           minItems: 1
           maxItems: 500
           uniqueItems: true
-          items: { type: string, format: uuid }
+          items: {type: string, format: uuid}
         confirm_defective_version_uuids:
           type: array
           uniqueItems: true
-          items: { type: string, format: uuid }
+          items: {type: string, format: uuid}
     ModuleVersionPinBulkPreviewItem:
       type: object
       required: [environment_uuid, project_uuid, environment_id, project_id, eligible, production]
       properties:
-        environment_uuid: { type: string, format: uuid }
-        project_uuid: { type: string, format: uuid }
-        environment_id: { type: string }
-        project_id: { type: string }
-        environment_type: { type: string }
-        production: { type: boolean }
-        eligible: { type: boolean }
-        version_uuid: { type: string, format: uuid }
-        pin_id: { type: string, format: uuid }
-        pin_resource_version: { type: integer, format: int64 }
-        idempotent_match: { type: boolean }
-        problem: { type: string }
+        environment_uuid: {type: string, format: uuid}
+        project_uuid: {type: string, format: uuid}
+        environment_id: {type: string}
+        project_id: {type: string}
+        environment_type: {type: string}
+        production: {type: boolean}
+        eligible: {type: boolean}
+        version_uuid: {type: string, format: uuid}
+        pin_id: {type: string, format: uuid}
+        pin_resource_version: {type: integer, format: int64}
+        idempotent_match: {type: boolean}
+        problem: {type: string}
     ModuleVersionPinBulkPreview:
       type: object
       required: [operation_id, fingerprint, action, module_uuid, eligible, items]
       properties:
-        operation_id: { type: string, format: uuid }
-        fingerprint: { type: string }
-        action: { $ref: '#/components/schemas/ModuleVersionPinBulkAction' }
-        module_uuid: { type: string, format: uuid }
-        eligible: { type: boolean }
+        operation_id: {type: string, format: uuid}
+        fingerprint: {type: string}
+        action: {$ref: '#/components/schemas/ModuleVersionPinBulkAction'}
+        module_uuid: {type: string, format: uuid}
+        eligible: {type: boolean}
         items:
           type: array
-          items: { $ref: '#/components/schemas/ModuleVersionPinBulkPreviewItem' }
+          items: {$ref: '#/components/schemas/ModuleVersionPinBulkPreviewItem'}
     ModuleVersionPinBulkCommandBody:
       type: object
       required: [action, module_uuid, environment_uuids, preview_fingerprint, reason]
       properties:
-        action: { $ref: '#/components/schemas/ModuleVersionPinBulkAction' }
-        module_uuid: { type: string, format: uuid }
+        action: {$ref: '#/components/schemas/ModuleVersionPinBulkAction'}
+        module_uuid: {type: string, format: uuid}
         environment_uuids:
           type: array
           minItems: 1
           maxItems: 500
           uniqueItems: true
-          items: { type: string, format: uuid }
-        preview_fingerprint: { type: string, minLength: 64, maxLength: 64 }
-        reason: { type: string, minLength: 1, maxLength: 2000 }
+          items: {type: string, format: uuid}
+        preview_fingerprint: {type: string, minLength: 64, maxLength: 64}
+        reason: {type: string, minLength: 1, maxLength: 2000}
         confirm_defective_version_uuids:
           type: array
           uniqueItems: true
-          items: { type: string, format: uuid }
+          items: {type: string, format: uuid}
     ModuleVersionPinBulkResult:
       type: object
       required: [operation_id, action, pins]
       properties:
-        operation_id: { type: string, format: uuid }
-        action: { $ref: '#/components/schemas/ModuleVersionPinBulkAction' }
+        operation_id: {type: string, format: uuid}
+        action: {$ref: '#/components/schemas/ModuleVersionPinBulkAction'}
         pins:
           type: array
-          items: { $ref: '#/components/schemas/EnvironmentModuleVersionPin' }
+          items: {$ref: '#/components/schemas/EnvironmentModuleVersionPin'}
     ModuleVersionPinOverrideBody:
       type: object
       required: [expected_resource_version, operation_id, target_version_uuid, reason]
       properties:
-        expected_resource_version: { type: integer, format: int64, minimum: 1 }
-        operation_id: { type: string, format: uuid }
-        target_version_uuid: { type: string, format: uuid }
-        reason: { type: string, minLength: 1, maxLength: 2000 }
+        expected_resource_version: {type: integer, format: int64, minimum: 1}
+        operation_id: {type: string, format: uuid}
+        target_version_uuid: {type: string, format: uuid}
+        reason: {type: string, minLength: 1, maxLength: 2000}
     ModuleVersionPinOverrideReconcileBody:
       type: object
       required: [expected_resource_version, operation_id, outcome, deployment_id, reason]
       properties:
-        expected_resource_version: { type: integer, format: int64, minimum: 1 }
-        operation_id: { type: string, format: uuid }
+        expected_resource_version: {type: integer, format: int64, minimum: 1}
+        operation_id: {type: string, format: uuid}
         outcome:
           type: string
           enum: [succeeded, failed, cancelled]
-          x-enum-varnames:
-            [
-              ModuleVersionPinOverrideReconcileBodyOutcomeSucceeded,
-              ModuleVersionPinOverrideReconcileBodyOutcomeFailed,
-              ModuleVersionPinOverrideReconcileBodyOutcomeCancelled,
-            ]
-        deployment_id: { type: string, format: uuid }
-        reason: { type: string, minLength: 1, maxLength: 2000 }
+          x-enum-varnames: [ModuleVersionPinOverrideReconcileBodyOutcomeSucceeded, ModuleVersionPinOverrideReconcileBodyOutcomeFailed, ModuleVersionPinOverrideReconcileBodyOutcomeCancelled]
+        deployment_id: {type: string, format: uuid}
+        reason: {type: string, minLength: 1, maxLength: 2000}
     ModuleVersionPinRollbackRestoreBody:
       type: object
-      required:
-        [expected_resource_version, operation_id, deployment_id, restored_version_uuid, reason]
+      required: [expected_resource_version, operation_id, deployment_id, restored_version_uuid, reason]
       properties:
-        expected_resource_version: { type: integer, format: int64, minimum: 1 }
-        operation_id: { type: string, format: uuid }
-        deployment_id: { type: string, format: uuid }
-        restored_version_uuid: { type: string, format: uuid }
-        reason: { type: string, minLength: 1, maxLength: 2000 }
+        expected_resource_version: {type: integer, format: int64, minimum: 1}
+        operation_id: {type: string, format: uuid}
+        deployment_id: {type: string, format: uuid}
+        restored_version_uuid: {type: string, format: uuid}
+        reason: {type: string, minLength: 1, maxLength: 2000}
     InternalModuleCatalogue:
       type: object
       description: A collation of all the applicable modules, and providers for an environment. A module is applicable if there is at least one rule for it that matches the requested environment.
@@ -5674,95 +5951,181 @@ components:
           x-go-type-skip-optional-pointer: true
     ModuleOperationReservation:
       type: object
-      required:
-        [
-          id,
-          module_uuid,
-          namespace,
-          operation_id,
-          related_resource_id,
-          reason,
-          resource_version,
-          acquired_by,
-          acquired_at,
-        ]
+      required: [id, module_uuid, namespace, operation_id, related_resource_id, reason, resource_version, acquired_by, acquired_at]
       properties:
-        id: { type: string, format: uuid }
-        module_uuid: { type: string, format: uuid }
-        namespace: { type: string, pattern: '^[a-z][a-z0-9.-]*$' }
-        operation_id: { type: string, format: uuid }
-        related_resource_id: { type: string }
-        reason: { type: string }
-        resource_version: { type: integer, format: int64, minimum: 1 }
-        acquired_by: { type: string, format: uuid }
-        acquired_at: { type: string, format: date-time }
-        released_by: { type: string, format: uuid }
-        released_at: { type: string, format: date-time }
-        release_reason: { type: string }
+        id: {type: string, format: uuid}
+        module_uuid: {type: string, format: uuid}
+        namespace: {type: string, pattern: '^[a-z][a-z0-9.-]*$'}
+        operation_id: {type: string, format: uuid}
+        related_resource_id: {type: string}
+        reason: {type: string}
+        resource_version: {type: integer, format: int64, minimum: 1}
+        acquired_by: {type: string, format: uuid}
+        acquired_at: {type: string, format: date-time}
+        released_by: {type: string, format: uuid}
+        released_at: {type: string, format: date-time}
+        release_reason: {type: string}
     ModuleOperationReservationAcquireBody:
       type: object
       required: [namespace, operation_id, related_resource_id, reason]
       properties:
-        namespace: { type: string, pattern: '^[a-z][a-z0-9.-]*$' }
-        operation_id: { type: string, format: uuid }
-        related_resource_id: { type: string, minLength: 1 }
-        reason: { type: string, minLength: 1 }
+        namespace: {type: string, pattern: '^[a-z][a-z0-9.-]*$'}
+        operation_id: {type: string, format: uuid}
+        related_resource_id: {type: string, minLength: 1}
+        reason: {type: string, minLength: 1}
     ModuleExtensionContribution:
       type: object
-      required:
-        [
-          id,
-          module_uuid,
-          namespace,
-          external_resource_id,
-          kind,
-          lifecycle_state,
-          label,
-          payload,
-          created_by,
-          created_at,
-          updated_at,
-        ]
+      required: [id, module_uuid, namespace, external_resource_id, kind, lifecycle_state, label, payload, created_by, created_at, updated_at]
       properties:
-        id: { type: string, format: uuid }
-        module_uuid: { type: string, format: uuid }
-        version_uuid: { type: string, format: uuid }
-        environment_uuid: { type: string, format: uuid }
-        namespace: { type: string, pattern: '^[a-z][a-z0-9.-]*$' }
-        external_resource_id: { type: string }
-        kind: { type: string, enum: [related_resource, contextual_action] }
-        lifecycle_state: { type: string, enum: [draft, active, terminal] }
-        label: { type: string }
-        target_url: { type: string }
-        payload: { type: object, additionalProperties: true }
-        created_by: { type: string, format: uuid }
-        created_at: { type: string, format: date-time }
-        updated_at: { type: string, format: date-time }
+        id: {type: string, format: uuid}
+        module_uuid: {type: string, format: uuid}
+        version_uuid: {type: string, format: uuid}
+        environment_uuid: {type: string, format: uuid}
+        namespace: {type: string, pattern: '^[a-z][a-z0-9.-]*$'}
+        external_resource_id: {type: string}
+        kind: {type: string, enum: [related_resource, contextual_action]}
+        lifecycle_state: {type: string, enum: [draft, active, terminal]}
+        label: {type: string}
+        target_url: {type: string}
+        payload: {type: object, additionalProperties: true}
+        created_by: {type: string, format: uuid}
+        created_at: {type: string, format: date-time}
+        updated_at: {type: string, format: date-time}
     ModuleExtensionContributionUpsertBody:
       type: object
       required: [namespace, external_resource_id, kind, lifecycle_state, label, payload]
       properties:
-        version_uuid: { type: string, format: uuid }
-        environment_uuid: { type: string, format: uuid }
-        namespace: { type: string, pattern: '^[a-z][a-z0-9.-]*$' }
-        external_resource_id: { type: string, minLength: 1 }
-        kind: { type: string, enum: [related_resource, contextual_action] }
-        lifecycle_state: { type: string, enum: [draft, active, terminal] }
-        label: { type: string, minLength: 1 }
-        target_url: { type: string }
-        payload: { type: object, additionalProperties: true }
+        version_uuid: {type: string, format: uuid}
+        environment_uuid: {type: string, format: uuid}
+        namespace: {type: string, pattern: '^[a-z][a-z0-9.-]*$'}
+        external_resource_id: {type: string, minLength: 1}
+        kind: {type: string, enum: [related_resource, contextual_action]}
+        lifecycle_state: {type: string, enum: [draft, active, terminal]}
+        label: {type: string, minLength: 1}
+        target_url: {type: string}
+        payload: {type: object, additionalProperties: true}
     EnvironmentDeletionImpact:
       type: object
       required: [environment_uuid, blocked, blockers, pins, related_resources]
       properties:
-        environment_uuid: { type: string, format: uuid }
-        blocked: { type: boolean }
+        environment_uuid: {type: string, format: uuid}
+        blocked: {type: boolean}
         blockers:
           type: array
-          items: { type: string }
+          items: {type: string}
         pins:
           type: array
-          items: { $ref: '#/components/schemas/EnvironmentModuleVersionPin' }
+          items: {$ref: '#/components/schemas/EnvironmentModuleVersionPin'}
         related_resources:
           type: array
-          items: { $ref: '#/components/schemas/ModuleExtensionContribution' }
+          items: {$ref: '#/components/schemas/ModuleExtensionContribution'}
+    ResourceTypeVersion:
+      type: object
+      required: [uuid, resource_type_uuid, resource_type_id, version, output_schema, created_at]
+      properties:
+        uuid: {type: string, format: uuid}
+        resource_type_uuid: {type: string, format: uuid}
+        resource_type_id: {type: string}
+        version: {type: integer, format: int64, minimum: 1}
+        output_schema: {type: object, additionalProperties: true}
+        module_contract: {$ref: '#/components/schemas/ResourceTypeModuleContract'}
+        created_at: {type: string, format: date-time}
+        created_by: {type: string, format: uuid}
+        reason: {type: string}
+    ResourceTypeVersionPublishBody:
+      type: object
+      additionalProperties: false
+      required: [version, expected_resource_version, reason, output_schema]
+      properties:
+        version:
+          type: integer
+          format: int64
+          minimum: 2
+          description: Exact next immutable interface number. It is distinct from the catalogue resource_version concurrency precondition.
+        expected_resource_version: {type: integer, format: int64, minimum: 1}
+        reason: {type: string, minLength: 1, maxLength: 2000}
+        output_schema: {type: object, additionalProperties: true}
+        module_contract: {$ref: '#/components/schemas/ResourceTypeModuleContract'}
+    ModuleDraftPage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: {$ref: '#/components/schemas/ModuleDraft'}
+        next_page_token: {type: string}
+    ModuleDraftCreateBody:
+      type: object
+      additionalProperties: false
+      required: [definition, reason]
+      properties:
+        definition: {$ref: '#/components/schemas/ModuleVersionPublishBody'}
+        reason: {type: string, minLength: 1, maxLength: 2000}
+    ModuleDraft:
+      type: object
+      required: [id, org_id, module_uuid, module_slug, resource_version, definition, status, created_at, created_by, updated_at, updated_by]
+      properties:
+        id: {type: string, format: uuid}
+        org_id: {type: string}
+        module_uuid: {type: string, format: uuid}
+        module_slug: {type: string}
+        resource_version: {type: integer, format: int64, minimum: 1}
+        definition: {$ref: '#/components/schemas/ModuleVersionPublishBody'}
+        status: {type: string, enum: [open, published, discarded]}
+        published_version_uuid: {type: string, format: uuid}
+        created_at: {type: string, format: date-time}
+        created_by: {type: string, format: uuid}
+        updated_at: {type: string, format: date-time}
+        updated_by: {type: string, format: uuid}
+    ModuleDraftUpdateBody:
+      type: object
+      additionalProperties: false
+      required: [definition, reason, expected_resource_version]
+      properties:
+        definition: {$ref: '#/components/schemas/ModuleVersionPublishBody'}
+        reason: {type: string, minLength: 1, maxLength: 2000}
+        expected_resource_version: {type: integer, format: int64, minimum: 1}
+    ModuleDraftRevision:
+      type: object
+      required: [draft_id, resource_version, definition, status, created_at, actor, reason]
+      properties:
+        draft_id: {type: string, format: uuid}
+        resource_version: {type: integer, format: int64, minimum: 1}
+        definition: {$ref: '#/components/schemas/ModuleVersionPublishBody'}
+        status: {type: string, enum: [open, published, discarded]}
+        published_version_uuid: {type: string, format: uuid}
+        created_at: {type: string, format: date-time}
+        actor: {type: string, format: uuid}
+        reason: {type: string}
+    ModuleDraftTestCaptureBody:
+      type: object
+      additionalProperties: false
+      required: [reason, expected_resource_version]
+      properties:
+        reason: {type: string, minLength: 1, maxLength: 2000}
+        expected_resource_version: {type: integer, format: int64, minimum: 1}
+    ModuleDraftTestSnapshot:
+      type: object
+      required: [id, provenance, org_id, module_uuid, module_slug, draft_id, draft_revision, resource_type_version_uuid, resource_type_version, project_uuid, environment_uuid, definition, captured_at, captured_by, reason]
+      properties:
+        id: {type: string, format: uuid}
+        provenance: {type: string, enum: [draft_test]}
+        org_id: {type: string}
+        module_uuid: {type: string, format: uuid}
+        module_slug: {type: string}
+        draft_id: {type: string, format: uuid}
+        draft_revision: {type: integer, format: int64, minimum: 1}
+        resource_type_version_uuid: {type: string, format: uuid}
+        resource_type_version: {type: integer, format: int64, minimum: 1}
+        project_uuid: {type: string, format: uuid}
+        environment_uuid: {type: string, format: uuid}
+        definition: {$ref: '#/components/schemas/ModuleVersionPublishBody'}
+        captured_at: {type: string, format: date-time}
+        captured_by: {type: string, format: uuid}
+        reason: {type: string}
+    ModuleDraftPublication:
+      type: object
+      required: [draft, version]
+      properties:
+        draft: {$ref: '#/components/schemas/ModuleDraft'}
+        version: {$ref: '#/components/schemas/CoreModuleVersion'}

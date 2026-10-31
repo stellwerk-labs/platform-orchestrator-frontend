@@ -27,6 +27,10 @@ import { useParams } from 'react-router';
 import { MatchParams } from '@src/config/routing';
 import { invalidateModuleManagementQueries } from '@src/containers/Orgs/Modules/moduleManagementCache';
 import {
+  publishModuleVersion,
+  publishModuleVersionWithInterface,
+  publishStableModuleVersionSuccessor,
+  publishStableModuleVersionSuccessorWithInterface,
   useCompareModuleVersions,
   useGetModuleCatalogueEntry,
   useGetModuleVersionUsage,
@@ -71,6 +75,9 @@ export const publicationBodyFromDetail = (
   source: CoreModuleVersionDetail,
 ): ModuleVersionPublishBody => ({
   semantic_version: source.version.semantic_version ?? '',
+  ...(source.definition.resource_type_version === undefined
+    ? {}
+    : { resource_type_version: source.definition.resource_type_version }),
   ...(source.version.artifact_digest ? { artifact_digest: source.version.artifact_digest } : {}),
   ...(source.version.source_revision ? { source_revision: source.version.source_revision } : {}),
   ...(source.version.release_notes ? { release_notes: source.version.release_notes } : {}),
@@ -583,6 +590,15 @@ export const ModuleVersions = () => {
   });
   const publish = usePublishModuleVersion({
     mutation: {
+      mutationFn: ({ orgId: org, moduleId: module, data }) => {
+        const action =
+          data.resource_type_version === undefined
+            ? publishModuleVersion
+            : publishModuleVersionWithInterface;
+        return action(org, module, data, {
+          headers: { 'Idempotency-Key': publishIdempotencyKey.current },
+        });
+      },
       onSuccess: async () => {
         await invalidateModuleManagementQueries(queryClient, orgId, moduleId);
         publishIdempotencyKey.current = crypto.randomUUID();
@@ -595,6 +611,15 @@ export const ModuleVersions = () => {
   });
   const publishStable = usePublishStableModuleVersionSuccessor({
     mutation: {
+      mutationFn: ({ orgId: org, moduleId: module, moduleVersionId, data }) => {
+        const action =
+          data.version.resource_type_version === undefined
+            ? publishStableModuleVersionSuccessor
+            : publishStableModuleVersionSuccessorWithInterface;
+        return action(org, module, moduleVersionId, data, {
+          headers: { 'Idempotency-Key': stableIdempotencyKey.current },
+        });
+      },
       onSuccess: async () => {
         await invalidateModuleManagementQueries(queryClient, orgId, moduleId);
         stableIdempotencyKey.current = crypto.randomUUID();

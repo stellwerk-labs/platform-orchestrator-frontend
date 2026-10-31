@@ -9,6 +9,14 @@ import type { ModuleCoreFieldsModuleParams } from './moduleCoreFieldsModuleParam
 import type { ModuleOutputSchema } from './moduleOutputSchema.ts';
 
 export interface ModuleCoreFields {
+  /**
+   * Exact immutable Resource Type interface version, distinct from resource_version concurrency metadata.
+   *
+   * @minimum 1
+   */
+  resource_type_version?: number;
+  /** Immutable identity of the exact Resource Type interface. */
+  resource_type_version_uuid?: string;
   output_schema?: ModuleOutputSchema;
   /**
    * The parameters supported by this module. The orchestrator enforces that any required parameters are

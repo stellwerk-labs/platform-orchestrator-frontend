@@ -2,7 +2,6 @@ import {
   getGetProjectMockHandler,
   getListProjectsMockHandler,
 } from '@src/hooks/react-query/v2/controlplane/project/project.msw';
-import { getListSandboxesMockHandler } from '@src/hooks/react-query/v2/controlplane/sandboxes/sandboxes.msw';
 import {
   getGetCurrentUserMockHandler,
   getGetCurrentUserResponseMock,
@@ -30,7 +29,6 @@ test.describe('Project list', () => {
         items: [project],
       }),
       getGetProjectMockHandler(project),
-      getListSandboxesMockHandler({ items: [] }),
     );
 
     await page.goto('/');

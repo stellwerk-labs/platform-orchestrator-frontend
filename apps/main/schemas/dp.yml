@@ -336,7 +336,6 @@ paths:
           $ref: '#/components/responses/400BadRequest'
         '404':
           $ref: '#/components/responses/404NotFound'
-
   /orgs/{orgId}/deployments/{deploymentId}/encrypted-outputs:
     get:
       operationId: getDeploymentEncryptedOutputs
@@ -360,7 +359,6 @@ paths:
                 $ref: '#/components/schemas/DeploymentEncryptedOutputs'
         '404':
           $ref: '#/components/responses/404NotFound'
-
   /orgs/{orgId}/deployments/{deploymentId}/bundle:
     get:
       operationId: getDeploymentBundle
@@ -387,7 +385,6 @@ paths:
           $ref: '#/components/responses/400BadRequest'
         '404':
           $ref: '#/components/responses/404NotFound'
-
   /orgs/{orgId}/deployments/{deploymentId}/results:
     post:
       summary: Return the runner outcome for a specific deployment.
@@ -419,7 +416,6 @@ paths:
           $ref: '#/components/responses/404NotFound'
         '409':
           $ref: '#/components/responses/409Conflict'
-
   /orgs/{orgId}/deployments/{deploymentId}/tf:
     get:
       summary: Returns the compiled TF file associated with a deployment.
@@ -443,7 +439,6 @@ paths:
                 type: string
         '404':
           $ref: '#/components/responses/404NotFound'
-
   /internal/orgs/{orgId}/deployments/{deploymentId}/actions/force-failure:
     post:
       operationId: internalForceFailDeployment
@@ -470,7 +465,6 @@ paths:
           $ref: '#/components/responses/404NotFound'
         '409':
           $ref: '#/components/responses/409Conflict'
-
   /orgs/{orgId}/deployments/{deploymentId}/resources:
     get:
       operationId: listDeploymentResourceNodes
@@ -495,7 +489,6 @@ paths:
                 $ref: '#/components/schemas/ResourceNodesPage'
         404:
           $ref: '#/components/responses/404NotFound'
-
   /orgs/{orgId}/active-resources:
     get:
       operationId: listActiveResourceNodes
@@ -521,7 +514,6 @@ paths:
           $ref: '#/components/responses/400BadRequest'
         404:
           $ref: '#/components/responses/404NotFound'
-
   /internal/orgs/{orgId}/modules/{moduleId}/actions/check-usage:
     post:
       summary: Check whether a given module is in use in a resource graph.
@@ -553,7 +545,6 @@ paths:
                 $ref: '#/components/schemas/InternalModuleUsage'
         404:
           $ref: '#/components/responses/404NotFound'
-
   /orgs/{orgId}/metadata-keys:
     get:
       summary: List metadata keys for an organization
@@ -679,7 +670,6 @@ paths:
           $ref: '#/components/responses/400BadRequest'
         404:
           $ref: '#/components/responses/404NotFound'
-
   /internal/orgs/{orgId}/deployments:
     delete:
       operationId: internalDeleteDeployments
@@ -708,7 +698,6 @@ paths:
           $ref: '#/components/responses/404NotFound'
         '409':
           $ref: '#/components/responses/409Conflict'
-
   '/.well-known/openid-configuration':
     get:
       operationId: getOpenidConfiguration
@@ -739,7 +728,71 @@ paths:
                 '$ref': '#/components/schemas/Jwks'
         '404':
           $ref: '#/components/responses/404NotFound'
+  /orgs/{orgId}/module-test-deployments:
+    post:
+      operationId: createModuleTestDeployment
+      tags:
+        - Deployment
+      summary: Create a new deployment in the target project and environment.
+      description: |
+        Deploy and rollback requests mutate the Environment and run one at a time. A request that finds the Environment
+        busy waits in the Environment's deployment queue and the response is 202 with the queue item, unless it sets
+        `when_busy` to `reject`: then it fails with 409 and the error code `environment_busy`. Requests authorized by an
+        organization token cannot wait and always get that 409. Queued requests are promoted strictly in order and
+        resolved against the Environment state at promotion.
 
+        Plan-only requests and dry runs are never queued and ignore `when_busy`, `queue_ttl_seconds` and
+        `halt_on_failure`. A dry run is answered while Deployments run or wait. A plan-only request starts while
+        requests wait in the queue, but not while a deploy, rollback, destroy or another plan runs, because their Runners
+        would contend for the Environment's state lock; it then fails with 409 `environment_busy`. Either response
+        carries `pending_changes` when Deployments that run or wait will change the Environment first, so the plan or
+        diff may still change.
+
+        Conflicts carry a stable error code: `environment_busy`, `deployment_queue_full`, `outcome_unreconciled` (a failed
+        plugin-dispatched Deployment awaits acknowledgement of its outcome), `environment_deleting` and
+        `deployment_base_changed`. Other conflicts keep the code `HTTP-409`.
+      security:
+        - userIdHeader: []
+      parameters:
+        - $ref: "#/components/parameters/orgIdPathParam"
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema:
+            type: string
+          description: |
+            Ensures that the deployment request is only accepted once per idempotency key per 24 hours. A uuid or similar is recommended.
+            When the key matches the key in last deployment and the environment and manifest is the same, this will return the last deployment.
+            When the key matches a queued request, this returns its queue item until it is dispatched, and its Deployment afterwards.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ModuleTestDeploymentCreateBody"
+      responses:
+        "200":
+          description: Successful dry run create response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeploymentDryRun"
+        "201":
+          description: Successful create response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deployment"
+        "202":
+          description: The Environment is busy and the request waits in its deployment queue.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeploymentQueueItem"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "409":
+          $ref: "#/components/responses/409Conflict"
 components:
   securitySchemes:
     userIdHeader:
@@ -750,7 +803,6 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
   responses:
     400BadRequest:
       description: The request was invalid. More detail can be found in the error body.
@@ -770,7 +822,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-
   parameters:
     orgIdPathParam:
       name: orgId
@@ -875,7 +926,6 @@ components:
             - executing
             - failed
             - succeeded
-
   schemas:
     Error:
       description: A standard error response
@@ -898,19 +948,16 @@ components:
         - error
         - message
       type: object
-
     OrganizationId:
       description: The Organization ID
       type: string
       minLength: 2
       example: my-org
-
     DeploymentId:
       description: The unique deployment id
       type: string
       format: uuid
       example: 01234567-89ab-cdef-0123-4566789abcdef
-
     ResourceClass:
       description: A resource class requested by the resource graph. 'default' is the default value.
       type: string
@@ -919,7 +966,6 @@ components:
       pattern: ^[A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9]$
       x-pattern-error: resource class must be a valid identifier of alphanumerics and hyphens
       example: classic
-
     ResourceId:
       description: A specific resource id requested by the resource graph
       type: string
@@ -928,7 +974,6 @@ components:
       maxLength: 63
       pattern: ^[a-z0-9]+(?:-+[a-z0-9]+)*(?:\.[a-z0-9]+(?:-+[a-z0-9]+)*)*$
       x-pattern-error: resource id must be a valid resource id with one or more dot-separated parts of lowercase alphanumerics and hyphens
-
     DeploymentResultsUpdateBody:
       description: The outcome of the runner execution.
       type: object
@@ -951,14 +996,12 @@ components:
           $ref: '#/components/schemas/DeploymentResultMetadata'
       required:
         - status
-
     DeploymentResultMetadata:
       x-go-type-skip-optional-pointer: true
       description: The metadata produced by the resources involved in the deployment.
       type: array
       items:
         $ref: '#/components/schemas/DeploymentResultMetadataPerNode'
-
     DeploymentResultMetadataPerNode:
       description: The metadata produced by a specific resource identified by its hash.
       type: object
@@ -977,7 +1020,6 @@ components:
           example:
             k8s_namespace: test-namespace
             gcp_project: test-gcp-project
-
     DeploymentTFResourceCounts:
       type: object
       x-go-type-skip-optional-pointer: true
@@ -1000,7 +1042,6 @@ components:
         - num_resources_added
         - num_resources_removed
         - num_resources_changed
-
     DeploymentMetrics:
       type: object
       description: Metrics resulting from a deployment.
@@ -1026,7 +1067,6 @@ components:
         num_tf_resources_changed:
           type: integer
           description: The number of terraformed resources changed. Only known after deployment.
-
     DeploymentSummary:
       description: Summary information for a deployment, more information can be retrieved through the GetDeployment APIs.
       type: object
@@ -1094,7 +1134,6 @@ components:
           $ref: '#/components/schemas/DeploymentMetrics'
         environment_fence:
           $ref: '#/components/schemas/EnvironmentFence'
-
     EnvironmentFence:
       description: |
         Reported on `listLastDeployments` items only, and only while the item's Environment is fenced: its current
@@ -1141,7 +1180,6 @@ components:
           type: string
           format: date-time
           example: '2025-01-02T04:04:05Z'
-
     DeploymentQueueItemState:
       type: string
       description: |
@@ -1153,7 +1191,6 @@ components:
         - cancelled
         - expired
         - rejected
-
     DeploymentQueueItem:
       type: object
       description: A deploy or rollback request waiting for its Environment, or the record of how its wait ended.
@@ -1245,7 +1282,6 @@ components:
           description: The Deployment the item became once dispatched.
         manifest:
           $ref: '#/components/schemas/DeploymentManifest'
-
     DeploymentQueueItemPage:
       description: A page of deployment queue items
       type: object
@@ -1259,7 +1295,6 @@ components:
         next_page_token:
           type: string
           description: The page token to use to request the next page of items
-
     DeploymentQueueCancelBody:
       type: object
       additionalProperties: false
@@ -1268,7 +1303,6 @@ components:
           type: string
           maxLength: 1000
           description: Why the request is no longer wanted.
-
     DeploymentPage:
       description: A page of deployments
       type: object
@@ -1282,7 +1316,6 @@ components:
         next_page_token:
           type: string
           description: The page token to use to request the next page of items
-
     DeploymentManifest:
       type: object
       description: The manifest associated with a deployment
@@ -1302,7 +1335,6 @@ components:
           additionalProperties:
             $ref: '#/components/schemas/DeploymentManifestResource'
           x-go-type-skip-optional-pointer: true
-
     DeploymentManifestResource:
       description: A resource to provision as part of the deployment
       type: object
@@ -1327,7 +1359,6 @@ components:
           maxItems: 20
           additionalProperties: true
           x-go-type-skip-optional-pointer: true
-
     DeploymentManifestWorkload:
       type: object
       properties:
@@ -1353,7 +1384,6 @@ components:
           x-go-type-skip-optional-pointer: true
           x-oapi-codegen-extra-tags:
             yaml: variables,omitempty
-
     Deployment:
       type: object
       allOf:
@@ -1370,7 +1400,6 @@ components:
               example: my-runner
             pending_changes:
               $ref: '#/components/schemas/PendingEnvironmentChanges'
-
     PendingEnvironmentChanges:
       description: |
         Reported only on the response that creates a plan-only Deployment or answers a dry run, and only when Deployments
@@ -1398,7 +1427,6 @@ components:
           type: integer
           minimum: 0
           example: 2
-
     DeploymentCreateBody:
       type: object
       required:
@@ -1524,7 +1552,6 @@ components:
             is promoted. Dry runs do not check it.
           type: string
           format: uuid
-
     DeploymentDryRun:
       type: object
       required:
@@ -1539,7 +1566,6 @@ components:
           $ref: '#/components/schemas/DeploymentDiff'
         pending_changes:
           $ref: '#/components/schemas/PendingEnvironmentChanges'
-
     DeploymentEncryptedOutputs:
       type: object
       required:
@@ -1550,7 +1576,6 @@ components:
             The base64 encoded encrypted outputs. These are returned in standard base64 with padding. The outputs are encrypted with https://age-encryption.org/ and may
             be decrypted by the holder of the recipients key.
           type: string
-
     DeploymentDiff:
       type: object
       description: Describes a diff between the resource graphs of two deployments.
@@ -1581,7 +1606,6 @@ components:
         num_removed:
           type: integer
           description: The number of resources removed in the deployment.
-
     DeploymentDiffChange:
       type: object
       required:
@@ -1614,7 +1638,6 @@ components:
         summary:
           description: A human readable summary of the change to this node.
           type: string
-
     MetadataKeyPage:
       description: A page of metadata keys
       type: object
@@ -1628,7 +1651,6 @@ components:
         next_page_token:
           type: string
           description: The page token to use to request the next page of items
-
     MetadataKey:
       description: A metadata key for an organization.
       properties:
@@ -1653,7 +1675,6 @@ components:
         - schema
         - created_at
       type: object
-
     MetadataKeySchema:
       description: The schema of the metadata key.
       type: object
@@ -1675,7 +1696,6 @@ components:
           example: '^[a-zA-Z0-9_.-]*$'
       required:
         - type
-
     MetadataKeyCreateBody:
       description: A metadata key for an organization.
       properties:
@@ -1694,7 +1714,6 @@ components:
         - name
         - schema
       type: object
-
     MetadataKeyUpdateBody:
       description: A metadata key for an organization.
       properties:
@@ -1706,7 +1725,6 @@ components:
         schema:
           $ref: '#/components/schemas/UpdateMetadataKeySchema'
       type: object
-
     UpdateMetadataKeySchema:
       description: The schema of the metadata key.
       type: object
@@ -1728,7 +1746,6 @@ components:
           nullable: true
           format: regex
           example: '^[a-zA-Z0-9_.-]*$'
-
     ActiveResourceNode:
       type: object
       description: A node in the active resource graph
@@ -1788,7 +1805,6 @@ components:
           example:
             namespace: test-k8s-namespace
             gcp_project: test-gcp-project
-
     ListActiveResourceNodesPage:
       type: object
       required:
@@ -1799,7 +1815,6 @@ components:
           description: The list of active resource nodes.
           items:
             $ref: '#/components/schemas/ActiveResourceNode'
-
     ResourceNodesPage:
       type: object
       required:
@@ -1810,7 +1825,6 @@ components:
           description: The list of resource nodes for this deployment.
           items:
             $ref: '#/components/schemas/ActiveResourceNode'
-
     OpenidConfiguration:
       description: OpenID discovery configuration.
       properties:
@@ -1847,7 +1861,6 @@ components:
         - id_token_signing_alg_values_supported
         - scopes_supported
       type: object
-
     Jwks:
       description: JSON Web Keys Set (JWKS).
       properties:
@@ -1858,7 +1871,6 @@ components:
       required:
         - keys
       type: object
-
     Jwk:
       description: JSON Web Key
       type: object
@@ -1888,7 +1900,6 @@ components:
         - n
         - e
         - kid
-
     InternalModuleUsage:
       type: object
       required:
@@ -1909,14 +1920,25 @@ components:
         observed_at:
           type: string
           format: date-time
-
     InternalModuleUsageItem:
       type: object
       required: [project_id, env_id, environment_uuid, module_version, deployment_id, observed_at]
       properties:
-        project_id: { type: string }
-        env_id: { type: string }
-        environment_uuid: { type: string, format: uuid }
-        module_version: { type: string }
-        deployment_id: { type: string, format: uuid }
-        observed_at: { type: string, format: date-time }
+        project_id: {type: string}
+        env_id: {type: string}
+        environment_uuid: {type: string, format: uuid}
+        module_version: {type: string}
+        deployment_id: {type: string, format: uuid}
+        observed_at: {type: string, format: date-time}
+    ModuleTestDeploymentCreateBody:
+      type: object
+      additionalProperties: false
+      required: [deployment, draft_test_snapshots]
+      properties:
+        deployment: {$ref: '#/components/schemas/DeploymentCreateBody'}
+        draft_test_snapshots:
+          type: object
+          minProperties: 1
+          maxProperties: 1000
+          description: Stable Module UUID to immutable captured test snapshot UUID. Draft heads and published Version references are not accepted here.
+          additionalProperties: {type: string, format: uuid}

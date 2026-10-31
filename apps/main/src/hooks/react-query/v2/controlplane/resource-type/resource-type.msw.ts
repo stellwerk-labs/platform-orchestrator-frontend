@@ -8,12 +8,14 @@ import { http, HttpResponse } from 'msw';
 
 import type {
   AvailableResourceTypePage,
+  ListResourceTypeVersions200,
   N400BadRequestResponse,
   N403ForbiddenResponse,
   N404NotFoundResponse,
   N409ConflictResponse,
   ResourceType,
   ResourceTypePage,
+  ResourceTypeVersion,
 } from '../../../../../models/v2/controlplane';
 
 export const getInternalListResourceTypesResponseMock = (
@@ -621,6 +623,174 @@ export const getChangeResourceTypeCatalogueStatusResponseMock404 = (
 export const getChangeResourceTypeCatalogueStatusResponseMock409 = (
   overrideResponse: Partial<Extract<N409ConflictResponse, object>> = {},
 ): N409ConflictResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getListResourceTypeVersionsResponseMock = (
+  overrideResponse: Partial<Extract<ListResourceTypeVersions200, object>> = {},
+): ListResourceTypeVersions200 => ({
+  items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    uuid: faker.string.uuid(),
+    resource_type_uuid: faker.string.uuid(),
+    resource_type_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    version: faker.number.int({ min: 1 }),
+    output_schema: {},
+    module_contract: faker.helpers.arrayElement([{}, undefined]),
+    created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+    created_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    reason: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+  })),
+  next_page_token: undefined,
+  ...overrideResponse,
+});
+
+export const getListResourceTypeVersionsResponseMock200 = (
+  overrideResponse: Partial<Extract<ListResourceTypeVersions200, object>> = {},
+): ListResourceTypeVersions200 => ({
+  items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    uuid: faker.string.uuid(),
+    resource_type_uuid: faker.string.uuid(),
+    resource_type_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    version: faker.number.int({ min: 1 }),
+    output_schema: {},
+    module_contract: faker.helpers.arrayElement([{}, undefined]),
+    created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+    created_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+    reason: faker.helpers.arrayElement([
+      faker.string.alpha({ length: { min: 10, max: 20 } }),
+      undefined,
+    ]),
+  })),
+  next_page_token: undefined,
+  ...overrideResponse,
+});
+
+export const getListResourceTypeVersionsResponseMock400 = (
+  overrideResponse: Partial<Extract<N400BadRequestResponse, object>> = {},
+): N400BadRequestResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getListResourceTypeVersionsResponseMock404 = (
+  overrideResponse: Partial<Extract<N404NotFoundResponse, object>> = {},
+): N404NotFoundResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPublishResourceTypeVersionResponseMock = (
+  overrideResponse: Partial<Extract<ResourceTypeVersion, object>> = {},
+): ResourceTypeVersion => ({
+  uuid: faker.string.uuid(),
+  resource_type_uuid: faker.string.uuid(),
+  resource_type_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  version: faker.number.int({ min: 1 }),
+  output_schema: {},
+  module_contract: faker.helpers.arrayElement([{}, undefined]),
+  created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  created_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getPublishResourceTypeVersionResponseMock201 = (
+  overrideResponse: Partial<Extract<ResourceTypeVersion, object>> = {},
+): ResourceTypeVersion => ({
+  uuid: faker.string.uuid(),
+  resource_type_uuid: faker.string.uuid(),
+  resource_type_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  version: faker.number.int({ min: 1 }),
+  output_schema: {},
+  module_contract: faker.helpers.arrayElement([{}, undefined]),
+  created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  created_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getPublishResourceTypeVersionResponseMock400 = (
+  overrideResponse: Partial<Extract<N400BadRequestResponse, object>> = {},
+): N400BadRequestResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPublishResourceTypeVersionResponseMock404 = (
+  overrideResponse: Partial<Extract<N404NotFoundResponse, object>> = {},
+): N404NotFoundResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getPublishResourceTypeVersionResponseMock409 = (
+  overrideResponse: Partial<Extract<N409ConflictResponse, object>> = {},
+): N409ConflictResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
+export const getGetResourceTypeVersionResponseMock = (
+  overrideResponse: Partial<Extract<ResourceTypeVersion, object>> = {},
+): ResourceTypeVersion => ({
+  uuid: faker.string.uuid(),
+  resource_type_uuid: faker.string.uuid(),
+  resource_type_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  version: faker.number.int({ min: 1 }),
+  output_schema: {},
+  module_contract: faker.helpers.arrayElement([{}, undefined]),
+  created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  created_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getGetResourceTypeVersionResponseMock200 = (
+  overrideResponse: Partial<Extract<ResourceTypeVersion, object>> = {},
+): ResourceTypeVersion => ({
+  uuid: faker.string.uuid(),
+  resource_type_uuid: faker.string.uuid(),
+  resource_type_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  version: faker.number.int({ min: 1 }),
+  output_schema: {},
+  module_contract: faker.helpers.arrayElement([{}, undefined]),
+  created_at: faker.date.past().toISOString().slice(0, 19) + 'Z',
+  created_by: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  reason: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  ...overrideResponse,
+});
+
+export const getGetResourceTypeVersionResponseMock404 = (
+  overrideResponse: Partial<Extract<N404NotFoundResponse, object>> = {},
+): N404NotFoundResponse => ({
   error: 'API-000',
   message: 'Something happened!',
   details: faker.helpers.arrayElement([{}, undefined]),
@@ -1634,6 +1804,294 @@ export const getChangeResourceTypeCatalogueStatusMockHandler409 = (
     options,
   );
 };
+
+export const getListResourceTypeVersionsMockHandler = (
+  overrideResponse?:
+    | ListResourceTypeVersions200
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ListResourceTypeVersions200> | ListResourceTypeVersions200),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/resource-types/:typeId/versions',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getListResourceTypeVersionsResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getListResourceTypeVersionsMockHandler200 = (
+  overrideResponse?:
+    | ListResourceTypeVersions200
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ListResourceTypeVersions200> | ListResourceTypeVersions200),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/resource-types/:typeId/versions',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getListResourceTypeVersionsResponseMock200(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getListResourceTypeVersionsMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/resource-types/:typeId/versions',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getListResourceTypeVersionsResponseMock400(),
+        { status: 400 },
+      );
+    },
+    options,
+  );
+};
+
+export const getListResourceTypeVersionsMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/resource-types/:typeId/versions',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getListResourceTypeVersionsResponseMock404(),
+        { status: 404 },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishResourceTypeVersionMockHandler = (
+  overrideResponse?:
+    | ResourceTypeVersion
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ResourceTypeVersion> | ResourceTypeVersion),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/resource-types/:typeId/versions',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPublishResourceTypeVersionResponseMock(),
+        { status: 201 },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishResourceTypeVersionMockHandler201 = (
+  overrideResponse?:
+    | ResourceTypeVersion
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<ResourceTypeVersion> | ResourceTypeVersion),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/resource-types/:typeId/versions',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPublishResourceTypeVersionResponseMock201(),
+        { status: 201 },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishResourceTypeVersionMockHandler400 = (
+  overrideResponse?:
+    | N400BadRequestResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N400BadRequestResponse> | N400BadRequestResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/resource-types/:typeId/versions',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPublishResourceTypeVersionResponseMock400(),
+        { status: 400 },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishResourceTypeVersionMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/resource-types/:typeId/versions',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPublishResourceTypeVersionResponseMock404(),
+        { status: 404 },
+      );
+    },
+    options,
+  );
+};
+
+export const getPublishResourceTypeVersionMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    'http://example.com/orgs/:orgId/resource-types/:typeId/versions',
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPublishResourceTypeVersionResponseMock409(),
+        { status: 409 },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetResourceTypeVersionMockHandler = (
+  overrideResponse?:
+    | ResourceTypeVersion
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ResourceTypeVersion> | ResourceTypeVersion),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/resource-types/:typeId/versions/:resourceTypeVersion',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetResourceTypeVersionResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetResourceTypeVersionMockHandler200 = (
+  overrideResponse?:
+    | ResourceTypeVersion
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<ResourceTypeVersion> | ResourceTypeVersion),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/resource-types/:typeId/versions/:resourceTypeVersion',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetResourceTypeVersionResponseMock200(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetResourceTypeVersionMockHandler404 = (
+  overrideResponse?:
+    | N404NotFoundResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N404NotFoundResponse> | N404NotFoundResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/resource-types/:typeId/versions/:resourceTypeVersion',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetResourceTypeVersionResponseMock404(),
+        { status: 404 },
+      );
+    },
+    options,
+  );
+};
 export const getResourceTypeMock = () => [
   getInternalListResourceTypesMockHandler(),
   getInternalCreateResourceTypeMockHandler(),
@@ -1646,4 +2104,7 @@ export const getResourceTypeMock = () => [
   getGetResourceTypeMockHandler(),
   getUpdateResourceTypeMockHandler(),
   getChangeResourceTypeCatalogueStatusMockHandler(),
+  getListResourceTypeVersionsMockHandler(),
+  getPublishResourceTypeVersionMockHandler(),
+  getGetResourceTypeVersionMockHandler(),
 ];
