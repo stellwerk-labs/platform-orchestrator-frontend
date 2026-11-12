@@ -72,9 +72,7 @@ export const ProvidersList = () => {
     {
       title: 'Status',
       dataIndex: 'deletion_requested_at',
-      render: (value) => (
-        <Tag color={value ? 'orange' : 'green'}>{value ? 'Deletion pending' : 'Active'}</Tag>
-      ),
+      render: (value) => <Tag>{value ? 'Deletion pending' : 'Active'}</Tag>,
     },
     {
       title: 'Created at',
