@@ -12,14 +12,14 @@ export const pluginManagerRoute: RouteObject = {
   children: [
     {
       index: true,
-      handle: { crumbs: () => [{ label: 'Platform', name: 'Plugin Manager' }] },
+      handle: { crumbs: () => [{ label: 'Administration', name: 'Plugin Manager' }] },
       element: <PluginInstallations />,
     },
     {
       path: ':installationId',
       handle: {
         crumbs: (match: UIMatch) => [
-          { label: 'Platform', name: 'Plugin Manager', pathname: generatePluginManagerUrl() },
+          { label: 'Administration', name: 'Plugin Manager', pathname: generatePluginManagerUrl() },
           { label: 'Installation', name: match.params.installationId },
         ],
       },

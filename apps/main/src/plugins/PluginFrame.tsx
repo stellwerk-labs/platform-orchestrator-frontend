@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 
 import { useUserPreferencesStore } from '@src/hooks/zustand/useUserPreferencesStore';
+import { useSessionActivity } from '@src/session/SessionGuard';
 
 import { invokeBridgeOperation, type PluginDeploymentMaterial } from './hostOperationInvocation';
 import {
@@ -31,6 +32,9 @@ const bridgeError = (requestId: string | undefined, nonce: string, error: string
 });
 
 export const PluginFrame = ({ orgId, plugin }: PluginFrameProps) => {
+  const reportActivity = useSessionActivity();
+  const activityRef = useRef(reportActivity);
+  activityRef.current = reportActivity;
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const portRef = useRef<MessagePort | undefined>(undefined);
   const handshakeTimerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
@@ -124,6 +128,10 @@ export const PluginFrame = ({ orgId, plugin }: PluginFrameProps) => {
           channel.port1.postMessage(
             bridgeError(validated.requestId, nonceRef.current, validated.error),
           );
+          return;
+        }
+        if (validated.message.type === 'stellwerk.plugin.activity') {
+          activityRef.current();
           return;
         }
         if (validated.message.type === 'stellwerk.plugin.navigate') {

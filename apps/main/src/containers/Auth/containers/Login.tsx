@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { Flex, Typography } from 'antd';
+import { Alert, Flex, Typography } from 'antd';
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 
 import { Freetrial } from '@src/components/shared/Freetrial';
 import { features } from '@src/config/features';
@@ -17,6 +17,7 @@ import { SsoRedirectButton } from '../components/SsoRedirectButton';
 
 export const Login = () => {
   const navigate = useNavigate();
+  const [search] = useSearchParams();
   const {
     mutate: verifyProviderSignIn,
     isSuccess: loggedIn,
@@ -71,6 +72,10 @@ export const Login = () => {
         <div>
           <Typography.Text className={'txt-sm'}>Are you new here?</Typography.Text> <Freetrial />
         </div>
+      )}
+
+      {search.get('reason') === 'session-expired' && (
+        <Alert type={'info'} showIcon message={'Your session ended. Please sign in again.'} />
       )}
 
       <AuthButtons

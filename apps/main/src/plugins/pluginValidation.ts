@@ -307,6 +307,10 @@ export const validatePluginBridgeRequest = (
     return { ok: false, requestId, error: 'Stale or incompatible plugin bridge session.' };
   }
 
+  if (value.type === 'stellwerk.plugin.activity') {
+    return { ok: true, message: value as unknown as PluginBridgeRequestMessage };
+  }
+
   if (
     value.type === 'stellwerk.plugin.navigate' ||
     value.type === 'stellwerk.plugin.navigate-core'

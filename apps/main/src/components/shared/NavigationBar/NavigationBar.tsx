@@ -30,7 +30,6 @@ import {
   generateEnvironmentTypesUrl,
   generateModulesUrl,
   generateOrgMembersUrl,
-  generatePluginManagerUrl,
   generateProjectsUrl,
   generateProvidersUrl,
   generateResourceTypesUrl,
@@ -52,6 +51,12 @@ const NavigationBar = () => {
     permission: RBACPermission.PLUGIN_MANAGER_READ,
   };
   const canReadPluginManager = useRBACPermissions([pluginManagerCheck]).allowed(pluginManagerCheck);
+
+  const settingsCheck = {
+    resource: PLATFORM_RESOURCE,
+    permission: RBACPermission.PLATFORM_SETTINGS_READ,
+  };
+  const canReadSettings = useRBACPermissions([settingsCheck]).allowed(settingsCheck);
 
   const orgId = routerOrgId ? routerOrgId : user?.organization_memberships?.[0]?.id;
 
@@ -186,15 +191,15 @@ const NavigationBar = () => {
             style={{ padding: 0, border: 0, marginBottom: 0 }}
             tabIndex={-1}
             inlineIndent={24}
-            selectedKeys={[]}>
-            {canReadPluginManager && (
+            selectedKeys={location.pathname.startsWith('/platform') ? ['administration'] : []}>
+            {(canReadSettings || canReadPluginManager) && (
               <Menu.Item
-                key={'plugin-manager'}
+                key={'administration'}
                 icon={<ControlOutlined />}
                 tabIndex={0}
                 onKeyDown={handleMenuItemKeyDown}>
-                <Link to={generatePluginManagerUrl()} tabIndex={-1}>
-                  Plugin Manager
+                <Link to={'/platform'} tabIndex={-1}>
+                  Administration
                 </Link>
               </Menu.Item>
             )}

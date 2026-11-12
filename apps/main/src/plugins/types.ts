@@ -1,20 +1,12 @@
 export const pluginUiSdkVersion = '1' as const;
 
 export type PluginAvailabilityState =
-  | 'available'
-  | 'not_installed'
-  | 'not_enabled'
-  | 'not_entitled'
-  | 'incompatible'
-  | 'unavailable';
+  'available' | 'not_installed' | 'not_enabled' | 'not_entitled' | 'incompatible' | 'unavailable';
 
 export type PluginUiMode = 'full' | 'read_only' | 'safety_only' | 'hidden';
 
 export type PluginModuleVersionLifecycleStatus =
-  | 'proposed'
-  | 'default'
-  | 'deprecated'
-  | 'defective';
+  'proposed' | 'default' | 'deprecated' | 'defective';
 
 export type PluginModuleVersionContextValue = '$module_id' | '$semantic_version' | '$version_uuid';
 
@@ -149,7 +141,14 @@ export interface PluginNavigateCoreMessage {
   route: string;
 }
 
+export interface PluginActivityMessage {
+  type: 'stellwerk.plugin.activity';
+  sdk_version: typeof pluginUiSdkVersion;
+  nonce: string;
+}
+
 export type PluginBridgeRequestMessage =
+  | PluginActivityMessage
   | PluginOperationRequestMessage
   | PluginNavigateMessage
   | PluginNavigateCoreMessage;

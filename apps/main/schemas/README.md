@@ -23,3 +23,10 @@ with the pinned public specs. Copy the updated contract fields and metadata into
 the existing schemas, preserving the Console's operation subset. Run
 `pnpm run orval --clean` from the repository root and review all generated changes.
 These revisions record API provenance, not a published image release.
+
+Provider retirement entries use the signed local Control Plane contract commit
+`92d87c7ea7b1123c522c474387ee2bf0e94ffc07`, full spec SHA-256
+`d622638c9aaa6baaf3b9648cbba3f3518f1738e6d20583f804c69c0f1421db7c`. Only Provider status and deletion
+responses were imported into the curated schema. This source is unpublished;
+its public availability and matching server behavior must be qualified before a
+Console release. Internal retirement proof endpoints are excluded.
