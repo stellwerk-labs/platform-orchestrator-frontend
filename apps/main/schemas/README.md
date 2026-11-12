@@ -24,9 +24,30 @@ the existing schemas, preserving the Console's operation subset. Run
 `pnpm run orval --clean` from the repository root and review all generated changes.
 These revisions record API provenance, not a published image release.
 
-Provider retirement entries use the signed local Control Plane contract commit
-`92d87c7ea7b1123c522c474387ee2bf0e94ffc07`, full spec SHA-256
-`d622638c9aaa6baaf3b9648cbba3f3518f1738e6d20583f804c69c0f1421db7c`. Only Provider status and deletion
-responses were imported into the curated schema. This source is unpublished;
-its public availability and matching server behavior must be qualified before a
-Console release. Internal retirement proof endpoints are excluded.
+Provider retirement entries use the public Control Plane contract commit
+`935835a8efa36623f955294b48fadbaedb90436f`, full `openapi/spec.yaml` SHA-256
+`d622638c9aaa6baaf3b9648cbba3f3518f1738e6d20583f804c69c0f1421db7c`.
+Only Provider status and deletion responses were imported into the curated schema.
+Internal retirement proof endpoints are excluded. The public source is available
+at that immutable commit; matching server artifacts are qualified separately.
+
+Installation settings and browser session requests use small handwritten clients
+in `settingsApi.ts` and `SessionGuard.tsx`. Their contract sources are the actual
+server routes and handlers at these public revisions:
+
+- Control Plane `935835a8efa36623f955294b48fadbaedb90436f`,
+  `internal/api/server.go` and `internal/api/installation_maintenance.go`, for
+  `GET /platform-settings/maintenance-status` and installation readiness.
+- Data Plane `79c303569075f9754eb0e767eca547ce62c65b13`,
+  `internal/api/server.go` and `internal/api/installation_settings.go`, for
+  `GET` and `PUT /platform-settings/deployments` (maintenance policy).
+- IAM `2d402bf501ec4b8217ad3ad10833a1b8658bea36`,
+  `internal/api/server.go`, `internal/api/browser_sessions.go` and
+  `internal/api/installation_settings.go`, for session policy, browser session
+  inspection and genuine activity reporting.
+
+These installation operations are not part of the generated OpenAPI subset.
+The unchanged public IAM `openapi/spec.yaml` has SHA-256
+`703e941a255dc57a6639abbdf434e4bcbb3b389dd3639b912b2917717ff77512`;
+it is not the definition of these handwritten installation routes. Public source
+availability does not establish a released or installed matching server version.
