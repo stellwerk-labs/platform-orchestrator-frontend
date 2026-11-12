@@ -51,3 +51,16 @@ The unchanged public IAM `openapi/spec.yaml` has SHA-256
 `703e941a255dc57a6639abbdf434e4bcbb3b389dd3639b912b2917717ff77512`;
 it is not the definition of these handwritten installation routes. Public source
 availability does not establish a released or installed matching server version.
+
+Module catalogue quick filters currently include local additive contract changes
+from Control Plane worktree `platform-orchestrator-cp-release-pilot-20261112`,
+branch `fix/modules-and-database-tls-20261112`, based on
+`2ab7c3482d96882bf09b4fe4295a0cdbb7ac9d8f`. Its modified `openapi/spec.yaml`
+has SHA-256 `2206a8c312106fc5b0471f6b71271b0b0c36d904200504c7f46a10b81b010b38`.
+This identifies an unpublished local producer, not a public commit or release.
+The curated additions are optional `has_proposed` and `default_verified` fields
+on `ModuleCatalogueEntry`, returned only by listing with `module.version.read`.
+They summarize all versions and the current Default respectively. The existing
+verification model only supports `unverified`, so Default verified currently
+matches no modules. Replace this local provenance with an immutable public
+producer revision before publishing the Console.

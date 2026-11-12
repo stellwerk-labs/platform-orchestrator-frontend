@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, App, Card, Space, Switch, Typography } from 'antd';
+import { Alert, App, Button, Card, Space, Typography } from 'antd';
 
 import { MaintenanceDrainStatus } from './MaintenanceDrainStatus';
 import {
@@ -65,13 +65,15 @@ export const MaintenanceSettingsCard = ({ canWrite }: { canWrite: boolean }) => 
           available.
         </Typography.Paragraph>
         <MaintenanceDrainStatus revision={query.data.revision} enabled={query.data.enabled} />
-        <Switch
-          checked={query.data.enabled}
+        <Button
+          color={query.data.enabled ? 'danger' : 'green'}
+          variant={'solid'}
+          aria-pressed={query.data.enabled}
           disabled={!canWrite || save.isPending}
           loading={save.isPending}
-          aria-label={'Maintenance mode'}
-          onChange={confirm}
-        />
+          onClick={() => confirm(!query.data.enabled)}>
+          {query.data.enabled ? 'Maintenance mode ON' : 'Maintenance mode OFF'}
+        </Button>
       </Space>
       {save.isError && (
         <SettingsError

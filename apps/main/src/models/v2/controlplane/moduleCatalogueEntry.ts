@@ -24,4 +24,8 @@ export interface ModuleCatalogueEntry {
   archived_at?: string;
   archived_by?: string;
   archive_reason?: string;
+  /** Whether any version is Proposed. Only returned by catalogue listing with module.version.read; absent means unknown. */
+  has_proposed?: boolean;
+  /** Whether the current Default version is verified. False when there is no Default. Only returned by catalogue listing with module.version.read; absent means unknown. Current verification status only supports unverified, so this is currently always false. */
+  default_verified?: boolean;
 }

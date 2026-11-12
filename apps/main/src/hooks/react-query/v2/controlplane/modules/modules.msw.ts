@@ -1168,6 +1168,8 @@ export const getGetModuleCatalogueEntryResponseMock = (
     faker.string.alpha({ length: { min: 10, max: 20 } }),
     undefined,
   ]),
+  has_proposed: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+  default_verified: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
   ...overrideResponse,
 });
 
@@ -1198,6 +1200,8 @@ export const getGetModuleCatalogueEntryResponseMock200 = (
     faker.string.alpha({ length: { min: 10, max: 20 } }),
     undefined,
   ]),
+  has_proposed: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+  default_verified: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
   ...overrideResponse,
 });
 
@@ -1246,6 +1250,8 @@ export const getUpdateModuleCatalogueEntryResponseMock = (
     faker.string.alpha({ length: { min: 10, max: 20 } }),
     undefined,
   ]),
+  has_proposed: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+  default_verified: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
   ...overrideResponse,
 });
 
@@ -1276,6 +1282,8 @@ export const getUpdateModuleCatalogueEntryResponseMock200 = (
     faker.string.alpha({ length: { min: 10, max: 20 } }),
     undefined,
   ]),
+  has_proposed: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+  default_verified: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
   ...overrideResponse,
 });
 
@@ -1341,6 +1349,8 @@ export const getListModuleCatalogueEntriesResponseMock = (): ModuleCatalogueEntr
       faker.string.alpha({ length: { min: 10, max: 20 } }),
       undefined,
     ]),
+    has_proposed: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    default_verified: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
   }));
 
 export const getListModuleCatalogueEntriesResponseMock200 = (): ModuleCatalogueEntry[] =>
@@ -1369,6 +1379,8 @@ export const getListModuleCatalogueEntriesResponseMock200 = (): ModuleCatalogueE
       faker.string.alpha({ length: { min: 10, max: 20 } }),
       undefined,
     ]),
+    has_proposed: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+    default_verified: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
   }));
 
 export const getListModuleCatalogueEntriesResponseMock403 = (
@@ -1407,6 +1419,8 @@ export const getCreateModuleCatalogueEntryResponseMock = (
     faker.string.alpha({ length: { min: 10, max: 20 } }),
     undefined,
   ]),
+  has_proposed: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+  default_verified: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
   ...overrideResponse,
 });
 
@@ -1437,6 +1451,8 @@ export const getCreateModuleCatalogueEntryResponseMock201 = (
     faker.string.alpha({ length: { min: 10, max: 20 } }),
     undefined,
   ]),
+  has_proposed: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+  default_verified: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
   ...overrideResponse,
 });
 
@@ -2159,6 +2175,8 @@ export const getChangeModuleCatalogueStatusResponseMock = (
     faker.string.alpha({ length: { min: 10, max: 20 } }),
     undefined,
   ]),
+  has_proposed: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+  default_verified: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
   ...overrideResponse,
 });
 
@@ -2189,6 +2207,8 @@ export const getChangeModuleCatalogueStatusResponseMock200 = (
     faker.string.alpha({ length: { min: 10, max: 20 } }),
     undefined,
   ]),
+  has_proposed: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+  default_verified: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
   ...overrideResponse,
 });
 

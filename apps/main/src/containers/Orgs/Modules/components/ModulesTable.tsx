@@ -16,6 +16,7 @@ import { generateModuleUrl, generateResourceTypeDetailsUrl } from '@src/utilitie
 interface ResourcesTableProps {
   modules: ModuleCatalogueEntry[];
   modulesLoading?: boolean;
+  filtered?: boolean;
 }
 
 const ModuleLifecycleSummary = ({ module }: { module: ModuleCatalogueEntry }) => {
@@ -111,7 +112,7 @@ const LastPublication = ({ module }: { module: ModuleCatalogueEntry }) => {
       : 'Never';
 };
 
-export const ModulesTable = ({ modules, modulesLoading }: ResourcesTableProps) => {
+export const ModulesTable = ({ modules, modulesLoading, filtered }: ResourcesTableProps) => {
   const { t } = useTranslation();
   const tableTranslations = t('ACCOUNT_SETTINGS').RESOURCES.TABLE;
   const { orgId } = useParams<keyof MatchParams>() as MatchParams;
@@ -169,20 +170,24 @@ export const ModulesTable = ({ modules, modulesLoading }: ResourcesTableProps) =
         emptyText: (
           <Empty
             description={
-              <>
-                No modules found, see{' '}
-                <a href={DOCS_MODULES} target={'_blank'} rel={'noreferrer noopener'}>
-                  modules docs
-                </a>{' '}
-                for details, or follow the{' '}
-                <a
-                  href={DOCS_GET_STARTED_EMPTY_STATE}
-                  target={'_blank'}
-                  rel={'noreferrer noopener'}>
-                  tutorial
-                </a>{' '}
-                to explore the full setup flow.
-              </>
+              filtered ? (
+                'No modules match these filters. Reset filters to see all modules.'
+              ) : (
+                <>
+                  No modules found, see{' '}
+                  <a href={DOCS_MODULES} target={'_blank'} rel={'noreferrer noopener'}>
+                    modules docs
+                  </a>{' '}
+                  for details, or follow the{' '}
+                  <a
+                    href={DOCS_GET_STARTED_EMPTY_STATE}
+                    target={'_blank'}
+                    rel={'noreferrer noopener'}>
+                    tutorial
+                  </a>{' '}
+                  to explore the full setup flow.
+                </>
+              )
             }
             styles={{ image: { display: 'none' } }}
           />
