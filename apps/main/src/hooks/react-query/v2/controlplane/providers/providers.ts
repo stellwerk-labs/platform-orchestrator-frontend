@@ -539,7 +539,7 @@ export const useUpdateModuleProvider = <
   return useMutation(getUpdateModuleProviderMutationOptions(options), queryClient);
 };
 /**
- * @summary Delete an existing module provider in the org if it is unused
+ * @summary Request deletion of a module provider
  */
 export const deleteModuleProvider = (
   orgId: string,
@@ -610,7 +610,7 @@ export type DeleteModuleProviderMutationVariables = {
 };
 
 /**
- * @summary Delete an existing module provider in the org if it is unused
+ * @summary Request deletion of a module provider
  */
 export const useDeleteModuleProvider = <
   TError = ErrorType<N404NotFoundResponse | N409ConflictResponse>,

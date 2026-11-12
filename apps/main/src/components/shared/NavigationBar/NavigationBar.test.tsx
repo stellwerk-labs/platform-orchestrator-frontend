@@ -27,7 +27,7 @@ describe('NavigationBar', () => {
     ),
   );
 
-  it('links the Plugin Manager for a platform operator holding plugin_manager_read', async () => {
+  it('links Administration for a platform operator holding plugin_manager_read', async () => {
     server.use(
       answerPermissionChecks(
         ({ resource, permission }) =>
@@ -37,27 +37,43 @@ describe('NavigationBar', () => {
 
     renderNavigation();
 
-    expect(await screen.findByRole('link', { name: 'Plugin Manager' })).toHaveAttribute(
+    expect(await screen.findByRole('link', { name: 'Administration' })).toHaveAttribute(
       'href',
-      '/platform/plugins',
+      '/platform',
     );
   });
 
-  it('hides the Plugin Manager from everyone else', async () => {
+  it('links Administration for an installation settings operator', async () => {
+    server.use(
+      answerPermissionChecks(
+        ({ resource, permission }) =>
+          resource === 'platform' && permission === 'platform_settings_read',
+      ),
+    );
+    renderNavigation();
+    expect(await screen.findByRole('link', { name: 'Administration' })).toHaveAttribute(
+      'href',
+      '/platform',
+    );
+    expect(screen.queryByRole('link', { name: 'Plugin Manager' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Installation settings' })).not.toBeInTheDocument();
+  });
+
+  it('hides Administration from everyone else', async () => {
     server.use(answerPermissionChecks(({ resource }) => resource !== 'platform'));
 
     renderNavigation();
 
     expect(await screen.findByRole('link', { name: 'Projects' })).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Plugin Manager' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Administration' })).not.toBeInTheDocument();
   });
 
-  it('hides the Plugin Manager when the permission check fails', async () => {
+  it('hides Administration when the permission check fails', async () => {
     server.use(getCheckPermissionsMockHandler403());
 
     renderNavigation();
 
     expect(await screen.findByRole('link', { name: 'Projects' })).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Plugin Manager' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Administration' })).not.toBeInTheDocument();
   });
 });

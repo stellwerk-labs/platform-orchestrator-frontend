@@ -13,7 +13,9 @@ import { SsoLogin } from '@src/containers/Auth/containers/SsoLogin';
 import { Device } from '@src/containers/Device';
 import { AcceptInvite } from '@src/containers/Orgs/AcceptInvite';
 import { Orgs } from '@src/containers/Orgs/Orgs';
+import { Administration } from '@src/containers/Platform/Administration';
 import { pluginManagerRoute } from '@src/containers/Platform/PluginManager/pluginManagerRoute';
+import { platformSettingsRoute } from '@src/containers/Platform/Settings/PlatformSettings';
 import { ResourceGraphFullPage } from '@src/containers/ResourceGraphFullPage/ResourceGraphFullPage';
 import { RedirectRoot } from '@src/RedirectRoot';
 
@@ -112,7 +114,16 @@ export const router = createBrowserRouter([
             </MainLayout>
           </PrivateRoute>
         ),
-        children: [pluginManagerRoute],
+        children: [
+          {
+            element: <Administration />,
+            children: [
+              { path: 'platform', element: null },
+              pluginManagerRoute,
+              platformSettingsRoute,
+            ],
+          },
+        ],
       },
       {
         path: 'devicelogins/:deviceLoginCode',

@@ -26,6 +26,7 @@ import { MatchParams } from './config/routing';
 import { useWalhallContext, WalhallContext } from './context/walhallContext';
 import { AXIOS_INSTANCE } from './custom-instance';
 import { useGetCurrentUser } from './hooks/react-query/v2/iam/user/user';
+import { SessionGuard } from './session/SessionGuard';
 
 OpenFeature.setProvider(provider);
 
@@ -143,7 +144,7 @@ export const App = () => {
 
   useEffect(() => {
     // request interceptor
-    AXIOS_INSTANCE.interceptors.request.use(
+    const requestInterceptor = AXIOS_INSTANCE.interceptors.request.use(
       (request) => {
         setPendingRequests((prev) => prev + 1);
         return request;
@@ -154,7 +155,7 @@ export const App = () => {
       },
     );
     // response interceptor
-    AXIOS_INSTANCE.interceptors.response.use(
+    const responseInterceptor = AXIOS_INSTANCE.interceptors.response.use(
       (response) => {
         setPendingRequests((prev) => prev - 1);
         return response;
@@ -175,13 +176,21 @@ export const App = () => {
             setLastVisitedURL('/');
           }
 
-          window.location.href = `${window.location.origin}/auth/login`;
+          setShouldConfirmOnNavigate(false);
+          setShowNavigateDialog(false);
+          Modal.destroyAll();
+          queryClient.clear();
+          navigate('/auth/login?reason=session-expired', { replace: true });
         }
         setPendingRequests((prev) => prev - 1);
         return Promise.reject(error);
       },
     );
-  }, []);
+    return () => {
+      AXIOS_INSTANCE.interceptors.request.eject(requestInterceptor);
+      AXIOS_INSTANCE.interceptors.response.eject(responseInterceptor);
+    };
+  }, [navigate]);
 
   useEffect(() => {
     const showWarningBeforeLeavePage = (event: BeforeUnloadEvent) => {
@@ -242,7 +251,14 @@ export const App = () => {
                 pendingRequests,
               }}>
               <QueryClientProvider client={queryClient}>
-                <AppMain />
+                <SessionGuard
+                  onExpired={() => {
+                    setShouldConfirmOnNavigate(false);
+                    setShowNavigateDialog(false);
+                    Modal.destroyAll();
+                  }}>
+                  <AppMain />
+                </SessionGuard>
                 <ReactQueryDevtools initialIsOpen={false} />
               </QueryClientProvider>
             </WalhallContext.Provider>

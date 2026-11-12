@@ -7,6 +7,11 @@
  * A summary of configuration for an OpenTofu provider that will be used in modules
  */
 export interface ModuleProviderSummary {
+  /**
+   * When deletion was requested. Present while waiting for managed state
+   * and in-flight operations to release this Provider. Omitted while active.
+   */
+  readonly deletion_requested_at?: string;
   /** The Organization ID */
   org_id: string;
   /** The OpenTofu provider name */

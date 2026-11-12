@@ -18,6 +18,10 @@ export const getListModuleProvidersResponseMock = (
   overrideResponse: Partial<Extract<ModuleProviderPage, object>> = {},
 ): ModuleProviderPage => ({
   items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    deletion_requested_at: faker.helpers.arrayElement([
+      faker.date.past().toISOString().slice(0, 19) + 'Z',
+      undefined,
+    ]),
     org_id: 'my-org',
     provider_type: 'aws',
     id: 'my-aws-provider',
@@ -33,6 +37,10 @@ export const getListModuleProvidersResponseMock200 = (
   overrideResponse: Partial<Extract<ModuleProviderPage, object>> = {},
 ): ModuleProviderPage => ({
   items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+    deletion_requested_at: faker.helpers.arrayElement([
+      faker.date.past().toISOString().slice(0, 19) + 'Z',
+      undefined,
+    ]),
     org_id: 'my-org',
     provider_type: 'aws',
     id: 'my-aws-provider',
@@ -55,6 +63,10 @@ export const getListModuleProvidersResponseMock404 = (
 
 export const getCreateModuleProviderResponseMock = (): ModuleProvider => ({
   ...{
+    deletion_requested_at: faker.helpers.arrayElement([
+      faker.date.past().toISOString().slice(0, 19) + 'Z',
+      undefined,
+    ]),
     org_id: 'my-org',
     provider_type: 'aws',
     id: 'my-aws-provider',
@@ -67,6 +79,10 @@ export const getCreateModuleProviderResponseMock = (): ModuleProvider => ({
 
 export const getCreateModuleProviderResponseMock201 = (): ModuleProvider => ({
   ...{
+    deletion_requested_at: faker.helpers.arrayElement([
+      faker.date.past().toISOString().slice(0, 19) + 'Z',
+      undefined,
+    ]),
     org_id: 'my-org',
     provider_type: 'aws',
     id: 'my-aws-provider',
@@ -97,6 +113,10 @@ export const getCreateModuleProviderResponseMock409 = (
 
 export const getGetModuleProviderResponseMock = (): ModuleProvider => ({
   ...{
+    deletion_requested_at: faker.helpers.arrayElement([
+      faker.date.past().toISOString().slice(0, 19) + 'Z',
+      undefined,
+    ]),
     org_id: 'my-org',
     provider_type: 'aws',
     id: 'my-aws-provider',
@@ -109,6 +129,10 @@ export const getGetModuleProviderResponseMock = (): ModuleProvider => ({
 
 export const getGetModuleProviderResponseMock200 = (): ModuleProvider => ({
   ...{
+    deletion_requested_at: faker.helpers.arrayElement([
+      faker.date.past().toISOString().slice(0, 19) + 'Z',
+      undefined,
+    ]),
     org_id: 'my-org',
     provider_type: 'aws',
     id: 'my-aws-provider',
@@ -130,6 +154,10 @@ export const getGetModuleProviderResponseMock404 = (
 
 export const getUpdateModuleProviderResponseMock = (): ModuleProvider => ({
   ...{
+    deletion_requested_at: faker.helpers.arrayElement([
+      faker.date.past().toISOString().slice(0, 19) + 'Z',
+      undefined,
+    ]),
     org_id: 'my-org',
     provider_type: 'aws',
     id: 'my-aws-provider',
@@ -142,6 +170,10 @@ export const getUpdateModuleProviderResponseMock = (): ModuleProvider => ({
 
 export const getUpdateModuleProviderResponseMock200 = (): ModuleProvider => ({
   ...{
+    deletion_requested_at: faker.helpers.arrayElement([
+      faker.date.past().toISOString().slice(0, 19) + 'Z',
+      undefined,
+    ]),
     org_id: 'my-org',
     provider_type: 'aws',
     id: 'my-aws-provider',
@@ -569,7 +601,25 @@ export const getDeleteModuleProviderMockHandler = (
         await overrideResponse(info);
       }
 
-      return new HttpResponse(null, { status: 204 });
+      return new HttpResponse(null, { status: 202 });
+    },
+    options,
+  );
+};
+
+export const getDeleteModuleProviderMockHandler202 = (
+  overrideResponse?:
+    void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void),
+  options?: RequestHandlerOptions,
+) => {
+  return http.delete(
+    'http://example.com/orgs/:orgId/module-providers/:providerType/:providerId',
+    async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
+      if (typeof overrideResponse === 'function') {
+        await overrideResponse(info);
+      }
+
+      return new HttpResponse(null, { status: 202 });
     },
     options,
   );

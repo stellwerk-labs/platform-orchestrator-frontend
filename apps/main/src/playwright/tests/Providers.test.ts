@@ -10,39 +10,46 @@ import { runA11yAudit } from '@src/playwright/a11y-helpers';
 import { test } from '@src/playwright/testFixtures';
 
 test.describe('Service providers', () => {
-  test('list and details providers', async ({ page, network }) => {
-    const mockProvider: ModuleProvider = {
-      org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
-      provider_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
-      id: 'mock-provider',
-      description: 'mock-description',
-      source: faker.string.alpha({ length: { min: 10, max: 20 } }),
-      created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
-      version_constraint: '',
-      configuration: {
-        configA: 'test',
-      },
-    };
-    network.use(
-      getGetCurrentUserMockHandler(),
-      getListModuleProvidersMockHandler({
-        items: [mockProvider],
-      }),
-      getGetModuleProviderMockHandler(mockProvider),
-    );
-    await test.step('should navigate to providers', async () => {
-      await page.goto('/');
-      await page.getByRole('menuitem', { name: 'Providers' }).click();
-      await test.expect(page.getByRole('heading', { name: 'Providers' })).toBeVisible();
-      await runA11yAudit(page);
-      await test.expect(page.getByText('mock-provider')).toBeVisible();
+  for (const [status, deletionRequestedAt] of [
+    ['Active', undefined],
+    ['Deletion pending', '2026-11-12T00:00:00Z'],
+  ] as const) {
+    test(`list and details providers (${status})`, async ({ page, network }) => {
+      const mockProvider: ModuleProvider = {
+        org_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        provider_type: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        id: 'mock-provider',
+        deletion_requested_at: deletionRequestedAt,
+        description: 'mock-description',
+        source: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+        version_constraint: '',
+        configuration: {
+          configA: 'test',
+        },
+      };
+      network.use(
+        getGetCurrentUserMockHandler(),
+        getListModuleProvidersMockHandler({
+          items: [mockProvider],
+        }),
+        getGetModuleProviderMockHandler(mockProvider),
+      );
+      await test.step('should navigate to providers', async () => {
+        await page.goto('/');
+        await page.getByRole('menuitem', { name: 'Providers' }).click();
+        await test.expect(page.getByRole('heading', { name: 'Providers' })).toBeVisible();
+        await test.expect(page.getByText(status, { exact: true })).toBeVisible();
+        await runA11yAudit(page);
+        await test.expect(page.getByText('mock-provider')).toBeVisible();
+      });
+      await test.step('Should see the provider details', async () => {
+        await page.getByText('mock-provider').click();
+        await test.expect(page.getByText('mock-description')).toBeVisible();
+        await test.expect(page.getByText('configA')).toBeVisible();
+      });
     });
-    await test.step('Should see the provider details', async () => {
-      await page.getByText('mock-provider').click();
-      await test.expect(page.getByText('mock-description')).toBeVisible();
-      await test.expect(page.getByText('configA')).toBeVisible();
-    });
-  });
+  }
 
   test('should filter correctly', async ({ network, page }) => {
     network.use(

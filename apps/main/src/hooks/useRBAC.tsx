@@ -20,6 +20,7 @@ export enum RBACPermission {
   ROLE_WRITE = 'role_write',
   SERVICE_USER_WRITE = 'service_user_write',
   MODULE_READ = 'module.read',
+  MODULE_PROVIDER_WRITE = 'module_provider_write',
   MODULE_ARCHIVE = 'module.archive',
   MODULE_VERSION_READ = 'module.version.read',
   MODULE_VERSION_PUBLISH = 'module.version.publish',
@@ -35,6 +36,8 @@ export enum RBACPermission {
   DEPLOYMENT_WRITE = 'deployment_write',
   DEPLOYMENT_OUTCOME_ACKNOWLEDGE = 'deployment.outcome.acknowledge',
   PLUGIN_MANAGER_READ = 'plugin_manager_read',
+  PLATFORM_SETTINGS_READ = 'platform_settings_read',
+  PLATFORM_SETTINGS_WRITE = 'platform_settings_write',
 }
 
 /** The resource of platform-level permissions, which no organization role grants. */

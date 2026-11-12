@@ -366,3 +366,12 @@ describe('plugin bridge validation', () => {
     ).toMatchObject({ ok: false, error: expect.stringContaining('same-origin') });
   });
 });
+
+describe('plugin session activity', () => {
+  it('accepts activity only on the current nonce and SDK session', () => {
+    const message = { type: 'stellwerk.plugin.activity', sdk_version: '1', nonce: session.nonce };
+    expect(validatePluginBridgeRequest(message, session).ok).toBe(true);
+    expect(validatePluginBridgeRequest({ ...message, nonce: 'old' }, session).ok).toBe(false);
+    expect(validatePluginBridgeRequest({ ...message, sdk_version: '2' }, session).ok).toBe(false);
+  });
+});

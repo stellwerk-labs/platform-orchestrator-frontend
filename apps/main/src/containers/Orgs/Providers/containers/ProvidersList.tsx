@@ -1,4 +1,4 @@
-import { Empty, Flex, Table, TableColumnProps, Tooltip } from 'antd';
+import { Empty, Flex, Table, TableColumnProps, Tag, Tooltip } from 'antd';
 import { formatDate } from 'date-fns';
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
@@ -68,6 +68,11 @@ export const ProvidersList = () => {
       title: 'Source',
       dataIndex: 'source',
       sorter: (a, b) => a.source.localeCompare(b.source),
+    },
+    {
+      title: 'Status',
+      dataIndex: 'deletion_requested_at',
+      render: (value) => <Tag>{value ? 'Deletion pending' : 'Active'}</Tag>,
     },
     {
       title: 'Created at',

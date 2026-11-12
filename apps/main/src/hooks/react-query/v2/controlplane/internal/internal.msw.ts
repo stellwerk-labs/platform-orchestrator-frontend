@@ -777,6 +777,10 @@ export const getGenerateInternalModuleCatalogueResponseMock = (
   providers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
     () => ({
       ...{
+        deletion_requested_at: faker.helpers.arrayElement([
+          faker.date.past().toISOString().slice(0, 19) + 'Z',
+          undefined,
+        ]),
         org_id: 'my-org',
         provider_type: 'aws',
         id: 'my-aws-provider',
@@ -875,6 +879,10 @@ export const getGenerateInternalModuleCatalogueResponseMock200 = (
   providers: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
     () => ({
       ...{
+        deletion_requested_at: faker.helpers.arrayElement([
+          faker.date.past().toISOString().slice(0, 19) + 'Z',
+          undefined,
+        ]),
         org_id: 'my-org',
         provider_type: 'aws',
         id: 'my-aws-provider',
