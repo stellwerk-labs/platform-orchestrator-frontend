@@ -1,7 +1,8 @@
-import { Alert, Card, Modal, Typography } from 'antd';
+import { Alert, Card, Modal } from 'antd';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 
+import { RunnerLogs } from '@src/components/shared/RunnerLogs';
 import { useUserPreferencesStore } from '@src/hooks/zustand/useUserPreferencesStore';
 import { useSessionActivity } from '@src/session/SessionGuard';
 
@@ -281,11 +282,7 @@ export const PluginFrame = ({ orgId, plugin }: PluginFrameProps) => {
         width={'min(960px, 90vw)'}
         onCancel={() => setVisibleLogs(undefined)}
         destroyOnHidden>
-        <Typography.Paragraph>
-          <pre style={{ maxHeight: '65vh', overflow: 'auto', whiteSpace: 'pre-wrap' }}>
-            {visibleLogs?.content}
-          </pre>
-        </Typography.Paragraph>
+        <RunnerLogs content={visibleLogs?.content ?? ''} />
       </Modal>
     </>
   );

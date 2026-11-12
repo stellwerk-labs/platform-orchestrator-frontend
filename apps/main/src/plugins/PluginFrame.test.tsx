@@ -587,7 +587,8 @@ describe('plugin frame', () => {
   });
 
   it('shows Deployment logs in a Console dialog and answers the frame with an empty completion', async () => {
-    const logs = 'wave canary: applied\nwave all: applied';
+    const logs =
+      'wave canary: applied\n{"@level":"info","@message":"wave all: applied","type":"apply_complete","hook":{"resource":"fixture-resource"}}';
     server.use(http.get(`${materialUrl}/logs`, () => HttpResponse.text(logs)));
     const session = connect(renderFrame());
     const answer = await exchange(
@@ -608,6 +609,9 @@ describe('plugin frame', () => {
     const dialog = await screen.findByRole('dialog');
     expect(dialog).toHaveTextContent(`Deployment ${material.deploymentId} logs`);
     expect(dialog).toHaveTextContent('wave all: applied');
+    expect(within(dialog).getByRole('button', { name: 'Show raw logs' })).toBeInTheDocument();
+    expect(dialog).toHaveTextContent('fixture-resource');
+    expect(JSON.stringify(session.received)).not.toContain('wave all: applied');
     expect(coreRequests).toEqual([
       `GET /orgs/${orgId}/plugins/${plugin.id}/projects/${material.projectUuid}/envs/${material.environmentUuid}/deployments/${material.deploymentId}/logs`,
     ]);
