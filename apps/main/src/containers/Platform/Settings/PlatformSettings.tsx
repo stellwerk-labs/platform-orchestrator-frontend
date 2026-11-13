@@ -4,6 +4,7 @@ import type { RouteObject } from 'react-router';
 import { ErrorPage } from '@src/components/shared/ErrorPage/ErrorPage';
 import { PLATFORM_RESOURCE, RBACPermission, RBACStatus, useRBAC } from '@src/hooks/useRBAC';
 
+import { CostEstimationSettingsCard } from './CostEstimationSettingsCard';
 import { MaintenanceSettingsCard } from './MaintenanceSettingsCard';
 import { SessionSettingsCard } from './SessionSettingsCard';
 
@@ -23,6 +24,7 @@ const SettingsPage = () => {
         />
       )}
       <SessionSettingsCard canWrite={canWrite} />
+      <CostEstimationSettingsCard canWrite={canWrite} />
       <MaintenanceSettingsCard canWrite={canWrite} />
     </Flex>
   );

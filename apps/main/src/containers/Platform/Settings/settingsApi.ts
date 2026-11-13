@@ -15,6 +15,36 @@ export interface Maintenance extends SettingsMetadata {
   executing_deployments: number;
   queued_deployments: number;
 }
+export interface CostEstimation extends SettingsMetadata {
+  enabled: boolean;
+  api_key_configured: boolean;
+}
+export interface CostEstimationValues {
+  enabled: boolean;
+  api_key?: string;
+}
+export const costEstimationPath = '/platform-settings/cost-estimation';
+export const getCostEstimation = () => customInstance<CostEstimation>({ url: costEstimationPath });
+export const putCostEstimation = async ({
+  values,
+  revision,
+}: {
+  values: CostEstimationValues;
+  revision: number;
+}) => {
+  try {
+    return await customInstance<CostEstimation>({
+      url: costEstimationPath,
+      method: 'PUT',
+      data: values,
+      headers: { 'If-Match': `"${revision}"` },
+    });
+  } catch (error) {
+    const status = (error as { response?: { status?: number } }).response?.status;
+    const message = settingsErrorMessage(error);
+    throw Object.assign(new Error(message), { response: { status, data: { message } } });
+  }
+};
 export const sessionPath = '/platform-settings/sessions';
 export const maintenancePath = '/platform-settings/deployments';
 export const getSessionPolicy = () => customInstance<SessionPolicy>({ url: sessionPath });
