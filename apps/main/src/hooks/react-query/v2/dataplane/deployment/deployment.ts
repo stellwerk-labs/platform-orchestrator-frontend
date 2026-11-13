@@ -33,6 +33,7 @@ import type {
   DeploymentQueueItemPage,
   DeploymentResultsUpdateBody,
   Error,
+  GetDeploymentLogsParams,
   ListDeploymentQueueItemsParams,
   ListDeploymentsParams,
   ListLastDeploymentsParams,
@@ -1239,33 +1240,47 @@ export const useCalculateDeploymentDiff = <
   return useMutation(getCalculateDeploymentDiffMutationOptions(options), queryClient);
 };
 /**
- * These logs are only stored and available for 30 days and they are returned encrypted or decrypted according to the existence or not of the
- * decryption key query parameter.
+ * Logs are retained for 30 days. Without decrypt=true or DecryptKey, the response remains encrypted and requires deployment_read.
+ * Plaintext requests require deployment_logs_read. Use managed_logs:true when creating a Deployment to enable server-managed decryption.
  *
  * @summary Get the logs produced by the runner execution during the deployment.
  */
 export const getDeploymentLogs = (
   orgId: string,
   deploymentId: string,
+  params?: GetDeploymentLogsParams,
   options?: SecondParameter<typeof customInstance>,
   signal?: AbortSignal,
 ) => {
   return customInstance<string>(
-    { url: `/orgs/${orgId}/deployments/${deploymentId}/actions/get-logs`, method: 'GET', signal },
+    {
+      url: `/orgs/${orgId}/deployments/${deploymentId}/actions/get-logs`,
+      method: 'GET',
+      params,
+      signal,
+    },
     options,
   );
 };
 
-export const getGetDeploymentLogsQueryKey = (orgId: string, deploymentId: string) => {
-  return [`/orgs/${orgId}/deployments/${deploymentId}/actions/get-logs`] as const;
+export const getGetDeploymentLogsQueryKey = (
+  orgId: string,
+  deploymentId: string,
+  params?: GetDeploymentLogsParams,
+) => {
+  return [
+    `/orgs/${orgId}/deployments/${deploymentId}/actions/get-logs`,
+    ...(params ? [params] : []),
+  ] as const;
 };
 
 export const getGetDeploymentLogsQueryOptions = <
   TData = Awaited<ReturnType<typeof getDeploymentLogs>>,
-  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse>,
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse>,
 >(
   orgId: string,
   deploymentId: string,
+  params?: GetDeploymentLogsParams,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getDeploymentLogs>>, TError, TData>>;
     request?: SecondParameter<typeof customInstance>;
@@ -1273,10 +1288,11 @@ export const getGetDeploymentLogsQueryOptions = <
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetDeploymentLogsQueryKey(orgId, deploymentId);
+  const queryKey =
+    queryOptions?.queryKey ?? getGetDeploymentLogsQueryKey(orgId, deploymentId, params);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getDeploymentLogs>>> = ({ signal }) =>
-    getDeploymentLogs(orgId, deploymentId, requestOptions, signal);
+    getDeploymentLogs(orgId, deploymentId, params, requestOptions, signal);
 
   return {
     queryKey,
@@ -1292,14 +1308,17 @@ export const getGetDeploymentLogsQueryOptions = <
 export type GetDeploymentLogsQueryResult = NonNullable<
   Awaited<ReturnType<typeof getDeploymentLogs>>
 >;
-export type GetDeploymentLogsQueryError = ErrorType<N400BadRequestResponse | N404NotFoundResponse>;
+export type GetDeploymentLogsQueryError = ErrorType<
+  N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse
+>;
 
 export function useGetDeploymentLogs<
   TData = Awaited<ReturnType<typeof getDeploymentLogs>>,
-  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse>,
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse>,
 >(
   orgId: string,
   deploymentId: string,
+  params: undefined | GetDeploymentLogsParams,
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getDeploymentLogs>>, TError, TData>> &
       Pick<
@@ -1316,10 +1335,11 @@ export function useGetDeploymentLogs<
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetDeploymentLogs<
   TData = Awaited<ReturnType<typeof getDeploymentLogs>>,
-  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse>,
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse>,
 >(
   orgId: string,
   deploymentId: string,
+  params?: GetDeploymentLogsParams,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getDeploymentLogs>>, TError, TData>> &
       Pick<
@@ -1336,10 +1356,11 @@ export function useGetDeploymentLogs<
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetDeploymentLogs<
   TData = Awaited<ReturnType<typeof getDeploymentLogs>>,
-  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse>,
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse>,
 >(
   orgId: string,
   deploymentId: string,
+  params?: GetDeploymentLogsParams,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getDeploymentLogs>>, TError, TData>>;
     request?: SecondParameter<typeof customInstance>;
@@ -1355,17 +1376,18 @@ export function useGetDeploymentLogs<
  */
 export function useGetDeploymentLogs<
   TData = Awaited<ReturnType<typeof getDeploymentLogs>>,
-  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse>,
+  TError = ErrorType<N400BadRequestResponse | N404NotFoundResponse | N409ConflictResponse>,
 >(
   orgId: string,
   deploymentId: string,
+  params?: GetDeploymentLogsParams,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getDeploymentLogs>>, TError, TData>>;
     request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-  const queryOptions = getGetDeploymentLogsQueryOptions(orgId, deploymentId, options);
+  const queryOptions = getGetDeploymentLogsQueryOptions(orgId, deploymentId, params, options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
     queryKey: DataTag<QueryKey, TData, TError>;

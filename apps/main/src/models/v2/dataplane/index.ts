@@ -52,6 +52,7 @@ export * from './environmentFenceCode.ts';
 export * from './environmentFenceRemedy.ts';
 export * from './error.ts';
 export * from './errorDetails.ts';
+export * from './getDeploymentLogsParams.ts';
 export * from './internalCheckModuleUsageParams.ts';
 export * from './internalDeleteDeploymentsParams.ts';
 export * from './internalModuleUsage.ts';

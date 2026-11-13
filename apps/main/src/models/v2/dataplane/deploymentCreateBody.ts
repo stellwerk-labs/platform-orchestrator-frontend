@@ -41,9 +41,11 @@ export interface DeploymentCreateBody {
    * Pattern: ^age[a-z0-9]+$
    */
   encrypted_outputs_recipient?: string;
+  /** Capture encrypted runner logs with a server-managed key. Set true for automatic plaintext retrieval with deployment_logs_read; cannot be combined with encrypted_logs_recipient. Omitted or false preserves legacy skip-logs behavior. */
+  managed_logs?: boolean;
   /**
    * A recipient public key must be provided in order to encrypt the logs produced by the runner. This must be an 'age' public key (see https://age-encryption.org).
-   * The caller must hold the matching private key in order to decrypt the logs when the logs url is provided. If the recipient key is not set, no logs will be captured
+   * The caller must hold the matching private key in order to decrypt the logs when the logs url is provided. If neither managed_logs nor the recipient key is set, no logs will be captured
    * by the runner.
    *
    * @minLength 1

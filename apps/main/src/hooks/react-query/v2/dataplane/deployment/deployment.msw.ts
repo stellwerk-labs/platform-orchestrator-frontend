@@ -1268,6 +1268,15 @@ export const getGetDeploymentLogsResponseMock404 = (
   ...overrideResponse,
 });
 
+export const getGetDeploymentLogsResponseMock409 = (
+  overrideResponse: Partial<Extract<N409ConflictResponse, object>> = {},
+): N409ConflictResponse => ({
+  error: 'API-000',
+  message: 'Something happened!',
+  details: faker.helpers.arrayElement([{}, undefined]),
+  ...overrideResponse,
+});
+
 export const getGetDeploymentEncryptedOutputsResponseMock = (
   overrideResponse: Partial<Extract<DeploymentEncryptedOutputs, object>> = {},
 ): DeploymentEncryptedOutputs => ({
@@ -2381,6 +2390,30 @@ export const getGetDeploymentLogsMockHandler404 = (
             : overrideResponse
           : getGetDeploymentLogsResponseMock404(),
         { status: 404 },
+      );
+    },
+    options,
+  );
+};
+
+export const getGetDeploymentLogsMockHandler409 = (
+  overrideResponse?:
+    | N409ConflictResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<N409ConflictResponse> | N409ConflictResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    'http://example.com/orgs/:orgId/deployments/:deploymentId/actions/get-logs',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getGetDeploymentLogsResponseMock409(),
+        { status: 409 },
       );
     },
     options,
