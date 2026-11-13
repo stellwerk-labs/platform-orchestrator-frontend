@@ -2,6 +2,7 @@ import { Navigate, Outlet, RouteObject, UIMatch } from 'react-router';
 
 import { Access as ProjectAccess } from '@src/containers/Orgs/Projects/containers/Project/containers/ViewApplication/components/Access/Access';
 import { Environments } from '@src/containers/Orgs/Projects/containers/Project/containers/ViewApplication/components/Environments/Environments';
+import { Logs } from '@src/containers/Orgs/Projects/containers/Project/containers/ViewDeployment/components/Logs';
 import { Manifest } from '@src/containers/Orgs/Projects/containers/Project/containers/ViewDeployment/components/Manifest';
 import { Resources } from '@src/containers/Orgs/Projects/containers/Project/containers/ViewDeployment/components/Resources';
 import { ViewDeployment } from '@src/containers/Orgs/Projects/containers/Project/containers/ViewDeployment/ViewDeployment';
@@ -29,6 +30,10 @@ const deploymentOrDeltaTabRoutes: RouteObject[] = [
   {
     path: 'manifest',
     element: <Manifest />,
+  },
+  {
+    path: 'logs',
+    element: <Logs />,
   },
 ];
 

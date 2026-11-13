@@ -1,4 +1,4 @@
-import { LineChartOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { FileTextOutlined, LineChartOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import { Flex, Tabs, Typography } from 'antd';
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router';
 
@@ -86,6 +86,11 @@ export const ViewDeployment = () => {
             label: 'Manifest',
             icon: <UnorderedListOutlined />,
             key: 'manifest',
+          },
+          {
+            label: 'Logs',
+            icon: <FileTextOutlined />,
+            key: 'logs',
           },
         ]}
         onChange={handleTabChange}
