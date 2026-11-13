@@ -1,5 +1,5 @@
 import { Button, Space, theme as antDesignTheme } from 'antd';
-import { useMemo, useState } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { atomOneDark, atomOneLight } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
@@ -48,15 +48,25 @@ const RunnerLogRow = ({ record }: { record: RunnerLogRecord }) => {
   );
 };
 
-export const RunnerLogs = ({ content }: { content: string }) => {
+export const RunnerLogs = ({
+  content,
+  renderToolbar,
+}: {
+  content: string;
+  renderToolbar?: (rawToggle: ReactNode) => ReactNode;
+}) => {
   const [raw, setRaw] = useState(false);
   const records = useMemo(() => parseRunnerLogs(content), [content]);
 
+  const rawToggle = (
+    <Button onClick={() => setRaw(!raw)} aria-pressed={raw}>
+      {raw ? 'Show formatted logs' : 'Show raw logs'}
+    </Button>
+  );
+
   return (
     <Space direction={'vertical'} style={{ width: '100%' }}>
-      <Button onClick={() => setRaw(!raw)} aria-pressed={raw}>
-        {raw ? 'Show formatted logs' : 'Show raw logs'}
-      </Button>
+      {renderToolbar ? renderToolbar(rawToggle) : rawToggle}
       {!records && (
         <div role={'note'}>Large log: formatting is disabled. Raw content is shown in full.</div>
       )}

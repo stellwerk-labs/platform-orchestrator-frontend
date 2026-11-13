@@ -14,3 +14,8 @@ Use a write-only password field plus presence-only readback. Omitted key preserv
 ## Managed deployment logs, 2026-11-13
 
 Use automatic native-cookie log reads with dedicated org/environment deployment_logs_read, preserving explicitlegacyclientmode only inCLI. No browser keyinput/cache/replay; managedplaintextqueryneverfallsbacktociphertext.
+
+
+## Logs toolbar layout, 2026-11-13
+
+Use an optional shared viewer toolbar render slot to arrange its existing raw toggle on the native page, keeping plugin viewer layout and raw state unchanged.
