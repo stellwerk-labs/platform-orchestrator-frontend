@@ -6,6 +6,18 @@ already tagged candidate without updating stable/latest channels. Both publicati
 paths are dormant unless explicitly enabled in the original
 `stellwerk-labs/platform-orchestrator-frontend` repository.
 
+## Stable source landing
+
+Stable releases require a verified signed `main` commit. Land approved changes
+through the protected GitHub squash merge route, retaining required checks and a
+conventional release subject. GitHub rebase-and-merge produces unsigned commits,
+even when the source commits are signed.
+
+Read back the actual landing commit through the GitHub API and require
+`commit.verification.verified` to be `true` before publication. Preserve failed
+attempts and prepare a signed forward change when needed; do not weaken the
+signature check or rewrite history.
+
 ## Before dispatch
 
 - Transfer this workflow/helper/docs change separately through an approved
