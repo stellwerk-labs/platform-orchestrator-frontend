@@ -99,7 +99,7 @@ export const Logs = () => {
     permission: RBACPermission.DEPLOYMENT_LOGS_READ,
   };
   const checks = [orgCheck];
-  if (environment) checks.push({ ...orgCheck, resource: `environment:${environment.uuid}` });
+  if (environment) checks.push({ ...orgCheck, resource: `env:${environment.uuid}` });
   const permissions = useRBACPermissions(checks);
   const allowed = checks.some((check) => permissions.allowed(check));
   return (
