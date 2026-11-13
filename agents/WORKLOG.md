@@ -14,3 +14,8 @@ Replaced obsolete online-feed controls with Infracost enablement/customer key, d
 ## Managed deployment logs, 2026-11-13
 
 ReplacedmanualkeyUIwithautomaticmanagedreads;18actualHTTP/DOMtestspass, fullTypeScript+ESLint passedbeforecuratedgeneration, generatedcontractfromactualDPsource; no new dependencies.
+
+
+## Logs toolbar layout, 2026-11-13
+
+Layout-only: removed duplicate Runner logs card title; composed Reload/Clear/raw toggle and right-aligned nowrap hint in one toolbar. Scoped Prettier, ESLint and TypeScript passed. User explicitly requested no full test-suite rerun; no API/auth/key/log state behavior changed.

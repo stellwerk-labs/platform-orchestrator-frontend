@@ -1,5 +1,5 @@
-import { Alert, Button, Card, Space, Spin, Typography } from 'antd';
-import { useEffect, useState } from 'react';
+import { Alert, Button, Card, Flex, Space, Spin, Typography } from 'antd';
+import { type ReactNode, useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 
 import { RunnerLogs } from '@src/components/shared/RunnerLogs';
@@ -52,30 +52,35 @@ const DeploymentLogs = ({ orgId, deploymentId }: { orgId: string; deploymentId: 
     setBusy(false);
   };
 
+  const renderToolbar = (rawToggle?: ReactNode) => (
+    <Flex align={'center'} gap={8} style={{ overflowX: 'auto', whiteSpace: 'nowrap' }}>
+      <Button
+        type={'primary'}
+        loading={busy}
+        onClick={() => {
+          setVisible(true);
+          setRevision((previous) => previous + 1);
+        }}>
+        Reload logs
+      </Button>
+      <Button onClick={clear}>Clear logs</Button>
+      {rawToggle ?? <Button disabled>Show raw logs</Button>}
+      <Typography.Text type={'secondary'} style={{ marginLeft: 'auto', whiteSpace: 'nowrap' }}>
+        Logs are encrypted and retained for up to 30 days. The Orchestrator manages decryption keys
+        for deployments using automatic log access. Your deployment log permission controls access
+        to their contents.
+      </Typography.Text>
+    </Flex>
+  );
+
   return (
-    <Card title={'Runner logs'}>
+    <Card>
       <Space direction={'vertical'} style={{ width: '100%' }}>
-        <Typography.Paragraph>
-          Logs are encrypted and retained for up to 30 days. The Orchestrator manages decryption
-          keys for deployments using automatic log access. Your deployment log permission controls
-          access to their contents.
-        </Typography.Paragraph>
-        <Space>
-          <Button
-            type={'primary'}
-            loading={busy}
-            onClick={() => {
-              setVisible(true);
-              setRevision((previous) => previous + 1);
-            }}>
-            Reload logs
-          </Button>
-          <Button onClick={clear}>Clear logs</Button>
-        </Space>
+        {!content && renderToolbar()}
         {error && <Alert type={'error'} showIcon message={error} />}
         {content !== undefined &&
           (content ? (
-            <RunnerLogs content={content} />
+            <RunnerLogs content={content} renderToolbar={renderToolbar} />
           ) : (
             <Alert type={'info'} message={'This deployment returned an empty log.'} />
           ))}
