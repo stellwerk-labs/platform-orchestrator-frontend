@@ -61,3 +61,13 @@ They summarize all versions and the current Default respectively. The existing
 verification model only supports `unverified`, so Default verified currently
 matches no modules. This is immutable public source provenance; matching server
 artifacts are qualified separately before release.
+
+
+Automatic deployment log access imports the log endpoint and `managed_logs`
+creation field from local Data Plane candidate commit `6eea87239038c8f6208c9c9b68dc98797d407a7b`,
+full `openapi/spec.yaml` SHA-256 `9421b3f94b36cab8e66653db258a0172c61bfc0c812a76b63024a462fa2cd24c`.
+This candidate has not been publicly pushed or released. The curated source
+retains other operations; the generated client is produced with the existing
+pinned Orval tooling. Publish the coordinated server source before publishing
+the Console. The log viewer uses a bounded handwritten native-cookie fetch
+with `decrypt=true`; it does not put decrypted contents into the query cache.

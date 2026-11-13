@@ -1,4 +1,3 @@
-import { File as NativeFile } from 'node:buffer';
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import type { AddressInfo } from 'node:net';
 
@@ -9,14 +8,13 @@ import { Link, MemoryRouter, Route, Routes } from 'react-router';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { windowEnv } from '@src/config/environment';
+import { getGetEnvironmentQueryKey } from '@src/hooks/react-query/v2/controlplane/environment/environment';
 import { getCheckPermissionsQueryKey } from '@src/hooks/react-query/v2/iam/user/user';
 import { RBACPermission } from '@src/hooks/useRBAC';
 import { server } from '@src/testing-utils/mswServer';
 
-import { maximumLogKeyFileBytes } from './deploymentLogsApi';
 import { Logs } from './Logs';
 
-const fakeKey = 'AGE-SECRET-KEY-1SYNTHETICTESTONLY';
 const firstLog = 'deployment completed <img src=x onerror=alert(1)>';
 let origin: string;
 let respond: (request: IncomingMessage, response: ServerResponse) => void;
@@ -32,7 +30,6 @@ const fixture = createServer((request, response) => {
 beforeAll(async () => {
   await new Promise<void>((resolve) => fixture.listen(0, '127.0.0.1', resolve));
   origin = `http://127.0.0.1:${(fixture.address() as AddressInfo).port}`;
-  // MSW tees response bodies; bypass it to exercise native stream cancellation.
   server.close();
   windowEnv.BASE_URL = origin;
 });
@@ -47,42 +44,48 @@ afterEach(() => {
 afterAll(async () => {
   windowEnv.BASE_URL = originalBaseURL;
   server.listen();
+  fixture.closeAllConnections();
   await new Promise<void>((resolve, reject) =>
     fixture.close((error) => (error ? reject(error) : resolve())),
   );
 });
 
-const renderLogs = (allowed = true) => {
+const renderLogs = (orgAllowed = true, envAllowed = false) => {
   const client = new QueryClient({
     defaultOptions: { queries: { staleTime: Infinity, retry: false } },
   });
   clients.push(client);
   for (const orgId of ['atlas', 'second-org']) {
-    const permission_check = {
-      resource: `organization:${orgId}`,
-      permission: RBACPermission.DEPLOYMENT_READ,
-    };
-    client.setQueryData(getCheckPermissionsQueryKey([permission_check]), {
-      items: [{ permission_check, allowed }],
+    client.setQueryData(getGetEnvironmentQueryKey(orgId, 'project', 'env'), {
+      uuid: 'environment-id',
+    });
+    const checks = [
+      { resource: `organization:${orgId}`, permission: RBACPermission.DEPLOYMENT_LOGS_READ },
+      { resource: 'environment:environment-id', permission: RBACPermission.DEPLOYMENT_LOGS_READ },
+    ];
+    client.setQueryData(getCheckPermissionsQueryKey(checks), {
+      items: checks.map((permission_check, index) => ({
+        permission_check,
+        allowed: index === 0 ? orgAllowed : envAllowed,
+      })),
     });
   }
   const view = render(
     <QueryClientProvider client={client}>
-      <MemoryRouter initialEntries={['/orgs/atlas/deployments/first/logs']}>
-        <Link to={'/orgs/second-org/deployments/second/logs'}>Next deployment</Link>
+      <MemoryRouter initialEntries={['/orgs/atlas/projects/project/envs/env/deploys/first/logs']}>
+        <Link to={'/orgs/second-org/projects/project/envs/env/deploys/second/logs'}>
+          Next deployment
+        </Link>
         <Routes>
-          <Route path={'/orgs/:orgId/deployments/:deployId/logs'} element={<Logs />} />
+          <Route
+            path={'/orgs/:orgId/projects/:projectId/envs/:envId/deploys/:deployId/logs'}
+            element={<Logs />}
+          />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
   );
   return { ...view, client };
-};
-
-const submitKey = async (key = fakeKey) => {
-  await userEvent.clear(screen.getByLabelText('Log decryption key'));
-  await userEvent.type(screen.getByLabelText('Log decryption key'), key);
-  await userEvent.click(screen.getByRole('button', { name: 'Load logs' }));
 };
 
 const openPendingStream = () => {
@@ -100,13 +103,12 @@ const openPendingStream = () => {
 };
 
 describe('Deployment Logs', () => {
-  it('clears a submitted key immediately, renders log text inertly, and keeps plaintext out of the query cache', async () => {
+  it('loads automatically without a key form, renders inert text, and excludes logs from the query cache', async () => {
     const { client } = renderLogs();
-    await submitKey();
-    expect(screen.getByLabelText('Log decryption key')).toHaveValue('');
     expect(await screen.findByText(firstLog)).toBeVisible();
+    expect(screen.queryByLabelText('Log decryption key')).not.toBeInTheDocument();
     expect(within(screen.getByLabelText('Runner logs')).queryByRole('img')).not.toBeInTheDocument();
-    const privacy = screen.getByLabelText('Log decryption key').closest('.amp-block');
+    const privacy = screen.getByLabelText('Runner logs').closest('.amp-block');
     expect(privacy).toHaveAttribute('data-amp-mask');
     expect(privacy).toHaveAttribute('data-dd-privacy', 'hidden');
     const cached = JSON.stringify(
@@ -115,116 +117,67 @@ describe('Deployment Logs', () => {
         .getAll()
         .map((query) => query.state),
     );
-    expect(cached).not.toContain(fakeKey);
     expect(cached).not.toContain(firstLog);
-    expect(window.location.href).not.toContain(fakeKey);
-
-    await userEvent.type(screen.getByLabelText('Log decryption key'), fakeKey);
-    await userEvent.click(screen.getByRole('button', { name: 'Clear logs and key' }));
-    expect(screen.getByLabelText('Log decryption key')).toHaveValue('');
+    expect(requests).toBe(1);
+    await userEvent.click(screen.getByRole('button', { name: 'Clear logs' }));
     expect(screen.queryByText(firstLog)).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Reload logs' }));
+    expect(await screen.findByText(firstLog)).toBeVisible();
+    expect(requests).toBe(2);
   });
 
-  it('clears a rejected key and shows a fixed error without reflecting the response body', async () => {
+  it('accepts a dedicated environment grant without an organization grant', async () => {
+    renderLogs(false, true);
+    expect(await screen.findByText(firstLog)).toBeVisible();
+    expect(requests).toBe(1);
+  });
+
+  it('shows a fixed legacy-key message without rendering ciphertext or a backend body', async () => {
     respond = (_request, response) => {
-      response.writeHead(400);
-      response.end(`backend failure: ${fakeKey}`);
+      response.writeHead(409);
+      response.end('sensitive backend body');
     };
     renderLogs();
-    await submitKey();
-    expect(screen.getByLabelText('Log decryption key')).toHaveValue('');
-    expect(
-      await screen.findByText('The key is invalid or cannot decrypt this deployment’s logs.'),
-    ).toBeVisible();
-    expect(screen.queryByText(`backend failure: ${fakeKey}`)).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Load logs' })).toBeDisabled();
-  });
-
-  it('clears invalid local input without making an HTTP request', async () => {
-    renderLogs();
-    await submitKey('not-an-age-key');
-    expect(
-      await screen.findByText('Provide exactly one age secret key, or a key file containing it.'),
-    ).toBeVisible();
-    expect(screen.getByLabelText('Log decryption key')).toHaveValue('');
-    expect(requests).toBe(0);
-  });
-
-  it('imports a real age key file, clears its selection, and removes the previous plaintext', async () => {
-    renderLogs();
-    await submitKey();
-    await screen.findByText(firstLog);
-    const fileInput = screen.getByLabelText('Load key file');
-    const file = new NativeFile([`# test fixture\n${fakeKey}\n`], 'synthetic-age-key.txt');
-    await userEvent.upload(fileInput, file as unknown as File);
-    expect(screen.queryByText(firstLog)).not.toBeInTheDocument();
-    expect(fileInput).toHaveValue('');
-    await waitFor(() => expect(screen.getByLabelText('Log decryption key')).toHaveValue(fakeKey));
-    await submitKey();
-    expect(screen.getByLabelText('Log decryption key')).toHaveValue('');
-    await screen.findByText(firstLog);
-  });
-
-  it.each([
-    new NativeFile(['invalid key'], 'invalid.txt'),
-    new NativeFile(['x'.repeat(maximumLogKeyFileBytes + 1)], 'oversized.txt'),
-  ])('clears invalid or oversized file input without requesting logs (%#)', async (file) => {
-    renderLogs();
-    const fileInput = screen.getByLabelText('Load key file');
-    await userEvent.upload(fileInput, file as unknown as File);
-    expect(
-      await screen.findByText(
-        'Choose a key file up to 4 KiB containing exactly one age secret key.',
-      ),
-    ).toBeVisible();
-    expect(fileInput).toHaveValue('');
-    expect(screen.getByLabelText('Log decryption key')).toHaveValue('');
-    expect(requests).toBe(0);
+    expect(await screen.findByText(/This deployment uses a caller-managed log key/)).toBeVisible();
+    expect(screen.queryByText('sensitive backend body')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Log decryption key')).not.toBeInTheDocument();
   });
 
   it('aborts a pending request when cleared and ignores its late result', async () => {
     const pending = openPendingStream();
     renderLogs();
-    await submitKey();
     await waitFor(() => expect(requests).toBe(1));
-    await userEvent.click(screen.getByRole('button', { name: 'Clear logs and key' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Clear logs' }));
     await waitFor(() => expect(pending.isClosed()).toBe(true));
     pending.finish();
     expect(screen.queryByLabelText('Runner logs')).not.toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-    expect(screen.getByLabelText('Log decryption key')).toHaveValue('');
   });
 
-  it('removes decrypted content and key when organization and deployment change', async () => {
+  it('removes old plaintext and automatically fetches the new deployment on navigation', async () => {
     renderLogs();
-    await submitKey();
     await screen.findByText(firstLog);
-    await userEvent.type(screen.getByLabelText('Log decryption key'), fakeKey);
+    respond = (_request, response) => response.end('second deployment');
     await userEvent.click(screen.getByRole('link', { name: 'Next deployment' }));
     expect(screen.queryByText(firstLog)).not.toBeInTheDocument();
-    expect(screen.getByLabelText('Log decryption key')).toHaveValue('');
-    expect(requests).toBe(1);
+    expect(await screen.findByText('second deployment')).toBeVisible();
+    expect(requests).toBe(2);
   });
 
-  it.each(['route', 'unmount'])('aborts a pending stream on %s', async (action) => {
+  it('aborts a pending stream on unmount', async () => {
     const pending = openPendingStream();
     const { unmount } = renderLogs();
-    await submitKey();
     await waitFor(() => expect(requests).toBe(1));
-    if (action === 'route')
-      await userEvent.click(screen.getByRole('link', { name: 'Next deployment' }));
-    else unmount();
+    unmount();
     await waitFor(() => expect(pending.isClosed()).toBe(true));
     pending.finish();
-    expect(screen.queryByLabelText('Runner logs')).not.toBeInTheDocument();
   });
 
-  it('shows a denial without mounting the key form or requesting logs', () => {
+  it('denies without the dedicated log permission and never requests log data', () => {
     renderLogs(false);
     expect(
       screen.getByText('You do not have permission to read these deployment logs.'),
     ).toBeVisible();
-    expect(screen.queryByLabelText('Log decryption key')).not.toBeInTheDocument();
     expect(requests).toBe(0);
   });
 });

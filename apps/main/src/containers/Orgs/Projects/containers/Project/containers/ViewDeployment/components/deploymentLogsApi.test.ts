@@ -6,7 +6,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { server } from '@src/testing-utils/mswServer';
 
-import { loadDeploymentLogs, maximumLogKeyFileBytes, parseLogKey } from './deploymentLogsApi';
+import { loadDeploymentLogs } from './deploymentLogsApi';
 
 const fakeKey = 'AGE-SECRET-KEY-1SYNTHETICTESTONLY';
 const limit = 4 * 1024 * 1024;
@@ -35,31 +35,10 @@ afterAll(async () => {
 });
 
 const load = (signal = new AbortController().signal) =>
-  loadDeploymentLogs(`${origin}/api/`, 'org/one', 'deployment?two', fakeKey, signal);
-
-describe('age log key parsing', () => {
-  it('accepts a normal age-keygen file with comments, blank lines and CRLF', () => {
-    expect(
-      parseLogKey(`# created: test fixture\r\n# public key: test\r\n\r\n ${fakeKey} \r\n`),
-    ).toBe(fakeKey);
-  });
-
-  it.each([
-    '',
-    '# comment only',
-    'not-a-key',
-    `${fakeKey}\n${fakeKey}`,
-    `${fakeKey}\nextra`,
-    '#'.repeat(maximumLogKeyFileBytes + 1),
-  ])('rejects invalid, multiple or oversized input without echoing it (%#)', (input) => {
-    expect(() => parseLogKey(input)).toThrow(
-      'Provide exactly one age secret key, or a key file containing it.',
-    );
-  });
-});
+  loadDeploymentLogs(`${origin}/api/`, 'org/one', 'deployment?two', signal);
 
 describe('deployment log HTTP transport', () => {
-  it('sends the key only as a header and preserves the API prefix and encoded route segments', async () => {
+  it('requests managed decryption without a key and preserves the API prefix and encoded route segments', async () => {
     let received: IncomingMessage | undefined;
     let observed: Request | undefined;
     const observe = ({ request }: { request: Request }) => {
@@ -76,9 +55,9 @@ describe('deployment log HTTP transport', () => {
     try {
       await expect(load()).resolves.toBe('deployment completed');
       expect(received?.url).toBe(
-        '/api/orgs/org%2Fone/deployments/deployment%3Ftwo/actions/get-logs',
+        '/api/orgs/org%2Fone/deployments/deployment%3Ftwo/actions/get-logs?decrypt=true',
       );
-      expect(received?.headers.decryptkey).toBe(fakeKey);
+      expect(received?.headers.decryptkey).toBeUndefined();
       expect(received?.headers.accept).toBe('text/plain');
       expect(received?.url).not.toContain(fakeKey);
       expect(observed).toMatchObject({
@@ -94,7 +73,10 @@ describe('deployment log HTTP transport', () => {
   });
 
   it.each([
-    [400, 'The key is invalid or cannot decrypt this deployment’s logs.'],
+    [
+      409,
+      'This deployment uses a caller-managed log key. Read it with octl logs --key-file. New deployments can use automatic log access.',
+    ],
     [401, 'Your session expired. Sign in again to read the logs.'],
     [403, 'You do not have permission to read these deployment logs.'],
     [

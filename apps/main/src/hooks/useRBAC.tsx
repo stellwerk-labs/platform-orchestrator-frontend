@@ -34,6 +34,7 @@ export enum RBACPermission {
   MODULE_VERSION_PIN_DEFECTIVE = 'module.version.pin-defective',
   RESOURCE_TYPE_WRITE = 'resource_type_write',
   DEPLOYMENT_READ = 'deployment_read',
+  DEPLOYMENT_LOGS_READ = 'deployment_logs_read',
   DEPLOYMENT_WRITE = 'deployment_write',
   DEPLOYMENT_OUTCOME_ACKNOWLEDGE = 'deployment.outcome.acknowledge',
   PLUGIN_MANAGER_READ = 'plugin_manager_read',

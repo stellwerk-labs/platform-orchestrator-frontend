@@ -9,3 +9,8 @@
 ## 2026-11-13: Infracost Administration
 
 Replaced obsolete online-feed controls with Infracost enablement/customer key, defaults off. Focused11tests, TypeScript, full lint, independent reviews and actual IAM/DP/CP/PG/Vault browser cycle passed. No publication or deployment.
+
+
+## Managed deployment logs, 2026-11-13
+
+ReplacedmanualkeyUIwithautomaticmanagedreads;18actualHTTP/DOMtestspass, fullTypeScript+ESLint passedbeforecuratedgeneration, generatedcontractfromactualDPsource; no new dependencies.

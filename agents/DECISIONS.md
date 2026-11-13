@@ -9,3 +9,8 @@
 ## 2026-11-13: Infracost Administration
 
 Use a write-only password field plus presence-only readback. Omitted key preserves; explicit removal requires estimates off. Enablement is captured for new executions; key rotation affects fresh dispatches.
+
+
+## Managed deployment logs, 2026-11-13
+
+Use automatic native-cookie log reads with dedicated org/environment deployment_logs_read, preserving explicitlegacyclientmode only inCLI. No browser keyinput/cache/replay; managedplaintextqueryneverfallsbacktociphertext.

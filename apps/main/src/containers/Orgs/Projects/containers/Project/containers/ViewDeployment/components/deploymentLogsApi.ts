@@ -1,22 +1,4 @@
 const maximumLogBytes = 4 * 1024 * 1024;
-export const maximumLogKeyFileBytes = 4096;
-
-export const parseLogKey = (content: string): string => {
-  const keys = content
-    .split(/\r?\n/u)
-    .map((line) => line.trim())
-    .filter((line) => line && !line.startsWith('#'));
-  const key = keys[0];
-  if (
-    content.length > maximumLogKeyFileBytes ||
-    keys.length !== 1 ||
-    !key ||
-    !/^AGE-SECRET-KEY-1[0-9A-Z]{1,128}$/u.test(key)
-  ) {
-    throw new Error('Provide exactly one age secret key, or a key file containing it.');
-  }
-  return key;
-};
 
 const readBoundedLog = async (response: Response): Promise<string | undefined> => {
   if (!response.body) return '';
@@ -41,7 +23,8 @@ const readBoundedLog = async (response: Response): Promise<string | undefined> =
 };
 
 const statusMessage = (status: number) => {
-  if (status === 400) return 'The key is invalid or cannot decrypt this deployment’s logs.';
+  if (status === 409)
+    return 'This deployment uses a caller-managed log key. Read it with octl logs --key-file. New deployments can use automatic log access.';
   if (status === 401) return 'Your session expired. Sign in again to read the logs.';
   if (status === 403) return 'You do not have permission to read these deployment logs.';
   if (status === 404)
@@ -53,15 +36,15 @@ export const loadDeploymentLogs = async (
   apiBaseURL: string,
   orgId: string,
   deploymentId: string,
-  key: string,
   signal: AbortSignal,
 ): Promise<string> => {
   const path = `/orgs/${encodeURIComponent(orgId)}/deployments/${encodeURIComponent(deploymentId)}/actions/get-logs`;
   const url = new URL(`${apiBaseURL.replace(/\/$/u, '')}${path}`);
+  url.searchParams.set('decrypt', 'true');
   let response: Response;
   try {
     response = await fetch(url, {
-      headers: { Accept: 'text/plain', DecryptKey: key },
+      headers: { Accept: 'text/plain' },
       credentials: 'include',
       redirect: 'error',
       cache: 'no-store',
