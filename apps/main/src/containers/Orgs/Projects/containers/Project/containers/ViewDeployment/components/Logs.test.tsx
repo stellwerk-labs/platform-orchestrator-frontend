@@ -61,7 +61,7 @@ const renderLogs = (orgAllowed = true, envAllowed = false) => {
     });
     const checks = [
       { resource: `organization:${orgId}`, permission: RBACPermission.DEPLOYMENT_LOGS_READ },
-      { resource: 'environment:environment-id', permission: RBACPermission.DEPLOYMENT_LOGS_READ },
+      { resource: 'env:environment-id', permission: RBACPermission.DEPLOYMENT_LOGS_READ },
     ];
     client.setQueryData(getCheckPermissionsQueryKey(checks), {
       items: checks.map((permission_check, index) => ({
