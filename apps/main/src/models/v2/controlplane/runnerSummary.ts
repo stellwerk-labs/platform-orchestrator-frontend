@@ -13,6 +13,8 @@ export interface RunnerSummary {
   org_id: string;
   /** The unique identifier for the runner under the organization. */
   id: string;
+  /** The server-issued immutable identity of this runner registration. Recreating a deleted runner creates a new identity. */
+  readonly uuid: string;
   /** An optional text description for this runner. */
   description?: string;
   /** The date and time when the runner was created. */

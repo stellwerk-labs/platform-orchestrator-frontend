@@ -50,6 +50,17 @@ export const getInternalForceFailDeploymentResponseMock = (
     },
     undefined,
   ]),
+  pipeline: faker.helpers.arrayElement([
+    {
+      id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      version: faker.number.int(),
+      name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      strategy: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      phase: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      infrastructure_applied: faker.datatype.boolean(),
+    },
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
@@ -86,6 +97,17 @@ export const getInternalForceFailDeploymentResponseMock200 = (
       since: '2025-01-02T03:04:05Z',
       remedy: 'acknowledge-outcome',
       remedy_available_at: '2025-01-02T04:04:05Z',
+    },
+    undefined,
+  ]),
+  pipeline: faker.helpers.arrayElement([
+    {
+      id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      version: faker.number.int(),
+      name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      strategy: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      phase: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      infrastructure_applied: faker.datatype.boolean(),
     },
     undefined,
   ]),

@@ -5,8 +5,8 @@
 import type { ByModeQueryParamParameter } from './byModeQueryParamParameter.ts';
 import type { ByStatusQueryParamParameter } from './byStatusQueryParamParameter.ts';
 import type { EnvIdQueryParamParameter } from './envIdQueryParamParameter.ts';
+import type { ListDeploymentsQuickFilter } from './listDeploymentsQuickFilter.ts';
 import type { PageTokenQueryParamParameter } from './pageTokenQueryParamParameter.ts';
-import type { PerPageQueryParamParameter } from './perPageQueryParamParameter.ts';
 import type { ProjectIdQueryParamParameter } from './projectIdQueryParamParameter.ts';
 
 export type ListDeploymentsParams = {
@@ -19,9 +19,10 @@ export type ListDeploymentsParams = {
    */
   env_id?: EnvIdQueryParamParameter;
   /**
-   * The maximum number of items to return in a page of results
+   * @minimum 1
+   * @maximum 100
    */
-  per_page?: PerPageQueryParamParameter;
+  per_page?: number;
   /**
    * The page token to request from
    */
@@ -34,4 +35,11 @@ export type ListDeploymentsParams = {
    * Filter deployments by status
    */
   by_status?: ByStatusQueryParamParameter;
+  /**
+   * Literal search over deployment ID, creator ID, project/environment slug and pipeline name or ID.
+   *
+   * @maxLength 200
+   */
+  q?: string;
+  quick_filter?: ListDeploymentsQuickFilter;
 };

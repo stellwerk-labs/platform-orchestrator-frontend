@@ -122,6 +122,34 @@
       }
     },
     {
+      "name": "@vscode/l10n",
+      "version": "0.0.18",
+      "identifier": "MIT",
+      "integrity": "sha512-KYSIHVmslkaCDyw013pphY+d7x1qV8IZupYfeIfzNA+nsaWHbn5uPuQRvdRFsa9zFzGeudPuoGoZ1Op4jrJXIQ==",
+      "packageJSONSHA256": "293375e8e1de0d54c2437079fdc47e6ee4f55a125ca346ac58e61cbd602e959a",
+      "notices": [
+        {
+          "fileName": "LICENSE",
+          "source": "vscode-l10n-LICENSE",
+          "sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
+        }
+      ],
+      "provenance": {
+        "packageSource": "https://github.com/microsoft/vscode-l10n/tree/fc7e3d79ddb91a2cc24a9730aad912026a43dbf2/l10n",
+        "note": "The npm archive omits the repository-root MIT notice. Its published l10n/v0.0.18 release tag resolves to this immutable commit, whose l10n/package.json confirms @vscode/l10n 0.0.18 MIT. The registry tarball integrity and installed package.json bytes were verified before preserving the original root notice.",
+        "sources": [
+          {
+            "url": "https://raw.githubusercontent.com/microsoft/vscode-l10n/fc7e3d79ddb91a2cc24a9730aad912026a43dbf2/LICENSE",
+            "sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
+          },
+          {
+            "url": "https://raw.githubusercontent.com/microsoft/vscode-l10n/fc7e3d79ddb91a2cc24a9730aad912026a43dbf2/l10n/package.json",
+            "sha256": "293375e8e1de0d54c2437079fdc47e6ee4f55a125ca346ac58e61cbd602e959a"
+          }
+        ]
+      }
+    },
+    {
       "name": "format",
       "version": "0.2.2",
       "identifier": "MIT",

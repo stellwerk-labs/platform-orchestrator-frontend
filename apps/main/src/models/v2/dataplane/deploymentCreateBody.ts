@@ -7,6 +7,7 @@ import type { DeploymentCreateBodyModuleVersions } from './deploymentCreateBodyM
 import type { DeploymentCreateBodyRunnerLogLevel } from './deploymentCreateBodyRunnerLogLevel.ts';
 import type { DeploymentCreateBodyWhenBusy } from './deploymentCreateBodyWhenBusy.ts';
 import type { DeploymentManifest } from './deploymentManifest.ts';
+import type { DeploymentPipelineSelection } from './deploymentPipelineSelection.ts';
 
 export interface DeploymentCreateBody {
   /**
@@ -87,4 +88,5 @@ export interface DeploymentCreateBody {
    * is promoted. Dry runs do not check it.
    */
   expected_base_deployment_id?: string;
+  pipeline?: DeploymentPipelineSelection;
 }

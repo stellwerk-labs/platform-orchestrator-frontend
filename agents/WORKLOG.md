@@ -19,3 +19,7 @@ ReplacedmanualkeyUIwithautomaticmanagedreads;18actualHTTP/DOMtestspass, fullType
 ## Logs toolbar layout, 2026-11-13
 
 Layout-only: removed duplicate Runner logs card title; composed Reload/Clear/raw toggle and right-aligned nowrap hint in one toolbar. Scoped Prettier, ESLint and TypeScript passed. User explicitly requested no full test-suite rerun; no API/auth/key/log state behavior changed.
+
+## Native pipeline source export
+
+Prepared the Native pipeline application source export. Public artifact publication and hosted qualification are separate release steps.

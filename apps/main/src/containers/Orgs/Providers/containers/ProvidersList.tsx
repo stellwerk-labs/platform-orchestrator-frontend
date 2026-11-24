@@ -1,9 +1,9 @@
 import { Empty, Flex, Table, TableColumnProps, Tag, Tooltip } from 'antd';
 import { formatDate } from 'date-fns';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link, useParams } from 'react-router';
 
-import { SearchInput } from '@src/components/shared/ui/SearchInput/SearchInput';
+import { matchesSearch, TableToolbar, useTableSearch } from '@src/components/shared/TableToolbar';
 import { DOCS_GET_STARTED_EMPTY_STATE, DOCS_PROVIDERS } from '@src/config/docs-links';
 import { MatchParams } from '@src/config/routing';
 import {
@@ -23,12 +23,15 @@ export const ProvidersList = () => {
     (params) => listModuleProviders(orgId, params),
   );
 
-  // state
-  const [filteredProviders, setFilteredProviders] = useState<ModuleProviderSummary[] | undefined>();
-
-  useEffect(() => {
-    setFilteredProviders(allProviders);
-  }, [allProviders]);
+  const search = useTableSearch();
+  const filteredProviders = allProviders?.filter(
+    (row) =>
+      matchesSearch(search.query, row.id, row.description, row.provider_type, row.source) &&
+      (search.view === 'all' ||
+        (search.view === 'deleting'
+          ? Boolean(row.deletion_requested_at)
+          : !row.deletion_requested_at)),
+  );
 
   const columns: TableColumnProps<ModuleProviderSummary>[] = [
     {
@@ -83,51 +86,48 @@ export const ProvidersList = () => {
     },
   ];
 
-  const handleSearchChange = (value: string) => {
-    if (value) {
-      setFilteredProviders(
-        allProviders?.filter(
-          (provider) =>
-            provider.id.toLowerCase().includes(value) ||
-            provider.provider_type.toLowerCase().includes(value.toLowerCase()),
-        ),
-      );
-    } else {
-      setFilteredProviders(allProviders);
-    }
-  };
-
   return (
     <Flex vertical gap={'middle'} justify={'center'}>
-      <SearchInput onChange={handleSearchChange} placeholder={'Filter providers'} />
+      <TableToolbar
+        label={'providers'}
+        {...search}
+        filters={[
+          { value: 'active', label: 'Active' },
+          { value: 'deleting', label: 'Deletion pending' },
+        ]}
+      />
       <Table
+        key={`${search.query}:${search.view}`}
         columns={columns}
         dataSource={filteredProviders}
         rowKey={(record) => record.id + record.provider_type}
         loading={runnersLoading}
         size={'small'}
         locale={{
-          emptyText: (
-            <Empty
-              description={
-                <>
-                  No providers found, see{' '}
-                  <a href={DOCS_PROVIDERS} target={'_blank'} rel={'noreferrer noopener'}>
-                    providers docs
-                  </a>{' '}
-                  for details, or follow the{' '}
-                  <a
-                    href={DOCS_GET_STARTED_EMPTY_STATE}
-                    target={'_blank'}
-                    rel={'noreferrer noopener'}>
-                    tutorial
-                  </a>{' '}
-                  to explore the full setup flow.
-                </>
-              }
-              styles={{ image: { display: 'none' } }}
-            />
-          ),
+          emptyText:
+            search.query || search.view !== 'all' ? (
+              'No results match these filters.'
+            ) : (
+              <Empty
+                description={
+                  <>
+                    No providers found, see{' '}
+                    <a href={DOCS_PROVIDERS} target={'_blank'} rel={'noreferrer noopener'}>
+                      providers docs
+                    </a>{' '}
+                    for details, or follow the{' '}
+                    <a
+                      href={DOCS_GET_STARTED_EMPTY_STATE}
+                      target={'_blank'}
+                      rel={'noreferrer noopener'}>
+                      tutorial
+                    </a>{' '}
+                    to explore the full setup flow.
+                  </>
+                }
+                styles={{ image: { display: 'none' } }}
+              />
+            ),
         }}
       />
     </Flex>

@@ -8,9 +8,10 @@ import {
   transitionEnvironmentModuleVersionPin,
 } from '@src/hooks/react-query/v2/controlplane/modules/modules';
 import { listProjects } from '@src/hooks/react-query/v2/controlplane/project/project';
+import { listMembers } from '@src/hooks/react-query/v2/iam/membership/membership';
 import { checkPermissions } from '@src/hooks/react-query/v2/iam/user/user';
 import type { ModuleReasonedCommand } from '@src/models/v2/controlplane';
-import type { ResourcePermissionCheck } from '@src/models/v2/iam';
+import type { Member, ResourcePermissionCheck } from '@src/models/v2/iam';
 
 import { invokePluginOperation } from './pluginInvocation';
 import type {
@@ -92,6 +93,25 @@ const exactPathParameter = (request: PluginInvocationRequest, name: string) => {
     throw new Error(`Host operation requires one UUID ${name} path parameter.`);
   }
   return entries[0][1];
+};
+
+const actorIdentity = (member: Member, userId: string) => {
+  if (
+    !member ||
+    member.user_id !== userId ||
+    typeof member.user_display_name !== 'string' ||
+    (member.user_primary_email_address !== undefined &&
+      typeof member.user_primary_email_address !== 'string')
+  ) {
+    throw new Error('IAM returned a malformed actor identity.');
+  }
+  return {
+    user_id: userId,
+    display_name: member.user_display_name,
+    ...(member.user_primary_email_address === undefined
+      ? {}
+      : { primary_email: member.user_primary_email_address }),
+  };
 };
 
 const organizationMembership = (orgId: string) => {
@@ -271,6 +291,27 @@ const pluginDeploymentMaterial =
     return null;
   };
 
+const actorDetailRoute = async (orgId: string, userId: string) => {
+  const resource = `organization:${orgId}`;
+  const checks = ['membership_read', 'role_read'].map((permission) => ({ resource, permission }));
+  try {
+    const result = await checkPermissions(checks);
+    const permitted =
+      result.items.length === checks.length &&
+      checks.every((check) =>
+        result.items.some(
+          (item) =>
+            item.allowed === true &&
+            item.permission_check.resource === resource &&
+            item.permission_check.permission === check.permission,
+        ),
+      );
+    return permitted ? `/members/${userId}` : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
 const hostOperations: Record<string, HostOperationDefinition> = {
   'core.listProjects': {
     method: 'GET',
@@ -329,6 +370,26 @@ const hostOperations: Record<string, HostOperationDefinition> = {
     invoke: async (orgId, pluginId, request) => {
       assertNoValues(request, ['path_parameters', 'query', 'idempotency_key']);
       return checkPermissions(await permissionChecks(orgId, pluginId, request.body));
+    },
+  },
+  'iam.getActor': {
+    method: 'GET',
+    mutating: false,
+    invoke: async (orgId, _pluginId, request) => {
+      assertNoValues(request, ['query', 'body', 'idempotency_key']);
+      const userId = exactPathParameter(request, 'userId').toLowerCase();
+      try {
+        const { items } = await listMembers(encodeURIComponent(orgId), { userId, per_page: 1 });
+        if (!Array.isArray(items) || items.length > 1) {
+          throw new Error('IAM returned an invalid actor page.');
+        }
+        if (items.length === 0) return { actor: null };
+        const actor = actorIdentity(items[0]!, userId);
+        const detailRoute = await actorDetailRoute(orgId, userId);
+        return { actor: { ...actor, ...(detailRoute ? { detail_route: detailRoute } : {}) } };
+      } catch {
+        throw new Error('Actor details are unavailable or access was denied.');
+      }
     },
   },
   'core.getEnvironmentModuleVersionPin': {

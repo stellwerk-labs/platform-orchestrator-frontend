@@ -68,14 +68,17 @@ import { notice } from 'bundled-notice';
 document.body.textContent = React.version + notice;`,
   );
   const output = join(root, 'dist');
-  const run = (supplement?: { manifestFile: string; lockFile: string }) =>
-    build({
+  const run = (supplement?: { manifestFile: string; lockFile: string }) => {
+    const notices = dependencyNotices(ownLicense, supplement);
+    return build({
       root,
       configFile: false,
       logLevel: 'silent',
-      plugins: [dependencyNotices(ownLicense, supplement)],
+      plugins: [notices.main],
+      worker: { plugins: notices.worker },
       build: { outDir: output, license: { fileName: dependencyLicenseFile } },
     });
+  };
   return { root, dependency, output, run };
 };
 
@@ -209,7 +212,7 @@ test('real Vite build requires the built-in catalogue and own licence', async ()
           root,
           configFile: false,
           logLevel: 'silent',
-          plugins: [dependencyNotices(ownLicense)],
+          plugins: [dependencyNotices(ownLicense).main],
           build: { outDir: output, license: false },
         }),
       /catalogue is missing/,
@@ -220,7 +223,7 @@ test('real Vite build requires the built-in catalogue and own licence', async ()
           root,
           configFile: false,
           logLevel: 'silent',
-          plugins: [dependencyNotices(join(root, 'missing-LICENSE'))],
+          plugins: [dependencyNotices(join(root, 'missing-LICENSE')).main],
           build: { outDir: output, license: { fileName: dependencyLicenseFile } },
         }),
       /ENOENT/,
@@ -426,4 +429,86 @@ test('Turbo invalidates configuration/helpers/notices and the image copies the s
   const dockerfile = await readFile(join(repo, 'apps/main/Dockerfile'), 'utf8');
   assert.match(dockerfile, /^COPY --from=build \/app\/apps\/main\/dist \/app\/build$/m);
   assert.match(dockerfile, /^COPY --from=build \/app\/apps\/main\/dist\/licenses \/licenses$/m);
+});
+
+test('real Vite workers merge worker-only and shared dependency notices into one hashed catalogue', async () => {
+  const { root, output, run } = await fixture();
+  const workerDependency = join(root, 'node_modules', 'worker-only');
+  try {
+    await mkdir(join(workerDependency, 'lib'), { recursive: true });
+    await writeFile(
+      join(workerDependency, 'package.json'),
+      JSON.stringify({
+        name: 'worker-only',
+        version: '2.0.0',
+        license: 'MIT',
+        main: 'lib/index.js',
+      }),
+    );
+    await writeFile(
+      join(workerDependency, 'lib/index.js'),
+      'export const value = "worker dependency";',
+    );
+    await writeFile(join(workerDependency, 'LICENSE'), 'Worker-only MIT licence fixture\n');
+    await writeFile(join(workerDependency, 'NOTICE'), 'Worker-only upstream notice fixture\n');
+    await writeFile(join(workerDependency, 'lib/PATENTS'), 'Nested worker patent grant fixture\n');
+    const mainEntry = await readFile(join(root, 'entry.js'), 'utf8');
+    await writeFile(
+      join(root, 'entry.js'),
+      mainEntry +
+        `
+const first = new Worker(new URL('./worker.js', import.meta.url), {type: 'module'});
+const second = new Worker(new URL('./worker-two.js', import.meta.url), {type: 'module'});
+first.postMessage('one'); second.postMessage('two');`,
+    );
+    for (const file of ['worker.js', 'worker-two.js']) {
+      await writeFile(
+        join(root, file),
+        `import React from 'react';
+import { value } from 'worker-only';
+self.onmessage = () => self.postMessage(React.version + value);`,
+      );
+    }
+    await run();
+    const entries = JSON.parse(await readFile(join(output, dependencyLicenseFile), 'utf8'));
+    assert.deepEqual(
+      entries.map((entry: { name: string }) => entry.name),
+      ['bundled-notice', 'react', 'worker-only'],
+    );
+    for (const file of ['LICENSE', 'NOTICE', 'lib/PATENTS']) {
+      assert.deepEqual(
+        await readFile(join(output, 'licenses/packages/worker-only@2.0.0', file)),
+        await readFile(join(workerDependency, file)),
+      );
+    }
+    const manifest = (await readFile(join(output, 'licenses/manifest.sha256'), 'utf8'))
+      .trimEnd()
+      .split('\n');
+    for (const line of manifest) {
+      const file = line.slice(66);
+      assert.equal(
+        createHash('sha256')
+          .update(await readFile(join(output, 'licenses', file)))
+          .digest('hex'),
+        line.slice(0, 64),
+      );
+    }
+    assert.ok(manifest.some((line) => line.endsWith('packages/worker-only@2.0.0/lib/PATENTS')));
+    assert.equal(manifest.filter((line) => line.endsWith('dependencies.json')).length, 1);
+    assert.equal(
+      manifest.filter((line) => line.endsWith('packages/react@' + entries[1].version + '/LICENSE'))
+        .length,
+      1,
+    );
+    const packageFile = join(workerDependency, 'package.json');
+    const packageJSON = JSON.parse(await readFile(packageFile, 'utf8'));
+    packageJSON.license = 'UNKNOWN';
+    await writeFile(packageFile, JSON.stringify(packageJSON));
+    await assert.rejects(
+      run,
+      /Missing or unreviewed bundled dependency licence: worker-only@2.0.0/,
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });

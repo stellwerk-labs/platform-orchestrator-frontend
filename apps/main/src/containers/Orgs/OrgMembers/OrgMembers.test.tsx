@@ -390,7 +390,7 @@ describe('OrgMembers', () => {
     await userEvent.click(manageRolesMenuItem);
 
     // Wait for modal to open and find the role select dropdown (it's the only combobox in modal)
-    const roleSelect = await screen.findByRole('combobox');
+    const roleSelect = within(await screen.findByRole('dialog')).getByRole('combobox');
     await userEvent.click(roleSelect);
 
     // Select Viewer role from dropdown

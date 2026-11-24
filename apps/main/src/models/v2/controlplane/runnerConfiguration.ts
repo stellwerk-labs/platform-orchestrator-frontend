@@ -6,6 +6,7 @@ import type { K8sAgentRunnerConfiguration } from './k8sAgentRunnerConfiguration.
 import type { K8sEksRunnerConfiguration } from './k8sEksRunnerConfiguration.ts';
 import type { K8sGkeRunnerConfiguration } from './k8sGkeRunnerConfiguration.ts';
 import type { K8sRunnerConfiguration } from './k8sRunnerConfiguration.ts';
+import type { NativeAgentRunnerConfiguration } from './nativeAgentRunnerConfiguration.ts';
 import type { ServerlessEcsRunnerConfiguration } from './serverlessEcsRunnerConfiguration.ts';
 
 /**
@@ -16,4 +17,5 @@ export type RunnerConfiguration =
   | K8sGkeRunnerConfiguration
   | K8sEksRunnerConfiguration
   | K8sAgentRunnerConfiguration
+  | NativeAgentRunnerConfiguration
   | ServerlessEcsRunnerConfiguration;

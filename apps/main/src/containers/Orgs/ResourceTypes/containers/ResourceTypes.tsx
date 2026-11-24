@@ -1,9 +1,9 @@
 import { Empty, Flex, Table, TableColumnProps, Tag, Tooltip } from 'antd';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link, useParams } from 'react-router';
 
 import { PageHeader } from '@src/components/shared/PageHeader/PageHeader';
-import { SearchInput } from '@src/components/shared/ui/SearchInput/SearchInput';
+import { matchesSearch, TableToolbar, useTableSearch } from '@src/components/shared/TableToolbar';
 import {
   DOCS_GET_STARTED_EMPTY_STATE,
   DOCS_RESOURCE_TYPES_EMPTY_STATE,
@@ -27,12 +27,19 @@ export const ResourceTypes = () => {
     getAllPagesQueryKey(getListResourceTypesQueryKey(orgId)),
     (params) => listResourceTypes(orgId, params),
   );
-  // state
-  const [filteredResourceTypes, setFilteredResourceTypes] = useState<ResourceType[] | undefined>();
-
-  useEffect(() => {
-    setFilteredResourceTypes(allResourceTypes);
-  }, [allResourceTypes]);
+  const search = useTableSearch();
+  const filteredResourceTypes = allResourceTypes?.filter(
+    (row) =>
+      matchesSearch(search.query, row.id, row.description) &&
+      (search.view === 'all' ||
+        (search.view === 'archived'
+          ? row.catalogue_status === 'archived'
+          : search.view === 'accessible'
+            ? row.is_developer_accessible
+            : search.view === 'built_in'
+              ? row.built_in
+              : !row.built_in)),
+  );
 
   const columns: TableColumnProps<ResourceType>[] = [
     {
@@ -69,7 +76,7 @@ export const ResourceTypes = () => {
       title: 'Type',
       dataIndex: 'built_in',
       ellipsis: true,
-      render: (record) => (record.built_in ? 'Built in' : 'Custom'),
+      render: (builtIn: boolean) => (builtIn ? 'Built in' : 'Custom'),
     },
     {
       title: 'Catalogue',
@@ -85,47 +92,54 @@ export const ResourceTypes = () => {
     },
   ];
 
-  const handleSearchChange = (value: string) => {
-    setFilteredResourceTypes(
-      allResourceTypes?.filter((resourceType) => resourceType.id.includes(value)),
-    );
-  };
-
   return (
     <Flex vertical gap={'middle'}>
       <PageHeader />
-      <SearchInput onChange={handleSearchChange} placeholder={'Filter resource types'} />
+      <TableToolbar
+        label={'resource types'}
+        {...search}
+        filters={[
+          { value: 'accessible', label: 'Developer accessible' },
+          { value: 'built_in', label: 'Built-in' },
+          { value: 'custom', label: 'Custom' },
+          { value: 'archived', label: 'Archived' },
+        ]}
+      />
       <Table
+        key={`${search.query}:${search.view}`}
         columns={columns}
         dataSource={filteredResourceTypes}
         rowKey={'id'}
         loading={resourceTypesLoading}
         size={'small'}
         locale={{
-          emptyText: (
-            <Empty
-              description={
-                <>
-                  No resource types found, see{' '}
-                  <a
-                    href={DOCS_RESOURCE_TYPES_EMPTY_STATE}
-                    target={'_blank'}
-                    rel={'noreferrer noopener'}>
-                    resource types docs
-                  </a>{' '}
-                  for details, or follow the{' '}
-                  <a
-                    href={DOCS_GET_STARTED_EMPTY_STATE}
-                    target={'_blank'}
-                    rel={'noreferrer noopener'}>
-                    tutorial
-                  </a>{' '}
-                  to explore the full setup flow.
-                </>
-              }
-              styles={{ image: { display: 'none' } }}
-            />
-          ),
+          emptyText:
+            search.query || search.view !== 'all' ? (
+              'No results match these filters.'
+            ) : (
+              <Empty
+                description={
+                  <>
+                    No resource types found, see{' '}
+                    <a
+                      href={DOCS_RESOURCE_TYPES_EMPTY_STATE}
+                      target={'_blank'}
+                      rel={'noreferrer noopener'}>
+                      resource types docs
+                    </a>{' '}
+                    for details, or follow the{' '}
+                    <a
+                      href={DOCS_GET_STARTED_EMPTY_STATE}
+                      target={'_blank'}
+                      rel={'noreferrer noopener'}>
+                      tutorial
+                    </a>{' '}
+                    to explore the full setup flow.
+                  </>
+                }
+                styles={{ image: { display: 'none' } }}
+              />
+            ),
         }}
       />
     </Flex>

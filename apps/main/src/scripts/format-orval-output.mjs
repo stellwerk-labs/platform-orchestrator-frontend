@@ -5,7 +5,11 @@ import { execa } from 'execa';
 
 import { formatGeneratedJSDoc } from './format-orval-docs.mjs';
 
-const paths = ['apps/main/src/models/v2', 'apps/main/src/hooks/react-query/v2'];
+const paths = [
+  'apps/main/src/models/v2',
+  'apps/main/src/hooks/react-query/v2',
+  'apps/main/src/api',
+];
 
 try {
   for (const directory of paths) {

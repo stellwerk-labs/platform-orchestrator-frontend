@@ -39,20 +39,17 @@ export const getSharedBreadcrumbs = (match?: UIMatch, data?: BreadcrumbData) => 
       )}/deploys`,
     });
 
-    // Add specific deployment breadcrumb if deployment data is available
-    if (data?.deployment) {
-      sharedCrumbs.push({
-        label: translations?.DEPLOY,
-        name: data?.deployment.id,
-        pathname: generateDeploymentUrl(
-          match?.params.orgId || '',
-          match?.params.projectId || '',
-          match?.params.envId || '',
-          match?.params.deployId || '',
-          'resources',
-        ),
-      });
-    }
+    sharedCrumbs.push({
+      label: translations?.DEPLOY,
+      name: data?.deployment?.id ?? match.params.deployId,
+      pathname: generateDeploymentUrl(
+        match.params.orgId || '',
+        data?.deployment?.project_id ?? match.params.projectId ?? '',
+        data?.deployment?.env_id ?? match.params.envId ?? '',
+        match.params.deployId,
+        'resources',
+      ),
+    });
   }
 
   return sharedCrumbs;

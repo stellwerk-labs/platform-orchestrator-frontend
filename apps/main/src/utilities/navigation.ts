@@ -3,7 +3,8 @@ export const generateDeploymentUrl = (
   projectId: string,
   envId: string,
   deploymentId: string,
-  workloadsOrResources: 'workloads' | 'shared-resources' | 'resources' | 'manifest',
+  workloadsOrResources:
+    'workloads' | 'shared-resources' | 'resources' | 'manifest' | 'pipeline' | 'logs',
 ) => `${generateAppUrl(orgId, projectId, envId)}/deploys/${deploymentId}/${workloadsOrResources}`;
 
 export const generateProjectsUrl = (orgId: string) => {
@@ -29,9 +30,9 @@ export const generateRolesUrl = (orgId: string) => `/orgs/${orgId}/roles`;
 export const generateServiceUserDetailsUrl = (orgId: string, serviceUserId: string) =>
   `/orgs/${orgId}/service-users/${serviceUserId}`;
 
-export const generateRunnersUrl = (orgId: string) => `/orgs/${orgId}/runners`;
+export const generateRunnersUrl = (orgId: string) => `/orgs/${encodeURIComponent(orgId)}/runners`;
 export const generateRunnerDetailUrl = (orgId: string, runnerId: string) =>
-  `/orgs/${orgId}/runners/${runnerId}`;
+  `/orgs/${encodeURIComponent(orgId)}/runners/by-id/${encodeURIComponent(runnerId)}/view`;
 export const generateProvidersUrl = (orgId: string) => `/orgs/${orgId}/providers`;
 export const generateEnvironmentTypesUrl = (orgId: string) => `/orgs/${orgId}/environment-types`;
 export const generateProviderDetailUrl = (

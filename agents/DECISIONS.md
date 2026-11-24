@@ -19,3 +19,7 @@ Use automatic native-cookie log reads with dedicated org/environment deployment_
 ## Logs toolbar layout, 2026-11-13
 
 Use an optional shared viewer toolbar render slot to arrange its existing raw toggle on the native page, keeping plugin viewer layout and raw state unchanged.
+
+## Native pipeline source export
+
+Prepare Native pipeline application changes as a source export with all product code, tests, documentation and release controls retained.

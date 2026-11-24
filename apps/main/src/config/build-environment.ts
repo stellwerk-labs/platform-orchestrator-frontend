@@ -6,6 +6,7 @@ export interface BuildEnvironment {
   BASE_URL: string;
   ENVIRONMENT_NAME: BuildEnvironmentNames;
   DEPLOYMENT_MODE: DeploymentMode;
+  RUNNER_ROLLOUTS?: string;
   VERSION: string;
 
   GOOGLE_CLIENT_ID: string;

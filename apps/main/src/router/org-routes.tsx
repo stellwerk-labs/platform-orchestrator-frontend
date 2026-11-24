@@ -19,9 +19,11 @@ import { RunnerRules } from '@src/containers/Orgs/Runners/containers/RunnerDetai
 import { RunnerStateStorageConfiguration } from '@src/containers/Orgs/Runners/containers/RunnerDetails/components/RunnerStateStorageConfiguration';
 import { RunnerDetails } from '@src/containers/Orgs/Runners/containers/RunnerDetails/RunnerDetails';
 import { RunnersList } from '@src/containers/Orgs/Runners/containers/RunnersList';
+import { NativeRunnerAuthor } from '@src/containers/Orgs/Runners/NativeRunnerAuthor';
 import { Runners } from '@src/containers/Orgs/Runners/Runners';
 import { ServiceUserDetails } from '@src/containers/Orgs/ServiceUsers/ServiceUserDetails';
 import { ServiceUsers } from '@src/containers/Orgs/ServiceUsers/ServiceUsers';
+import { Pipelines } from '@src/containers/Pipelines/Pipelines';
 import { i18n } from '@src/i18n/i18n';
 import { PluginRouteHost } from '@src/plugins/PluginRouteHost';
 import { moduleRoutes } from '@src/router/module-routes';
@@ -41,6 +43,7 @@ export const orgRoutes: RouteObject[] = [
   { index: true, element: <OrgsRoot /> },
   ...projectRoutes,
   ...moduleRoutes,
+  { path: 'pipelines', element: <Pipelines />, handle: { crumbs: () => [{ name: 'Pipelines' }] } },
   {
     path: 'environment-types',
     handle: {
@@ -101,7 +104,17 @@ export const orgRoutes: RouteObject[] = [
     element: <Runners />,
   },
   {
-    path: 'runners/:runnerId',
+    path: 'runners/list/new',
+    element: <NativeRunnerAuthor create />,
+    handle: { crumbs: () => [{ name: 'Register native Runner' }] },
+  },
+  {
+    path: 'runners/by-id/:runnerId/view/edit',
+    element: <NativeRunnerAuthor />,
+    handle: { crumbs: (match: UIMatch) => [{ label: 'Runner', name: match.params.runnerId }] },
+  },
+  ...['runners/by-id/:runnerId/view', 'runners/:runnerId'].map((path): RouteObject => ({
+    path,
     element: <RunnerDetails />,
     children: [
       {
@@ -134,7 +147,7 @@ export const orgRoutes: RouteObject[] = [
         },
       ],
     },
-  },
+  })),
   {
     path: 'providers',
     handle: {

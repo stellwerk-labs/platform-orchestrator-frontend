@@ -8,6 +8,11 @@ import { defineConfig } from 'vitest/config';
 
 import { dependencyLicenseFile, dependencyNotices } from './scripts/dependency-notices.mts';
 
+const notices = dependencyNotices(fileURLToPath(new URL('../../LICENSE', import.meta.url)), {
+  manifestFile: fileURLToPath(new URL('./licenses/supplemental/manifest.json', import.meta.url)),
+  lockFile: fileURLToPath(new URL('../../pnpm-lock.yaml', import.meta.url)),
+});
+
 // https://vitejs.dev/config/
 export default defineConfig({
   build: {
@@ -17,18 +22,8 @@ export default defineConfig({
       external: ['./src/**/*.test.{ts,tsx}'],
     },
   },
-  plugins: [
-    react(),
-    svgrPlugin(),
-    macrosPlugin(),
-    checker({ typescript: true }),
-    dependencyNotices(fileURLToPath(new URL('../../LICENSE', import.meta.url)), {
-      manifestFile: fileURLToPath(
-        new URL('./licenses/supplemental/manifest.json', import.meta.url),
-      ),
-      lockFile: fileURLToPath(new URL('../../pnpm-lock.yaml', import.meta.url)),
-    }),
-  ],
+  plugins: [react(), svgrPlugin(), macrosPlugin(), checker({ typescript: true }), notices.main],
+  worker: { plugins: notices.worker },
   server: {
     port: parseInt(process.env.VITE_PORT || '4200', 10),
   },

@@ -75,6 +75,23 @@ organization override. Advertising this operation does not grant Module read
 permission: Core still authorizes the current user independently. Read failures
 remain failures, not empty usage results.
 
+`iam.getActor` is an optional read-only dependency for audit identity labels.
+Discovery must advertise it as `GET`, nonmutating. It accepts exactly one UUID
+`userId` path parameter and no query, body, idempotency key or organization
+override. The host uses the active organization and IAM's exact `userId` member
+filter with a single-row bound. IAM still requires current membership-read
+permission on every call; the host caches no identities. The response is
+`{ actor: { user_id, display_name, primary_email?, detail_route? } | null }`, with no membership,
+subject or provider fields. Response identity must match the requested user.
+Plugins must keep their ID-based fallback when the operation is absent, the member is unavailable,
+or access fails; identity lookup must not prevent audit rows from rendering.
+
+Member navigation is optional: the host returns the existing org-relative
+`/members/{userId}` detail route only when both `membership_read` and `role_read`
+are freshly permitted on its active organization. Denied, malformed or unavailable
+permission checks retain the identity label and omit navigation. The plugin must
+validate the exact matching UUID and use Console navigation for the returned route.
+
 Protected Deployment logs and outputs use two additional closed operations,
 `core.getPluginDeploymentLogs` and `core.getPluginDeploymentOutputs`. The child
 supplies only immutable Project, Environment, and Deployment UUIDs. The host

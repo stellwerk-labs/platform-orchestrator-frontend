@@ -97,7 +97,7 @@ describe('Deploys', () => {
     expect(screen.getByRole('columnheader', { name: 'ID' })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: /Status/ })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: /Mode/ })).toBeInTheDocument();
-    expect(screen.getByRole('columnheader', { name: 'Deployed At' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Created At' })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: 'Created By' })).toBeInTheDocument();
   });
 
@@ -423,4 +423,75 @@ describe('Deploys', () => {
       expect(screen.queryByRole('link', { name: 'deploy-6' })).not.toBeInTheDocument();
     });
   });
+});
+
+it('filters the whole deployment collection on the server and resets cursor paging for a new query', async () => {
+  const requests: URL[] = [];
+  server.use(
+    getListOrgMembershipsMockHandler({ items: [] }),
+    getListServiceUsersMockHandler({ items: [] }),
+    getListDeploymentsMockHandler(({ request }) => {
+      const url = new URL(request.url);
+      requests.push(url);
+      return {
+        items: [createDeployment('server-result', ByStatusQueryParamParameterItem.succeeded)],
+        next_page_token: url.searchParams.get('page') ? undefined : 'page-two-token',
+      };
+    }),
+  );
+  render(
+    <MockProviders
+      route={{
+        path: '/orgs/:orgId/projects/:projectId/envs/:envId/deploys',
+        url: '/orgs/my-org/projects/my-project/envs/my-env/deploys',
+        searchParams: 'q=older&view=unused_plans',
+      }}>
+      <Deploys />
+    </MockProviders>,
+  );
+  expect(await screen.findByRole('link', { name: 'server-result' })).toBeVisible();
+  expect(requests[requests.length - 1]?.searchParams.get('q')).toBe('older');
+  expect(requests[requests.length - 1]?.searchParams.get('quick_filter')).toBe('unused_plans');
+  await userEvent.click(screen.getByTitle('2'));
+  await waitFor(() =>
+    expect(requests[requests.length - 1]?.searchParams.get('page')).toBe('page-two-token'),
+  );
+  const search = screen.getByRole('textbox', { name: 'Search deployments' });
+  await userEvent.clear(search);
+  await userEvent.type(search, 'newer');
+  await waitFor(() => expect(requests[requests.length - 1]?.searchParams.get('q')).toBe('newer'));
+  expect(requests[requests.length - 1]?.searchParams.get('page')).toBeNull();
+  expect(requests[requests.length - 1]?.searchParams.get('quick_filter')).toBe('unused_plans');
+});
+
+it('shows historical delivery information without changing execution status or showing generic progress', async () => {
+  const historical =
+    'A worker refused a delivery attempt (capability_refused). Execution may still be running.';
+  server.use(
+    getListOrgMembershipsMockHandler({ items: [] }),
+    getListServiceUsersMockHandler({ items: [] }),
+    getListDeploymentsMockHandler({
+      items: [
+        {
+          ...createDeployment('refused-delivery', ByStatusQueryParamParameterItem.executing),
+          status_message: historical,
+        },
+        {
+          ...createDeployment('normal-progress', ByStatusQueryParamParameterItem.executing),
+          status_message: 'Deploying...',
+        },
+        {
+          ...createDeployment('completed', ByStatusQueryParamParameterItem.succeeded),
+          status_message: 'OLD_HISTORICAL_NOTICE',
+        },
+      ],
+    }),
+  );
+  renderDeploys();
+  expect(await screen.findByText(historical)).toBeVisible();
+  expect(screen.queryByText('Deploying...')).not.toBeInTheDocument();
+  expect(screen.queryByText('OLD_HISTORICAL_NOTICE')).not.toBeInTheDocument();
+  const row = screen.getByRole('link', { name: 'refused-delivery' }).closest('tr')!;
+  expect(within(row).queryByText('Failed')).not.toBeInTheDocument();
+  expect(within(row).queryByText('Successful')).not.toBeInTheDocument();
 });

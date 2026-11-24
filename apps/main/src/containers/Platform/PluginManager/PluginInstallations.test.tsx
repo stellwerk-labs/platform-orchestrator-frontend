@@ -174,9 +174,9 @@ describe('PluginInstallations', () => {
     renderPluginManager('/platform/plugins');
 
     await rowOf('com.example.rollouts');
-    expect(screen.queryAllByRole('button')).toEqual([]);
+    expect(within(screen.getByRole('table')).queryAllByRole('button')).toEqual([]);
     expect(screen.queryAllByRole('switch')).toEqual([]);
-    expect(screen.queryAllByRole('textbox')).toEqual([]);
+    expect(screen.getByRole('textbox', { name: 'Search plugins' })).toBeVisible();
   });
 
   it('says that nothing is installed', async () => {

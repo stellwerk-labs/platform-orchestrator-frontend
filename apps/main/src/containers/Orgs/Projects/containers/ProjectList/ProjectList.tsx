@@ -1,12 +1,11 @@
 import { Empty, Flex, Table, TableColumnProps } from 'antd';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router';
+import { Link } from 'react-router';
 
 import { PageHeader } from '@src/components/shared/PageHeader/PageHeader';
-import { SearchInput } from '@src/components/shared/ui/SearchInput/SearchInput';
+import { TableToolbar, useTableSearch } from '@src/components/shared/TableToolbar';
 import { DOCS_GET_STARTED_EMPTY_STATE, DOCS_PROJECTS } from '@src/config/docs-links';
-import { MatchParams } from '@src/config/routing';
 import { useFilterProjects } from '@src/hooks/useFilterProjects';
 import { Project } from '@src/models/v2/controlplane';
 import { DATE_FORMATS_TYPES, formatDate } from '@src/utilities/datetime/datetime';
@@ -15,30 +14,11 @@ export const ProjectList = () => {
   // i18n
   const { t } = useTranslation('viewApplicationList');
 
-  // Router hooks
-  const { orgId } = useParams<keyof MatchParams>() as MatchParams;
-
-  // Component state
-  const [filterValue, setFilterValue] = useState<string>();
-  const [orgIdFromState, setOrgIdFromState] = useState<string>(orgId);
-
-  // React Query
-  const { filteredProjects, projectsLoading } = useFilterProjects(filterValue);
-
-  /*
-   *  We use the orgIdFromState and applicationsFromState state variables for performance reasons.
-   *  It makes sure the useEffect that dispatches the pausing calls only tracks neccessary updates for orgId and applications variables.
-   *  Thereby, reducing the amount of times the dispatch calls are made.
-   */
-  useEffect(() => {
-    if (orgId !== orgIdFromState) {
-      setOrgIdFromState(orgId);
-    }
-  }, [orgId, orgIdFromState]);
-
-  const handleFilterInput = (value: string) => {
-    setFilterValue(value);
-  };
+  const search = useTableSearch();
+  const { filteredProjects: searchedProjects, projectsLoading } = useFilterProjects(search.query);
+  const filteredProjects = searchedProjects?.filter(
+    (project) => search.view === 'all' || project.status === search.view,
+  );
 
   const columns: TableColumnProps<Project>[] = [
     {
@@ -93,37 +73,43 @@ export const ProjectList = () => {
     <>
       <PageHeader customHeading={t('APPLICATIONS_TITLE') as string} />
       <Flex vertical gap={'middle'}>
-        <SearchInput
-          placeholder={t('FILTER_PROJECTS') as string}
-          onChange={handleFilterInput}
-          debounceEvent
+        <TableToolbar
+          label={'projects'}
+          {...search}
+          filters={[...new Set(searchedProjects?.map((project) => project.status))].map(
+            (status) => ({ value: status, label: status }),
+          )}
         />
         <Table
+          key={`${search.query}:${search.view}`}
           columns={columns}
           dataSource={filteredProjects}
           loading={projectsLoading}
           locale={{
-            emptyText: (
-              <Empty
-                description={
-                  <>
-                    No projects found, see{' '}
-                    <a href={DOCS_PROJECTS} target={'_blank'} rel={'noreferrer noopener'}>
-                      projects docs
-                    </a>{' '}
-                    for details, or follow the{' '}
-                    <a
-                      href={DOCS_GET_STARTED_EMPTY_STATE}
-                      target={'_blank'}
-                      rel={'noreferrer noopener'}>
-                      tutorial
-                    </a>{' '}
-                    to explore the full setup flow.
-                  </>
-                }
-                styles={{ image: { display: 'none' } }}
-              />
-            ),
+            emptyText:
+              search.query || search.view !== 'all' ? (
+                'No results match these filters.'
+              ) : (
+                <Empty
+                  description={
+                    <>
+                      No projects found, see{' '}
+                      <a href={DOCS_PROJECTS} target={'_blank'} rel={'noreferrer noopener'}>
+                        projects docs
+                      </a>{' '}
+                      for details, or follow the{' '}
+                      <a
+                        href={DOCS_GET_STARTED_EMPTY_STATE}
+                        target={'_blank'}
+                        rel={'noreferrer noopener'}>
+                        tutorial
+                      </a>{' '}
+                      to explore the full setup flow.
+                    </>
+                  }
+                  styles={{ image: { display: 'none' } }}
+                />
+              ),
           }}
           rowKey={'id'}
         />

@@ -27,6 +27,8 @@
     "i18next-browser-languagedetector": "^8.2.1",
     "js-yaml": "^4.3.2",
     "lodash": "^4.18.1",
+    "monaco-editor": "0.52.2",
+    "monaco-yaml": "5.5.1",
     "qs": "^6.16.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -45,6 +47,8 @@
     "test:ci": "TZ=UTC vitest run --silent",
     "e2e": "TEST_SUITE_TYPE=mock playwright test --browser=$npm_config_pwbrowser; exitcode=$? ; exit $exitcode",
     "e2e:ci": "TEST_SUITE_TYPE=mock playwright test --config=./playwright.config.ci.ts",
+    "test:native-controls-browser": "node scripts/native-controls-browser_test.mjs --build test-reports/native-browser/controls/bundle && node scripts/native-controls-browser_test.mjs --run test-reports/native-browser/controls/bundle",
+    "test:native-phase-logs-browser": "node scripts/native-phase-logs-browser_test.mjs --build test-reports/native-browser/phase-logs/bundle && node scripts/native-phase-logs-browser_test.mjs --run test-reports/native-browser/phase-logs/bundle",
     "analyze": "source-map-explorer 'dist/assets/*.js'",
     "check-typescript": "tsc --noEmit"
   },

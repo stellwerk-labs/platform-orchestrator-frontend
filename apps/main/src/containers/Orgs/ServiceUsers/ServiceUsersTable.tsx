@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 
 import { CheckRBAC } from '@src/components/shared/CheckRBAC';
+import { matchesSearch, TableToolbar, useTableSearch } from '@src/components/shared/TableToolbar';
 import { MatchParams } from '@src/config/routing';
 import { getListRolesQueryKey, listRoles } from '@src/hooks/react-query/v2/iam/role/role';
 import {
@@ -27,6 +28,7 @@ import {
 } from './CreateServiceUserButton/CreateServiceUserButton';
 
 export const ServiceUserTable = () => {
+  const search = useTableSearch();
   // Component state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [serviceUserToRegenerate, setServiceUserToRegenerate] = useState<ServiceUserSummary>();
@@ -172,12 +174,42 @@ export const ServiceUserTable = () => {
 
       {contextHolder}
 
+      <TableToolbar
+        label={'service users'}
+        {...search}
+        filters={[
+          { value: 'active', label: 'Active tokens' },
+          { value: 'expired', label: 'Expired tokens' },
+          { value: 'expiring', label: 'Expiring in 7 days' },
+        ]}
+      />
       <Table<ServiceUserSummary>
+        key={`${search.query}:${search.view}`}
         rowKey={'id'}
         columns={columns}
-        dataSource={allServiceUsers}
+        dataSource={allServiceUsers?.filter(
+          (row) =>
+            matchesSearch(
+              search.query,
+              row.id,
+              row.display_name,
+              ...row.roles.map((role) => role.id),
+            ) &&
+            (search.view === 'all' ||
+              (search.view === 'expired'
+                ? Date.parse(row.current_token_expires_at) <= Date.now()
+                : search.view === 'expiring'
+                  ? Date.parse(row.current_token_expires_at) > Date.now() &&
+                    Date.parse(row.current_token_expires_at) <= Date.now() + 7 * 86400000
+                  : Date.parse(row.current_token_expires_at) > Date.now())),
+        )}
         loading={isServiceUsersLoading}
-        locale={{ emptyText: 'No service users found' }}
+        locale={{
+          emptyText:
+            search.query || search.view !== 'all'
+              ? 'No results match these filters.'
+              : 'No service users found',
+        }}
         aria-label={'Service users'}
       />
     </Space>

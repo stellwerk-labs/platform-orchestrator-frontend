@@ -18,6 +18,7 @@ import type {
   N400BadRequestResponse,
   N404NotFoundResponse,
   N409ConflictResponse,
+  NativeAgentRunnerConfiguration,
   Runner,
   RunnerPage,
   RunnerRule,
@@ -31,6 +32,42 @@ export const getGetInternalRunnerResponseK8sRunnerConfigurationMock = (
   overrideResponse: Partial<K8sRunnerConfiguration> = {},
 ): K8sRunnerConfiguration => ({
   ...{
+    native_execution: faker.helpers.arrayElement([
+      {
+        contract_version: faker.helpers.arrayElement(['stellwerk.runner.catalogue/v1'] as const),
+        runtime_version: faker.helpers.arrayElement([
+          'stellwerk.runner.rollout/v1',
+          'stellwerk.runner.rollout/v2',
+        ] as const),
+        tools_digest: faker.helpers.fromRegExp('^[a-f0-9]{64}$'),
+        tools: Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(
+          () => ({
+            id: faker.helpers.fromRegExp('^[A-Za-z0-9_.-]+$'),
+            name: faker.string.alpha({ length: { min: 1, max: 120 } }),
+            phase: faker.helpers.arrayElement(['pre_plan', 'plan_check', 'post_apply'] as const),
+            retry: faker.helpers.arrayElement(['read_only', 'receipt', 'unsafe'] as const),
+            required_capabilities: Array.from(
+              { length: faker.number.int({ min: 1, max: 32 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$')),
+          }),
+        ),
+      },
+      undefined,
+    ]),
+    max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    capabilities: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+        faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+      ),
+      undefined,
+    ]),
+    supported_protocols: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 16 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 10, max: 128 } }),
+      ),
+      undefined,
+    ]),
     type: faker.helpers.arrayElement(['kubernetes'] as const),
     job: {
       namespace: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -69,6 +106,42 @@ export const getGetInternalRunnerResponseK8sGkeRunnerConfigurationMock = (
   overrideResponse: Partial<K8sGkeRunnerConfiguration> = {},
 ): K8sGkeRunnerConfiguration => ({
   ...{
+    native_execution: faker.helpers.arrayElement([
+      {
+        contract_version: faker.helpers.arrayElement(['stellwerk.runner.catalogue/v1'] as const),
+        runtime_version: faker.helpers.arrayElement([
+          'stellwerk.runner.rollout/v1',
+          'stellwerk.runner.rollout/v2',
+        ] as const),
+        tools_digest: faker.helpers.fromRegExp('^[a-f0-9]{64}$'),
+        tools: Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(
+          () => ({
+            id: faker.helpers.fromRegExp('^[A-Za-z0-9_.-]+$'),
+            name: faker.string.alpha({ length: { min: 1, max: 120 } }),
+            phase: faker.helpers.arrayElement(['pre_plan', 'plan_check', 'post_apply'] as const),
+            retry: faker.helpers.arrayElement(['read_only', 'receipt', 'unsafe'] as const),
+            required_capabilities: Array.from(
+              { length: faker.number.int({ min: 1, max: 32 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$')),
+          }),
+        ),
+      },
+      undefined,
+    ]),
+    max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    capabilities: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+        faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+      ),
+      undefined,
+    ]),
+    supported_protocols: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 16 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 10, max: 128 } }),
+      ),
+      undefined,
+    ]),
     type: faker.helpers.arrayElement(['kubernetes-gke'] as const),
     job: {
       namespace: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -97,6 +170,42 @@ export const getGetInternalRunnerResponseK8sEksRunnerConfigurationMock = (
   overrideResponse: Partial<K8sEksRunnerConfiguration> = {},
 ): K8sEksRunnerConfiguration => ({
   ...{
+    native_execution: faker.helpers.arrayElement([
+      {
+        contract_version: faker.helpers.arrayElement(['stellwerk.runner.catalogue/v1'] as const),
+        runtime_version: faker.helpers.arrayElement([
+          'stellwerk.runner.rollout/v1',
+          'stellwerk.runner.rollout/v2',
+        ] as const),
+        tools_digest: faker.helpers.fromRegExp('^[a-f0-9]{64}$'),
+        tools: Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(
+          () => ({
+            id: faker.helpers.fromRegExp('^[A-Za-z0-9_.-]+$'),
+            name: faker.string.alpha({ length: { min: 1, max: 120 } }),
+            phase: faker.helpers.arrayElement(['pre_plan', 'plan_check', 'post_apply'] as const),
+            retry: faker.helpers.arrayElement(['read_only', 'receipt', 'unsafe'] as const),
+            required_capabilities: Array.from(
+              { length: faker.number.int({ min: 1, max: 32 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$')),
+          }),
+        ),
+      },
+      undefined,
+    ]),
+    max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    capabilities: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+        faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+      ),
+      undefined,
+    ]),
+    supported_protocols: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 16 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 10, max: 128 } }),
+      ),
+      undefined,
+    ]),
     type: faker.helpers.arrayElement(['kubernetes-eks'] as const),
     job: {
       namespace: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -128,6 +237,42 @@ export const getGetInternalRunnerResponseK8sAgentRunnerConfigurationMock = (
   overrideResponse: Partial<K8sAgentRunnerConfiguration> = {},
 ): K8sAgentRunnerConfiguration => ({
   ...{
+    native_execution: faker.helpers.arrayElement([
+      {
+        contract_version: faker.helpers.arrayElement(['stellwerk.runner.catalogue/v1'] as const),
+        runtime_version: faker.helpers.arrayElement([
+          'stellwerk.runner.rollout/v1',
+          'stellwerk.runner.rollout/v2',
+        ] as const),
+        tools_digest: faker.helpers.fromRegExp('^[a-f0-9]{64}$'),
+        tools: Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(
+          () => ({
+            id: faker.helpers.fromRegExp('^[A-Za-z0-9_.-]+$'),
+            name: faker.string.alpha({ length: { min: 1, max: 120 } }),
+            phase: faker.helpers.arrayElement(['pre_plan', 'plan_check', 'post_apply'] as const),
+            retry: faker.helpers.arrayElement(['read_only', 'receipt', 'unsafe'] as const),
+            required_capabilities: Array.from(
+              { length: faker.number.int({ min: 1, max: 32 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$')),
+          }),
+        ),
+      },
+      undefined,
+    ]),
+    max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    capabilities: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+        faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+      ),
+      undefined,
+    ]),
+    supported_protocols: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 16 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 10, max: 128 } }),
+      ),
+      undefined,
+    ]),
     type: faker.helpers.arrayElement(['kubernetes-agent'] as const),
     job: {
       namespace: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -139,10 +284,92 @@ export const getGetInternalRunnerResponseK8sAgentRunnerConfigurationMock = (
   ...overrideResponse,
 });
 
+export const getGetInternalRunnerResponseNativeAgentRunnerConfigurationMock = (
+  overrideResponse: Partial<NativeAgentRunnerConfiguration> = {},
+): NativeAgentRunnerConfiguration => ({
+  ...{
+    type: faker.helpers.arrayElement(['native-agent'] as const),
+    key: '-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAc5dgCx4ano39JT0XgTsHnts3jej+5xl7ZAwSIrKpef0=\n-----END PUBLIC KEY-----\n',
+    max_parallel_jobs: faker.number.int({ min: 1 }),
+    supported_protocols: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 16 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 1, max: 128 } }),
+      ),
+      undefined,
+    ]),
+    capabilities: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+        faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+      ),
+      undefined,
+    ]),
+    native_execution: faker.helpers.arrayElement([
+      {
+        contract_version: faker.helpers.arrayElement(['stellwerk.runner.catalogue/v1'] as const),
+        runtime_version: faker.helpers.arrayElement([
+          'stellwerk.runner.rollout/v1',
+          'stellwerk.runner.rollout/v2',
+        ] as const),
+        tools_digest: faker.helpers.fromRegExp('^[a-f0-9]{64}$'),
+        tools: Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(
+          () => ({
+            id: faker.helpers.fromRegExp('^[A-Za-z0-9_.-]+$'),
+            name: faker.string.alpha({ length: { min: 1, max: 120 } }),
+            phase: faker.helpers.arrayElement(['pre_plan', 'plan_check', 'post_apply'] as const),
+            retry: faker.helpers.arrayElement(['read_only', 'receipt', 'unsafe'] as const),
+            required_capabilities: Array.from(
+              { length: faker.number.int({ min: 1, max: 32 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$')),
+          }),
+        ),
+      },
+      undefined,
+    ]),
+  },
+  ...overrideResponse,
+});
+
 export const getGetInternalRunnerResponseServerlessEcsRunnerConfigurationMock = (
   overrideResponse: Partial<ServerlessEcsRunnerConfiguration> = {},
 ): ServerlessEcsRunnerConfiguration => ({
   ...{
+    native_execution: faker.helpers.arrayElement([
+      {
+        contract_version: faker.helpers.arrayElement(['stellwerk.runner.catalogue/v1'] as const),
+        runtime_version: faker.helpers.arrayElement([
+          'stellwerk.runner.rollout/v1',
+          'stellwerk.runner.rollout/v2',
+        ] as const),
+        tools_digest: faker.helpers.fromRegExp('^[a-f0-9]{64}$'),
+        tools: Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(
+          () => ({
+            id: faker.helpers.fromRegExp('^[A-Za-z0-9_.-]+$'),
+            name: faker.string.alpha({ length: { min: 1, max: 120 } }),
+            phase: faker.helpers.arrayElement(['pre_plan', 'plan_check', 'post_apply'] as const),
+            retry: faker.helpers.arrayElement(['read_only', 'receipt', 'unsafe'] as const),
+            required_capabilities: Array.from(
+              { length: faker.number.int({ min: 1, max: 32 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$')),
+          }),
+        ),
+      },
+      undefined,
+    ]),
+    max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    capabilities: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+        faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+      ),
+      undefined,
+    ]),
+    supported_protocols: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 16 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 10, max: 128 } }),
+      ),
+      undefined,
+    ]),
     type: faker.helpers.arrayElement(['serverless-ecs'] as const),
     auth: {
       role_arn: faker.helpers.fromRegExp('^arn:aws:iam::[0-9]{12}:role\\/[a-zA-Z_0-9+=,.@\\-_/]+$'),
@@ -236,10 +463,26 @@ export const getGetInternalRunnerResponseMock = (): InternalRunner => ({
     ...{
       org_id: 'my-org',
       id: 'my-k8s-runner',
+      uuid: faker.string.uuid(),
       description: 'Runner to execute Terraform in our production cluster',
       created_at: '2023-01-01T00:00:00Z',
       updated_at: '2023-01-01T00:00:00Z',
-      runner_configuration: { type: faker.helpers.arrayElement(Object.values(RunnerType)) },
+      runner_configuration: {
+        max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+        capabilities: faker.helpers.arrayElement([
+          Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+            faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+          ),
+          undefined,
+        ]),
+        supported_protocols: faker.helpers.arrayElement([
+          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha({ length: { min: 10, max: 20 } }),
+          ),
+          undefined,
+        ]),
+        type: faker.helpers.arrayElement(Object.values(RunnerType)),
+      },
       state_storage_configuration: {
         type: faker.helpers.arrayElement(Object.values(StateStorageType)),
       },
@@ -250,6 +493,7 @@ export const getGetInternalRunnerResponseMock = (): InternalRunner => ({
         { ...getGetInternalRunnerResponseK8sGkeRunnerConfigurationMock() },
         { ...getGetInternalRunnerResponseK8sEksRunnerConfigurationMock() },
         { ...getGetInternalRunnerResponseK8sAgentRunnerConfigurationMock() },
+        { ...getGetInternalRunnerResponseNativeAgentRunnerConfigurationMock() },
         { ...getGetInternalRunnerResponseServerlessEcsRunnerConfigurationMock() },
       ]),
       state_storage_configuration: faker.helpers.arrayElement([
@@ -273,10 +517,26 @@ export const getGetInternalRunnerResponseMock200 = (): InternalRunner => ({
     ...{
       org_id: 'my-org',
       id: 'my-k8s-runner',
+      uuid: faker.string.uuid(),
       description: 'Runner to execute Terraform in our production cluster',
       created_at: '2023-01-01T00:00:00Z',
       updated_at: '2023-01-01T00:00:00Z',
-      runner_configuration: { type: faker.helpers.arrayElement(Object.values(RunnerType)) },
+      runner_configuration: {
+        max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+        capabilities: faker.helpers.arrayElement([
+          Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+            faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+          ),
+          undefined,
+        ]),
+        supported_protocols: faker.helpers.arrayElement([
+          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha({ length: { min: 10, max: 20 } }),
+          ),
+          undefined,
+        ]),
+        type: faker.helpers.arrayElement(Object.values(RunnerType)),
+      },
       state_storage_configuration: {
         type: faker.helpers.arrayElement(Object.values(StateStorageType)),
       },
@@ -287,6 +547,7 @@ export const getGetInternalRunnerResponseMock200 = (): InternalRunner => ({
         { ...getGetInternalRunnerResponseK8sGkeRunnerConfigurationMock() },
         { ...getGetInternalRunnerResponseK8sEksRunnerConfigurationMock() },
         { ...getGetInternalRunnerResponseK8sAgentRunnerConfigurationMock() },
+        { ...getGetInternalRunnerResponseNativeAgentRunnerConfigurationMock() },
         { ...getGetInternalRunnerResponseServerlessEcsRunnerConfigurationMock() },
       ]),
       state_storage_configuration: faker.helpers.arrayElement([
@@ -320,11 +581,27 @@ export const getListRunnersResponseMock = (
   items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     org_id: 'my-org',
     id: 'my-k8s-runner',
+    uuid: faker.string.uuid(),
     description: 'Runner to execute Terraform in our production cluster',
     created_at: '2023-01-01T00:00:00Z',
     updated_at: '2023-01-01T00:00:00Z',
     runner_configuration: faker.helpers.arrayElement([
-      { type: faker.helpers.arrayElement(Object.values(RunnerType)) },
+      {
+        max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+        capabilities: faker.helpers.arrayElement([
+          Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+            faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+          ),
+          undefined,
+        ]),
+        supported_protocols: faker.helpers.arrayElement([
+          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha({ length: { min: 10, max: 20 } }),
+          ),
+          undefined,
+        ]),
+        type: faker.helpers.arrayElement(Object.values(RunnerType)),
+      },
       undefined,
     ]),
     state_storage_configuration: faker.helpers.arrayElement([
@@ -342,11 +619,27 @@ export const getListRunnersResponseMock200 = (
   items: Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     org_id: 'my-org',
     id: 'my-k8s-runner',
+    uuid: faker.string.uuid(),
     description: 'Runner to execute Terraform in our production cluster',
     created_at: '2023-01-01T00:00:00Z',
     updated_at: '2023-01-01T00:00:00Z',
     runner_configuration: faker.helpers.arrayElement([
-      { type: faker.helpers.arrayElement(Object.values(RunnerType)) },
+      {
+        max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+        capabilities: faker.helpers.arrayElement([
+          Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+            faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+          ),
+          undefined,
+        ]),
+        supported_protocols: faker.helpers.arrayElement([
+          Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.string.alpha({ length: { min: 10, max: 20 } }),
+          ),
+          undefined,
+        ]),
+        type: faker.helpers.arrayElement(Object.values(RunnerType)),
+      },
       undefined,
     ]),
     state_storage_configuration: faker.helpers.arrayElement([
@@ -371,6 +664,42 @@ export const getCreateRunnerResponseK8sRunnerConfigurationMock = (
   overrideResponse: Partial<K8sRunnerConfiguration> = {},
 ): K8sRunnerConfiguration => ({
   ...{
+    native_execution: faker.helpers.arrayElement([
+      {
+        contract_version: faker.helpers.arrayElement(['stellwerk.runner.catalogue/v1'] as const),
+        runtime_version: faker.helpers.arrayElement([
+          'stellwerk.runner.rollout/v1',
+          'stellwerk.runner.rollout/v2',
+        ] as const),
+        tools_digest: faker.helpers.fromRegExp('^[a-f0-9]{64}$'),
+        tools: Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(
+          () => ({
+            id: faker.helpers.fromRegExp('^[A-Za-z0-9_.-]+$'),
+            name: faker.string.alpha({ length: { min: 1, max: 120 } }),
+            phase: faker.helpers.arrayElement(['pre_plan', 'plan_check', 'post_apply'] as const),
+            retry: faker.helpers.arrayElement(['read_only', 'receipt', 'unsafe'] as const),
+            required_capabilities: Array.from(
+              { length: faker.number.int({ min: 1, max: 32 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$')),
+          }),
+        ),
+      },
+      undefined,
+    ]),
+    max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    capabilities: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+        faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+      ),
+      undefined,
+    ]),
+    supported_protocols: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 16 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 10, max: 128 } }),
+      ),
+      undefined,
+    ]),
     type: faker.helpers.arrayElement(['kubernetes'] as const),
     job: {
       namespace: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -409,6 +738,42 @@ export const getCreateRunnerResponseK8sGkeRunnerConfigurationMock = (
   overrideResponse: Partial<K8sGkeRunnerConfiguration> = {},
 ): K8sGkeRunnerConfiguration => ({
   ...{
+    native_execution: faker.helpers.arrayElement([
+      {
+        contract_version: faker.helpers.arrayElement(['stellwerk.runner.catalogue/v1'] as const),
+        runtime_version: faker.helpers.arrayElement([
+          'stellwerk.runner.rollout/v1',
+          'stellwerk.runner.rollout/v2',
+        ] as const),
+        tools_digest: faker.helpers.fromRegExp('^[a-f0-9]{64}$'),
+        tools: Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(
+          () => ({
+            id: faker.helpers.fromRegExp('^[A-Za-z0-9_.-]+$'),
+            name: faker.string.alpha({ length: { min: 1, max: 120 } }),
+            phase: faker.helpers.arrayElement(['pre_plan', 'plan_check', 'post_apply'] as const),
+            retry: faker.helpers.arrayElement(['read_only', 'receipt', 'unsafe'] as const),
+            required_capabilities: Array.from(
+              { length: faker.number.int({ min: 1, max: 32 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$')),
+          }),
+        ),
+      },
+      undefined,
+    ]),
+    max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    capabilities: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+        faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+      ),
+      undefined,
+    ]),
+    supported_protocols: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 16 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 10, max: 128 } }),
+      ),
+      undefined,
+    ]),
     type: faker.helpers.arrayElement(['kubernetes-gke'] as const),
     job: {
       namespace: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -437,6 +802,42 @@ export const getCreateRunnerResponseK8sEksRunnerConfigurationMock = (
   overrideResponse: Partial<K8sEksRunnerConfiguration> = {},
 ): K8sEksRunnerConfiguration => ({
   ...{
+    native_execution: faker.helpers.arrayElement([
+      {
+        contract_version: faker.helpers.arrayElement(['stellwerk.runner.catalogue/v1'] as const),
+        runtime_version: faker.helpers.arrayElement([
+          'stellwerk.runner.rollout/v1',
+          'stellwerk.runner.rollout/v2',
+        ] as const),
+        tools_digest: faker.helpers.fromRegExp('^[a-f0-9]{64}$'),
+        tools: Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(
+          () => ({
+            id: faker.helpers.fromRegExp('^[A-Za-z0-9_.-]+$'),
+            name: faker.string.alpha({ length: { min: 1, max: 120 } }),
+            phase: faker.helpers.arrayElement(['pre_plan', 'plan_check', 'post_apply'] as const),
+            retry: faker.helpers.arrayElement(['read_only', 'receipt', 'unsafe'] as const),
+            required_capabilities: Array.from(
+              { length: faker.number.int({ min: 1, max: 32 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$')),
+          }),
+        ),
+      },
+      undefined,
+    ]),
+    max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    capabilities: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+        faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+      ),
+      undefined,
+    ]),
+    supported_protocols: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 16 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 10, max: 128 } }),
+      ),
+      undefined,
+    ]),
     type: faker.helpers.arrayElement(['kubernetes-eks'] as const),
     job: {
       namespace: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -468,6 +869,42 @@ export const getCreateRunnerResponseK8sAgentRunnerConfigurationMock = (
   overrideResponse: Partial<K8sAgentRunnerConfiguration> = {},
 ): K8sAgentRunnerConfiguration => ({
   ...{
+    native_execution: faker.helpers.arrayElement([
+      {
+        contract_version: faker.helpers.arrayElement(['stellwerk.runner.catalogue/v1'] as const),
+        runtime_version: faker.helpers.arrayElement([
+          'stellwerk.runner.rollout/v1',
+          'stellwerk.runner.rollout/v2',
+        ] as const),
+        tools_digest: faker.helpers.fromRegExp('^[a-f0-9]{64}$'),
+        tools: Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(
+          () => ({
+            id: faker.helpers.fromRegExp('^[A-Za-z0-9_.-]+$'),
+            name: faker.string.alpha({ length: { min: 1, max: 120 } }),
+            phase: faker.helpers.arrayElement(['pre_plan', 'plan_check', 'post_apply'] as const),
+            retry: faker.helpers.arrayElement(['read_only', 'receipt', 'unsafe'] as const),
+            required_capabilities: Array.from(
+              { length: faker.number.int({ min: 1, max: 32 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$')),
+          }),
+        ),
+      },
+      undefined,
+    ]),
+    max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    capabilities: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+        faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+      ),
+      undefined,
+    ]),
+    supported_protocols: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 16 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 10, max: 128 } }),
+      ),
+      undefined,
+    ]),
     type: faker.helpers.arrayElement(['kubernetes-agent'] as const),
     job: {
       namespace: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -479,10 +916,92 @@ export const getCreateRunnerResponseK8sAgentRunnerConfigurationMock = (
   ...overrideResponse,
 });
 
+export const getCreateRunnerResponseNativeAgentRunnerConfigurationMock = (
+  overrideResponse: Partial<NativeAgentRunnerConfiguration> = {},
+): NativeAgentRunnerConfiguration => ({
+  ...{
+    type: faker.helpers.arrayElement(['native-agent'] as const),
+    key: '-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAc5dgCx4ano39JT0XgTsHnts3jej+5xl7ZAwSIrKpef0=\n-----END PUBLIC KEY-----\n',
+    max_parallel_jobs: faker.number.int({ min: 1 }),
+    supported_protocols: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 16 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 1, max: 128 } }),
+      ),
+      undefined,
+    ]),
+    capabilities: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+        faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+      ),
+      undefined,
+    ]),
+    native_execution: faker.helpers.arrayElement([
+      {
+        contract_version: faker.helpers.arrayElement(['stellwerk.runner.catalogue/v1'] as const),
+        runtime_version: faker.helpers.arrayElement([
+          'stellwerk.runner.rollout/v1',
+          'stellwerk.runner.rollout/v2',
+        ] as const),
+        tools_digest: faker.helpers.fromRegExp('^[a-f0-9]{64}$'),
+        tools: Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(
+          () => ({
+            id: faker.helpers.fromRegExp('^[A-Za-z0-9_.-]+$'),
+            name: faker.string.alpha({ length: { min: 1, max: 120 } }),
+            phase: faker.helpers.arrayElement(['pre_plan', 'plan_check', 'post_apply'] as const),
+            retry: faker.helpers.arrayElement(['read_only', 'receipt', 'unsafe'] as const),
+            required_capabilities: Array.from(
+              { length: faker.number.int({ min: 1, max: 32 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$')),
+          }),
+        ),
+      },
+      undefined,
+    ]),
+  },
+  ...overrideResponse,
+});
+
 export const getCreateRunnerResponseServerlessEcsRunnerConfigurationMock = (
   overrideResponse: Partial<ServerlessEcsRunnerConfiguration> = {},
 ): ServerlessEcsRunnerConfiguration => ({
   ...{
+    native_execution: faker.helpers.arrayElement([
+      {
+        contract_version: faker.helpers.arrayElement(['stellwerk.runner.catalogue/v1'] as const),
+        runtime_version: faker.helpers.arrayElement([
+          'stellwerk.runner.rollout/v1',
+          'stellwerk.runner.rollout/v2',
+        ] as const),
+        tools_digest: faker.helpers.fromRegExp('^[a-f0-9]{64}$'),
+        tools: Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(
+          () => ({
+            id: faker.helpers.fromRegExp('^[A-Za-z0-9_.-]+$'),
+            name: faker.string.alpha({ length: { min: 1, max: 120 } }),
+            phase: faker.helpers.arrayElement(['pre_plan', 'plan_check', 'post_apply'] as const),
+            retry: faker.helpers.arrayElement(['read_only', 'receipt', 'unsafe'] as const),
+            required_capabilities: Array.from(
+              { length: faker.number.int({ min: 1, max: 32 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$')),
+          }),
+        ),
+      },
+      undefined,
+    ]),
+    max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    capabilities: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+        faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+      ),
+      undefined,
+    ]),
+    supported_protocols: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 16 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 10, max: 128 } }),
+      ),
+      undefined,
+    ]),
     type: faker.helpers.arrayElement(['serverless-ecs'] as const),
     auth: {
       role_arn: faker.helpers.fromRegExp('^arn:aws:iam::[0-9]{12}:role\\/[a-zA-Z_0-9+=,.@\\-_/]+$'),
@@ -575,10 +1094,26 @@ export const getCreateRunnerResponseMock = (): Runner => ({
   ...{
     org_id: 'my-org',
     id: 'my-k8s-runner',
+    uuid: faker.string.uuid(),
     description: 'Runner to execute Terraform in our production cluster',
     created_at: '2023-01-01T00:00:00Z',
     updated_at: '2023-01-01T00:00:00Z',
-    runner_configuration: { type: faker.helpers.arrayElement(Object.values(RunnerType)) },
+    runner_configuration: {
+      max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+      capabilities: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+          faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+        ),
+        undefined,
+      ]),
+      supported_protocols: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha({ length: { min: 10, max: 20 } }),
+        ),
+        undefined,
+      ]),
+      type: faker.helpers.arrayElement(Object.values(RunnerType)),
+    },
     state_storage_configuration: {
       type: faker.helpers.arrayElement(Object.values(StateStorageType)),
     },
@@ -589,6 +1124,7 @@ export const getCreateRunnerResponseMock = (): Runner => ({
       { ...getCreateRunnerResponseK8sGkeRunnerConfigurationMock() },
       { ...getCreateRunnerResponseK8sEksRunnerConfigurationMock() },
       { ...getCreateRunnerResponseK8sAgentRunnerConfigurationMock() },
+      { ...getCreateRunnerResponseNativeAgentRunnerConfigurationMock() },
       { ...getCreateRunnerResponseServerlessEcsRunnerConfigurationMock() },
     ]),
     state_storage_configuration: faker.helpers.arrayElement([
@@ -604,10 +1140,26 @@ export const getCreateRunnerResponseMock201 = (): Runner => ({
   ...{
     org_id: 'my-org',
     id: 'my-k8s-runner',
+    uuid: faker.string.uuid(),
     description: 'Runner to execute Terraform in our production cluster',
     created_at: '2023-01-01T00:00:00Z',
     updated_at: '2023-01-01T00:00:00Z',
-    runner_configuration: { type: faker.helpers.arrayElement(Object.values(RunnerType)) },
+    runner_configuration: {
+      max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+      capabilities: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+          faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+        ),
+        undefined,
+      ]),
+      supported_protocols: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha({ length: { min: 10, max: 20 } }),
+        ),
+        undefined,
+      ]),
+      type: faker.helpers.arrayElement(Object.values(RunnerType)),
+    },
     state_storage_configuration: {
       type: faker.helpers.arrayElement(Object.values(StateStorageType)),
     },
@@ -618,6 +1170,7 @@ export const getCreateRunnerResponseMock201 = (): Runner => ({
       { ...getCreateRunnerResponseK8sGkeRunnerConfigurationMock() },
       { ...getCreateRunnerResponseK8sEksRunnerConfigurationMock() },
       { ...getCreateRunnerResponseK8sAgentRunnerConfigurationMock() },
+      { ...getCreateRunnerResponseNativeAgentRunnerConfigurationMock() },
       { ...getCreateRunnerResponseServerlessEcsRunnerConfigurationMock() },
     ]),
     state_storage_configuration: faker.helpers.arrayElement([
@@ -651,6 +1204,42 @@ export const getGetRunnerResponseK8sRunnerConfigurationMock = (
   overrideResponse: Partial<K8sRunnerConfiguration> = {},
 ): K8sRunnerConfiguration => ({
   ...{
+    native_execution: faker.helpers.arrayElement([
+      {
+        contract_version: faker.helpers.arrayElement(['stellwerk.runner.catalogue/v1'] as const),
+        runtime_version: faker.helpers.arrayElement([
+          'stellwerk.runner.rollout/v1',
+          'stellwerk.runner.rollout/v2',
+        ] as const),
+        tools_digest: faker.helpers.fromRegExp('^[a-f0-9]{64}$'),
+        tools: Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(
+          () => ({
+            id: faker.helpers.fromRegExp('^[A-Za-z0-9_.-]+$'),
+            name: faker.string.alpha({ length: { min: 1, max: 120 } }),
+            phase: faker.helpers.arrayElement(['pre_plan', 'plan_check', 'post_apply'] as const),
+            retry: faker.helpers.arrayElement(['read_only', 'receipt', 'unsafe'] as const),
+            required_capabilities: Array.from(
+              { length: faker.number.int({ min: 1, max: 32 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$')),
+          }),
+        ),
+      },
+      undefined,
+    ]),
+    max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    capabilities: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+        faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+      ),
+      undefined,
+    ]),
+    supported_protocols: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 16 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 10, max: 128 } }),
+      ),
+      undefined,
+    ]),
     type: faker.helpers.arrayElement(['kubernetes'] as const),
     job: {
       namespace: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -689,6 +1278,42 @@ export const getGetRunnerResponseK8sGkeRunnerConfigurationMock = (
   overrideResponse: Partial<K8sGkeRunnerConfiguration> = {},
 ): K8sGkeRunnerConfiguration => ({
   ...{
+    native_execution: faker.helpers.arrayElement([
+      {
+        contract_version: faker.helpers.arrayElement(['stellwerk.runner.catalogue/v1'] as const),
+        runtime_version: faker.helpers.arrayElement([
+          'stellwerk.runner.rollout/v1',
+          'stellwerk.runner.rollout/v2',
+        ] as const),
+        tools_digest: faker.helpers.fromRegExp('^[a-f0-9]{64}$'),
+        tools: Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(
+          () => ({
+            id: faker.helpers.fromRegExp('^[A-Za-z0-9_.-]+$'),
+            name: faker.string.alpha({ length: { min: 1, max: 120 } }),
+            phase: faker.helpers.arrayElement(['pre_plan', 'plan_check', 'post_apply'] as const),
+            retry: faker.helpers.arrayElement(['read_only', 'receipt', 'unsafe'] as const),
+            required_capabilities: Array.from(
+              { length: faker.number.int({ min: 1, max: 32 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$')),
+          }),
+        ),
+      },
+      undefined,
+    ]),
+    max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    capabilities: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+        faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+      ),
+      undefined,
+    ]),
+    supported_protocols: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 16 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 10, max: 128 } }),
+      ),
+      undefined,
+    ]),
     type: faker.helpers.arrayElement(['kubernetes-gke'] as const),
     job: {
       namespace: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -717,6 +1342,42 @@ export const getGetRunnerResponseK8sEksRunnerConfigurationMock = (
   overrideResponse: Partial<K8sEksRunnerConfiguration> = {},
 ): K8sEksRunnerConfiguration => ({
   ...{
+    native_execution: faker.helpers.arrayElement([
+      {
+        contract_version: faker.helpers.arrayElement(['stellwerk.runner.catalogue/v1'] as const),
+        runtime_version: faker.helpers.arrayElement([
+          'stellwerk.runner.rollout/v1',
+          'stellwerk.runner.rollout/v2',
+        ] as const),
+        tools_digest: faker.helpers.fromRegExp('^[a-f0-9]{64}$'),
+        tools: Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(
+          () => ({
+            id: faker.helpers.fromRegExp('^[A-Za-z0-9_.-]+$'),
+            name: faker.string.alpha({ length: { min: 1, max: 120 } }),
+            phase: faker.helpers.arrayElement(['pre_plan', 'plan_check', 'post_apply'] as const),
+            retry: faker.helpers.arrayElement(['read_only', 'receipt', 'unsafe'] as const),
+            required_capabilities: Array.from(
+              { length: faker.number.int({ min: 1, max: 32 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$')),
+          }),
+        ),
+      },
+      undefined,
+    ]),
+    max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    capabilities: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+        faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+      ),
+      undefined,
+    ]),
+    supported_protocols: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 16 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 10, max: 128 } }),
+      ),
+      undefined,
+    ]),
     type: faker.helpers.arrayElement(['kubernetes-eks'] as const),
     job: {
       namespace: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -748,6 +1409,42 @@ export const getGetRunnerResponseK8sAgentRunnerConfigurationMock = (
   overrideResponse: Partial<K8sAgentRunnerConfiguration> = {},
 ): K8sAgentRunnerConfiguration => ({
   ...{
+    native_execution: faker.helpers.arrayElement([
+      {
+        contract_version: faker.helpers.arrayElement(['stellwerk.runner.catalogue/v1'] as const),
+        runtime_version: faker.helpers.arrayElement([
+          'stellwerk.runner.rollout/v1',
+          'stellwerk.runner.rollout/v2',
+        ] as const),
+        tools_digest: faker.helpers.fromRegExp('^[a-f0-9]{64}$'),
+        tools: Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(
+          () => ({
+            id: faker.helpers.fromRegExp('^[A-Za-z0-9_.-]+$'),
+            name: faker.string.alpha({ length: { min: 1, max: 120 } }),
+            phase: faker.helpers.arrayElement(['pre_plan', 'plan_check', 'post_apply'] as const),
+            retry: faker.helpers.arrayElement(['read_only', 'receipt', 'unsafe'] as const),
+            required_capabilities: Array.from(
+              { length: faker.number.int({ min: 1, max: 32 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$')),
+          }),
+        ),
+      },
+      undefined,
+    ]),
+    max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    capabilities: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+        faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+      ),
+      undefined,
+    ]),
+    supported_protocols: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 16 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 10, max: 128 } }),
+      ),
+      undefined,
+    ]),
     type: faker.helpers.arrayElement(['kubernetes-agent'] as const),
     job: {
       namespace: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -759,10 +1456,92 @@ export const getGetRunnerResponseK8sAgentRunnerConfigurationMock = (
   ...overrideResponse,
 });
 
+export const getGetRunnerResponseNativeAgentRunnerConfigurationMock = (
+  overrideResponse: Partial<NativeAgentRunnerConfiguration> = {},
+): NativeAgentRunnerConfiguration => ({
+  ...{
+    type: faker.helpers.arrayElement(['native-agent'] as const),
+    key: '-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAc5dgCx4ano39JT0XgTsHnts3jej+5xl7ZAwSIrKpef0=\n-----END PUBLIC KEY-----\n',
+    max_parallel_jobs: faker.number.int({ min: 1 }),
+    supported_protocols: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 16 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 1, max: 128 } }),
+      ),
+      undefined,
+    ]),
+    capabilities: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+        faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+      ),
+      undefined,
+    ]),
+    native_execution: faker.helpers.arrayElement([
+      {
+        contract_version: faker.helpers.arrayElement(['stellwerk.runner.catalogue/v1'] as const),
+        runtime_version: faker.helpers.arrayElement([
+          'stellwerk.runner.rollout/v1',
+          'stellwerk.runner.rollout/v2',
+        ] as const),
+        tools_digest: faker.helpers.fromRegExp('^[a-f0-9]{64}$'),
+        tools: Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(
+          () => ({
+            id: faker.helpers.fromRegExp('^[A-Za-z0-9_.-]+$'),
+            name: faker.string.alpha({ length: { min: 1, max: 120 } }),
+            phase: faker.helpers.arrayElement(['pre_plan', 'plan_check', 'post_apply'] as const),
+            retry: faker.helpers.arrayElement(['read_only', 'receipt', 'unsafe'] as const),
+            required_capabilities: Array.from(
+              { length: faker.number.int({ min: 1, max: 32 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$')),
+          }),
+        ),
+      },
+      undefined,
+    ]),
+  },
+  ...overrideResponse,
+});
+
 export const getGetRunnerResponseServerlessEcsRunnerConfigurationMock = (
   overrideResponse: Partial<ServerlessEcsRunnerConfiguration> = {},
 ): ServerlessEcsRunnerConfiguration => ({
   ...{
+    native_execution: faker.helpers.arrayElement([
+      {
+        contract_version: faker.helpers.arrayElement(['stellwerk.runner.catalogue/v1'] as const),
+        runtime_version: faker.helpers.arrayElement([
+          'stellwerk.runner.rollout/v1',
+          'stellwerk.runner.rollout/v2',
+        ] as const),
+        tools_digest: faker.helpers.fromRegExp('^[a-f0-9]{64}$'),
+        tools: Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(
+          () => ({
+            id: faker.helpers.fromRegExp('^[A-Za-z0-9_.-]+$'),
+            name: faker.string.alpha({ length: { min: 1, max: 120 } }),
+            phase: faker.helpers.arrayElement(['pre_plan', 'plan_check', 'post_apply'] as const),
+            retry: faker.helpers.arrayElement(['read_only', 'receipt', 'unsafe'] as const),
+            required_capabilities: Array.from(
+              { length: faker.number.int({ min: 1, max: 32 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$')),
+          }),
+        ),
+      },
+      undefined,
+    ]),
+    max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    capabilities: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+        faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+      ),
+      undefined,
+    ]),
+    supported_protocols: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 16 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 10, max: 128 } }),
+      ),
+      undefined,
+    ]),
     type: faker.helpers.arrayElement(['serverless-ecs'] as const),
     auth: {
       role_arn: faker.helpers.fromRegExp('^arn:aws:iam::[0-9]{12}:role\\/[a-zA-Z_0-9+=,.@\\-_/]+$'),
@@ -855,10 +1634,26 @@ export const getGetRunnerResponseMock = (): Runner => ({
   ...{
     org_id: 'my-org',
     id: 'my-k8s-runner',
+    uuid: faker.string.uuid(),
     description: 'Runner to execute Terraform in our production cluster',
     created_at: '2023-01-01T00:00:00Z',
     updated_at: '2023-01-01T00:00:00Z',
-    runner_configuration: { type: faker.helpers.arrayElement(Object.values(RunnerType)) },
+    runner_configuration: {
+      max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+      capabilities: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+          faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+        ),
+        undefined,
+      ]),
+      supported_protocols: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha({ length: { min: 10, max: 20 } }),
+        ),
+        undefined,
+      ]),
+      type: faker.helpers.arrayElement(Object.values(RunnerType)),
+    },
     state_storage_configuration: {
       type: faker.helpers.arrayElement(Object.values(StateStorageType)),
     },
@@ -869,6 +1664,7 @@ export const getGetRunnerResponseMock = (): Runner => ({
       { ...getGetRunnerResponseK8sGkeRunnerConfigurationMock() },
       { ...getGetRunnerResponseK8sEksRunnerConfigurationMock() },
       { ...getGetRunnerResponseK8sAgentRunnerConfigurationMock() },
+      { ...getGetRunnerResponseNativeAgentRunnerConfigurationMock() },
       { ...getGetRunnerResponseServerlessEcsRunnerConfigurationMock() },
     ]),
     state_storage_configuration: faker.helpers.arrayElement([
@@ -884,10 +1680,26 @@ export const getGetRunnerResponseMock200 = (): Runner => ({
   ...{
     org_id: 'my-org',
     id: 'my-k8s-runner',
+    uuid: faker.string.uuid(),
     description: 'Runner to execute Terraform in our production cluster',
     created_at: '2023-01-01T00:00:00Z',
     updated_at: '2023-01-01T00:00:00Z',
-    runner_configuration: { type: faker.helpers.arrayElement(Object.values(RunnerType)) },
+    runner_configuration: {
+      max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+      capabilities: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+          faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+        ),
+        undefined,
+      ]),
+      supported_protocols: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha({ length: { min: 10, max: 20 } }),
+        ),
+        undefined,
+      ]),
+      type: faker.helpers.arrayElement(Object.values(RunnerType)),
+    },
     state_storage_configuration: {
       type: faker.helpers.arrayElement(Object.values(StateStorageType)),
     },
@@ -898,6 +1710,7 @@ export const getGetRunnerResponseMock200 = (): Runner => ({
       { ...getGetRunnerResponseK8sGkeRunnerConfigurationMock() },
       { ...getGetRunnerResponseK8sEksRunnerConfigurationMock() },
       { ...getGetRunnerResponseK8sAgentRunnerConfigurationMock() },
+      { ...getGetRunnerResponseNativeAgentRunnerConfigurationMock() },
       { ...getGetRunnerResponseServerlessEcsRunnerConfigurationMock() },
     ]),
     state_storage_configuration: faker.helpers.arrayElement([
@@ -922,6 +1735,42 @@ export const getUpdateRunnerResponseK8sRunnerConfigurationMock = (
   overrideResponse: Partial<K8sRunnerConfiguration> = {},
 ): K8sRunnerConfiguration => ({
   ...{
+    native_execution: faker.helpers.arrayElement([
+      {
+        contract_version: faker.helpers.arrayElement(['stellwerk.runner.catalogue/v1'] as const),
+        runtime_version: faker.helpers.arrayElement([
+          'stellwerk.runner.rollout/v1',
+          'stellwerk.runner.rollout/v2',
+        ] as const),
+        tools_digest: faker.helpers.fromRegExp('^[a-f0-9]{64}$'),
+        tools: Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(
+          () => ({
+            id: faker.helpers.fromRegExp('^[A-Za-z0-9_.-]+$'),
+            name: faker.string.alpha({ length: { min: 1, max: 120 } }),
+            phase: faker.helpers.arrayElement(['pre_plan', 'plan_check', 'post_apply'] as const),
+            retry: faker.helpers.arrayElement(['read_only', 'receipt', 'unsafe'] as const),
+            required_capabilities: Array.from(
+              { length: faker.number.int({ min: 1, max: 32 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$')),
+          }),
+        ),
+      },
+      undefined,
+    ]),
+    max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    capabilities: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+        faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+      ),
+      undefined,
+    ]),
+    supported_protocols: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 16 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 10, max: 128 } }),
+      ),
+      undefined,
+    ]),
     type: faker.helpers.arrayElement(['kubernetes'] as const),
     job: {
       namespace: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -960,6 +1809,42 @@ export const getUpdateRunnerResponseK8sGkeRunnerConfigurationMock = (
   overrideResponse: Partial<K8sGkeRunnerConfiguration> = {},
 ): K8sGkeRunnerConfiguration => ({
   ...{
+    native_execution: faker.helpers.arrayElement([
+      {
+        contract_version: faker.helpers.arrayElement(['stellwerk.runner.catalogue/v1'] as const),
+        runtime_version: faker.helpers.arrayElement([
+          'stellwerk.runner.rollout/v1',
+          'stellwerk.runner.rollout/v2',
+        ] as const),
+        tools_digest: faker.helpers.fromRegExp('^[a-f0-9]{64}$'),
+        tools: Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(
+          () => ({
+            id: faker.helpers.fromRegExp('^[A-Za-z0-9_.-]+$'),
+            name: faker.string.alpha({ length: { min: 1, max: 120 } }),
+            phase: faker.helpers.arrayElement(['pre_plan', 'plan_check', 'post_apply'] as const),
+            retry: faker.helpers.arrayElement(['read_only', 'receipt', 'unsafe'] as const),
+            required_capabilities: Array.from(
+              { length: faker.number.int({ min: 1, max: 32 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$')),
+          }),
+        ),
+      },
+      undefined,
+    ]),
+    max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    capabilities: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+        faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+      ),
+      undefined,
+    ]),
+    supported_protocols: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 16 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 10, max: 128 } }),
+      ),
+      undefined,
+    ]),
     type: faker.helpers.arrayElement(['kubernetes-gke'] as const),
     job: {
       namespace: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -988,6 +1873,42 @@ export const getUpdateRunnerResponseK8sEksRunnerConfigurationMock = (
   overrideResponse: Partial<K8sEksRunnerConfiguration> = {},
 ): K8sEksRunnerConfiguration => ({
   ...{
+    native_execution: faker.helpers.arrayElement([
+      {
+        contract_version: faker.helpers.arrayElement(['stellwerk.runner.catalogue/v1'] as const),
+        runtime_version: faker.helpers.arrayElement([
+          'stellwerk.runner.rollout/v1',
+          'stellwerk.runner.rollout/v2',
+        ] as const),
+        tools_digest: faker.helpers.fromRegExp('^[a-f0-9]{64}$'),
+        tools: Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(
+          () => ({
+            id: faker.helpers.fromRegExp('^[A-Za-z0-9_.-]+$'),
+            name: faker.string.alpha({ length: { min: 1, max: 120 } }),
+            phase: faker.helpers.arrayElement(['pre_plan', 'plan_check', 'post_apply'] as const),
+            retry: faker.helpers.arrayElement(['read_only', 'receipt', 'unsafe'] as const),
+            required_capabilities: Array.from(
+              { length: faker.number.int({ min: 1, max: 32 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$')),
+          }),
+        ),
+      },
+      undefined,
+    ]),
+    max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    capabilities: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+        faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+      ),
+      undefined,
+    ]),
+    supported_protocols: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 16 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 10, max: 128 } }),
+      ),
+      undefined,
+    ]),
     type: faker.helpers.arrayElement(['kubernetes-eks'] as const),
     job: {
       namespace: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -1019,6 +1940,42 @@ export const getUpdateRunnerResponseK8sAgentRunnerConfigurationMock = (
   overrideResponse: Partial<K8sAgentRunnerConfiguration> = {},
 ): K8sAgentRunnerConfiguration => ({
   ...{
+    native_execution: faker.helpers.arrayElement([
+      {
+        contract_version: faker.helpers.arrayElement(['stellwerk.runner.catalogue/v1'] as const),
+        runtime_version: faker.helpers.arrayElement([
+          'stellwerk.runner.rollout/v1',
+          'stellwerk.runner.rollout/v2',
+        ] as const),
+        tools_digest: faker.helpers.fromRegExp('^[a-f0-9]{64}$'),
+        tools: Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(
+          () => ({
+            id: faker.helpers.fromRegExp('^[A-Za-z0-9_.-]+$'),
+            name: faker.string.alpha({ length: { min: 1, max: 120 } }),
+            phase: faker.helpers.arrayElement(['pre_plan', 'plan_check', 'post_apply'] as const),
+            retry: faker.helpers.arrayElement(['read_only', 'receipt', 'unsafe'] as const),
+            required_capabilities: Array.from(
+              { length: faker.number.int({ min: 1, max: 32 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$')),
+          }),
+        ),
+      },
+      undefined,
+    ]),
+    max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    capabilities: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+        faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+      ),
+      undefined,
+    ]),
+    supported_protocols: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 16 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 10, max: 128 } }),
+      ),
+      undefined,
+    ]),
     type: faker.helpers.arrayElement(['kubernetes-agent'] as const),
     job: {
       namespace: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -1030,10 +1987,92 @@ export const getUpdateRunnerResponseK8sAgentRunnerConfigurationMock = (
   ...overrideResponse,
 });
 
+export const getUpdateRunnerResponseNativeAgentRunnerConfigurationMock = (
+  overrideResponse: Partial<NativeAgentRunnerConfiguration> = {},
+): NativeAgentRunnerConfiguration => ({
+  ...{
+    type: faker.helpers.arrayElement(['native-agent'] as const),
+    key: '-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAc5dgCx4ano39JT0XgTsHnts3jej+5xl7ZAwSIrKpef0=\n-----END PUBLIC KEY-----\n',
+    max_parallel_jobs: faker.number.int({ min: 1 }),
+    supported_protocols: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 16 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 1, max: 128 } }),
+      ),
+      undefined,
+    ]),
+    capabilities: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+        faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+      ),
+      undefined,
+    ]),
+    native_execution: faker.helpers.arrayElement([
+      {
+        contract_version: faker.helpers.arrayElement(['stellwerk.runner.catalogue/v1'] as const),
+        runtime_version: faker.helpers.arrayElement([
+          'stellwerk.runner.rollout/v1',
+          'stellwerk.runner.rollout/v2',
+        ] as const),
+        tools_digest: faker.helpers.fromRegExp('^[a-f0-9]{64}$'),
+        tools: Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(
+          () => ({
+            id: faker.helpers.fromRegExp('^[A-Za-z0-9_.-]+$'),
+            name: faker.string.alpha({ length: { min: 1, max: 120 } }),
+            phase: faker.helpers.arrayElement(['pre_plan', 'plan_check', 'post_apply'] as const),
+            retry: faker.helpers.arrayElement(['read_only', 'receipt', 'unsafe'] as const),
+            required_capabilities: Array.from(
+              { length: faker.number.int({ min: 1, max: 32 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$')),
+          }),
+        ),
+      },
+      undefined,
+    ]),
+  },
+  ...overrideResponse,
+});
+
 export const getUpdateRunnerResponseServerlessEcsRunnerConfigurationMock = (
   overrideResponse: Partial<ServerlessEcsRunnerConfiguration> = {},
 ): ServerlessEcsRunnerConfiguration => ({
   ...{
+    native_execution: faker.helpers.arrayElement([
+      {
+        contract_version: faker.helpers.arrayElement(['stellwerk.runner.catalogue/v1'] as const),
+        runtime_version: faker.helpers.arrayElement([
+          'stellwerk.runner.rollout/v1',
+          'stellwerk.runner.rollout/v2',
+        ] as const),
+        tools_digest: faker.helpers.fromRegExp('^[a-f0-9]{64}$'),
+        tools: Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(
+          () => ({
+            id: faker.helpers.fromRegExp('^[A-Za-z0-9_.-]+$'),
+            name: faker.string.alpha({ length: { min: 1, max: 120 } }),
+            phase: faker.helpers.arrayElement(['pre_plan', 'plan_check', 'post_apply'] as const),
+            retry: faker.helpers.arrayElement(['read_only', 'receipt', 'unsafe'] as const),
+            required_capabilities: Array.from(
+              { length: faker.number.int({ min: 1, max: 32 }) },
+              (_, i) => i + 1,
+            ).map(() => faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$')),
+          }),
+        ),
+      },
+      undefined,
+    ]),
+    max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+    capabilities: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+        faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+      ),
+      undefined,
+    ]),
+    supported_protocols: faker.helpers.arrayElement([
+      Array.from({ length: faker.number.int({ min: 1, max: 16 }) }, (_, i) => i + 1).map(() =>
+        faker.string.alpha({ length: { min: 10, max: 128 } }),
+      ),
+      undefined,
+    ]),
     type: faker.helpers.arrayElement(['serverless-ecs'] as const),
     auth: {
       role_arn: faker.helpers.fromRegExp('^arn:aws:iam::[0-9]{12}:role\\/[a-zA-Z_0-9+=,.@\\-_/]+$'),
@@ -1126,10 +2165,26 @@ export const getUpdateRunnerResponseMock = (): Runner => ({
   ...{
     org_id: 'my-org',
     id: 'my-k8s-runner',
+    uuid: faker.string.uuid(),
     description: 'Runner to execute Terraform in our production cluster',
     created_at: '2023-01-01T00:00:00Z',
     updated_at: '2023-01-01T00:00:00Z',
-    runner_configuration: { type: faker.helpers.arrayElement(Object.values(RunnerType)) },
+    runner_configuration: {
+      max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+      capabilities: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+          faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+        ),
+        undefined,
+      ]),
+      supported_protocols: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha({ length: { min: 10, max: 20 } }),
+        ),
+        undefined,
+      ]),
+      type: faker.helpers.arrayElement(Object.values(RunnerType)),
+    },
     state_storage_configuration: {
       type: faker.helpers.arrayElement(Object.values(StateStorageType)),
     },
@@ -1140,6 +2195,7 @@ export const getUpdateRunnerResponseMock = (): Runner => ({
       { ...getUpdateRunnerResponseK8sGkeRunnerConfigurationMock() },
       { ...getUpdateRunnerResponseK8sEksRunnerConfigurationMock() },
       { ...getUpdateRunnerResponseK8sAgentRunnerConfigurationMock() },
+      { ...getUpdateRunnerResponseNativeAgentRunnerConfigurationMock() },
       { ...getUpdateRunnerResponseServerlessEcsRunnerConfigurationMock() },
     ]),
     state_storage_configuration: faker.helpers.arrayElement([
@@ -1155,10 +2211,26 @@ export const getUpdateRunnerResponseMock200 = (): Runner => ({
   ...{
     org_id: 'my-org',
     id: 'my-k8s-runner',
+    uuid: faker.string.uuid(),
     description: 'Runner to execute Terraform in our production cluster',
     created_at: '2023-01-01T00:00:00Z',
     updated_at: '2023-01-01T00:00:00Z',
-    runner_configuration: { type: faker.helpers.arrayElement(Object.values(RunnerType)) },
+    runner_configuration: {
+      max_parallel_jobs: faker.helpers.arrayElement([faker.number.int({ min: 1 }), undefined]),
+      capabilities: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 32 }) }, (_, i) => i + 1).map(() =>
+          faker.helpers.fromRegExp('^[a-z][a-z0-9_.:/-]*$'),
+        ),
+        undefined,
+      ]),
+      supported_protocols: faker.helpers.arrayElement([
+        Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+          faker.string.alpha({ length: { min: 10, max: 20 } }),
+        ),
+        undefined,
+      ]),
+      type: faker.helpers.arrayElement(Object.values(RunnerType)),
+    },
     state_storage_configuration: {
       type: faker.helpers.arrayElement(Object.values(StateStorageType)),
     },
@@ -1169,6 +2241,7 @@ export const getUpdateRunnerResponseMock200 = (): Runner => ({
       { ...getUpdateRunnerResponseK8sGkeRunnerConfigurationMock() },
       { ...getUpdateRunnerResponseK8sEksRunnerConfigurationMock() },
       { ...getUpdateRunnerResponseK8sAgentRunnerConfigurationMock() },
+      { ...getUpdateRunnerResponseNativeAgentRunnerConfigurationMock() },
       { ...getUpdateRunnerResponseServerlessEcsRunnerConfigurationMock() },
     ]),
     state_storage_configuration: faker.helpers.arrayElement([

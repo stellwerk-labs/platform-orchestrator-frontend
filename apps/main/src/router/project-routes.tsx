@@ -14,6 +14,7 @@ import { EnvStatus } from '@src/containers/Orgs/Projects/containers/Project/cont
 import { ViewEnvironment } from '@src/containers/Orgs/Projects/containers/Project/containers/ViewEnvironment/ViewEnvironment';
 import { Project } from '@src/containers/Orgs/Projects/containers/Project/Project';
 import { ProjectList } from '@src/containers/Orgs/Projects/containers/ProjectList/ProjectList';
+import { DeploymentPipeline } from '@src/containers/RunnerRollouts/DeploymentPipeline';
 import { BreadcrumbData } from '@src/types/router';
 import { getSharedBreadcrumbs } from '@src/utilities/breadcrumbs-utils';
 import { generateProjectsUrl } from '@src/utilities/navigation';
@@ -34,6 +35,10 @@ const deploymentOrDeltaTabRoutes: RouteObject[] = [
   {
     path: 'logs',
     element: <Logs />,
+  },
+  {
+    path: 'pipeline',
+    element: <DeploymentPipeline />,
   },
 ];
 

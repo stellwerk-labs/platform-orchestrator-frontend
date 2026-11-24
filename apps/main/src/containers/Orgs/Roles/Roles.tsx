@@ -7,6 +7,7 @@ import { useParams } from 'react-router';
 
 import { CheckRBAC } from '@src/components/shared/CheckRBAC';
 import { PageHeader } from '@src/components/shared/PageHeader/PageHeader';
+import { matchesSearch, TableToolbar, useTableSearch } from '@src/components/shared/TableToolbar';
 import { MatchParams } from '@src/config/routing';
 import {
   getListRolesQueryKey,
@@ -23,6 +24,7 @@ import { Role, RoleWriteBody } from '@src/models/v2/iam';
 import { RoleModal } from './RoleModal';
 
 export const Roles = () => {
+  const search = useTableSearch();
   const { orgId } = useParams<keyof MatchParams>() as MatchParams;
   const queryClient = useQueryClient();
   const [editedRole, setEditedRole] = useState<Role>();
@@ -176,13 +178,32 @@ export const Roles = () => {
           </CheckRBAC>
         }
       />
+      <TableToolbar
+        label={'roles'}
+        {...search}
+        filters={[
+          { value: 'built_in', label: 'Built-in' },
+          { value: 'custom', label: 'Custom' },
+        ]}
+      />
       <Table<Role>
+        key={`${search.query}:${search.view}`}
         aria-label={'Roles'}
         rowKey={'id'}
         columns={columns}
-        dataSource={roles}
+        dataSource={roles?.filter(
+          (row) =>
+            matchesSearch(search.query, row.id, row.display_name, ...row.permissions) &&
+            (search.view === 'all' ||
+              (search.view === 'built_in' ? row.is_system : !row.is_system)),
+        )}
         loading={isLoading}
-        locale={{ emptyText: 'No roles found' }}
+        locale={{
+          emptyText:
+            search.query || search.view !== 'all'
+              ? 'No results match these filters.'
+              : 'No roles found',
+        }}
       />
       <RoleModal
         open={roleModalOpen}

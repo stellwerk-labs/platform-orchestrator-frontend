@@ -13,11 +13,11 @@ export interface BreadcrumbItem {
   labelAsTitle?: boolean;
 }
 export const useBreadcrumbs = () => {
-  const { orgId, projectId, envId, deploymentId } = useParams<keyof MatchParams>() as MatchParams;
+  const { orgId, projectId, envId, deployId } = useParams<keyof MatchParams>() as MatchParams;
 
   const matches: UIMatch[] = useMatches();
 
-  const { data: deployment } = useGetDeployment(orgId, deploymentId);
+  const { data: deployment } = useGetDeployment(orgId, deployId);
 
   const { data: env } = useGetEnvironment(orgId, projectId, envId);
 

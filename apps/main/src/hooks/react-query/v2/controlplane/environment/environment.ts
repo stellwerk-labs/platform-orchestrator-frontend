@@ -1476,15 +1476,16 @@ export const useUpdateRunnerInAnEnvironment = <
 };
 /**
  * Records, exactly once and attributed to the acting user, that an operator has confirmed the Runner attempt
- * of this failed plugin-dispatched Deployment of the Environment can no longer change it. The Data Plane
- * accepts only the current Environment head without Runner stop evidence after its Runner dispatch window
- * closed; the acknowledgement then lets the next Deployment of the Environment proceed. It does not change
+ * of this eligible Deployment of the Environment can no longer change it. Eligibility includes retained
+ * plugin-dispatched work and ordinary work retaining Runner capacity, including older non-head ownership,
+ * only after the bounded Runner dispatch window has closed and without Runner stop evidence. The
+ * acknowledgement releases that retained ownership and wakes Environment deletion. It does not change
  * the Deployment's status or history. Requires the `deployment.outcome.acknowledge` permission on the
  * Environment, with the organization as fallback. Organization tokens and the system user are rejected
  * because the actor is the audit record. Repeating the identical request returns the stored acknowledgement
  * with status 200; a different request for the same Deployment returns 409.
  *
- * @summary Acknowledge the unknown Runner outcome of a failed plugin-dispatched Deployment.
+ * @summary Acknowledge an eligible retained Deployment with unknown Runner outcome.
  */
 export const acknowledgeDeploymentOutcome = (
   orgId: string,
@@ -1571,7 +1572,7 @@ export type AcknowledgeDeploymentOutcomeMutationVariables = {
 };
 
 /**
- * @summary Acknowledge the unknown Runner outcome of a failed plugin-dispatched Deployment.
+ * @summary Acknowledge an eligible retained Deployment with unknown Runner outcome.
  */
 export const useAcknowledgeDeploymentOutcome = <
   TError = ErrorType<

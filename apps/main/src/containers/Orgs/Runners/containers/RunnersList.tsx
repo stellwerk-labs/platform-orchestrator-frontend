@@ -1,9 +1,10 @@
-import { Empty, Flex, Table, TableColumnProps, Tooltip } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+import { Button, Empty, Flex, Table, TableColumnProps, Tooltip } from 'antd';
 import { formatDate } from 'date-fns';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link, useParams } from 'react-router';
 
-import { SearchInput } from '@src/components/shared/ui/SearchInput/SearchInput';
+import { matchesSearch, TableToolbar, useTableSearch } from '@src/components/shared/TableToolbar';
 import { DOCS_GET_STARTED_EMPTY_STATE, DOCS_RUNNERS } from '@src/config/docs-links';
 import { MatchParams } from '@src/config/routing';
 import {
@@ -11,9 +12,10 @@ import {
   listRunners,
 } from '@src/hooks/react-query/v2/controlplane/runner/runner';
 import { getAllPagesQueryKey, useAllPages } from '@src/hooks/useFetchAllPages';
+import { RBACPermission, RBACStatus, useRBAC } from '@src/hooks/useRBAC';
 import { RunnerSummary } from '@src/models/v2/controlplane';
 import { DATE_FORMATS_TYPES } from '@src/utilities/datetime/datetime';
-import { generateRunnerDetailUrl } from '@src/utilities/navigation';
+import { generateRunnerDetailUrl, generateRunnersUrl } from '@src/utilities/navigation';
 
 export const RunnersList = () => {
   const { orgId } = useParams<keyof MatchParams>() as MatchParams;
@@ -23,12 +25,19 @@ export const RunnersList = () => {
     (params) => listRunners(orgId, params),
   );
 
-  // state
-  const [filteredRunners, setFilteredRunners] = useState<RunnerSummary[] | undefined>();
-
-  useEffect(() => {
-    setFilteredRunners(allRunners);
-  }, [allRunners]);
+  const search = useTableSearch();
+  const canWrite = useRBAC(RBACPermission.RUNNER_WRITE) === RBACStatus.ALLOWED;
+  const filteredRunners = allRunners?.filter(
+    (row) =>
+      matchesSearch(
+        search.query,
+        row.id,
+        row.description,
+        row.runner_configuration?.type,
+        row.state_storage_configuration?.type,
+      ) &&
+      (search.view === 'all' || row.runner_configuration?.type === search.view),
+  );
 
   const columns: TableColumnProps<RunnerSummary>[] = [
     {
@@ -74,41 +83,61 @@ export const RunnersList = () => {
     },
   ];
 
-  const handleSearchChange = (value: string) => {
-    setFilteredRunners(allRunners?.filter((runner) => runner.id.includes(value)));
-  };
-
   return (
     <Flex vertical gap={'middle'} justify={'center'}>
-      <SearchInput onChange={handleSearchChange} placeholder={'Filter runners'} />
+      {canWrite && (
+        <Flex justify={'flex-end'}>
+          <Button
+            type={'primary'}
+            icon={<PlusOutlined />}
+            href={`${generateRunnersUrl(orgId)}/list/new`}>
+            Register native Runner
+          </Button>
+        </Flex>
+      )}
+      <TableToolbar
+        label={'runners'}
+        {...search}
+        filters={[
+          ...new Set(
+            allRunners
+              ?.map((row) => row.runner_configuration?.type)
+              .filter((type) => type !== undefined),
+          ),
+        ].map((type) => ({ value: type, label: type }))}
+      />
       <Table
+        key={`${search.query}:${search.view}`}
         columns={columns}
         dataSource={filteredRunners}
         rowKey={'id'}
         loading={runnersLoading}
         size={'small'}
         locale={{
-          emptyText: (
-            <Empty
-              description={
-                <>
-                  No runners found, see{' '}
-                  <a href={DOCS_RUNNERS} target={'_blank'} rel={'noreferrer noopener'}>
-                    runners docs
-                  </a>{' '}
-                  for details, or follow the{' '}
-                  <a
-                    href={DOCS_GET_STARTED_EMPTY_STATE}
-                    target={'_blank'}
-                    rel={'noreferrer noopener'}>
-                    tutorial
-                  </a>{' '}
-                  to explore the full setup flow.
-                </>
-              }
-              styles={{ image: { display: 'none' } }}
-            />
-          ),
+          emptyText:
+            search.query || search.view !== 'all' ? (
+              'No results match these filters.'
+            ) : (
+              <Empty
+                description={
+                  <>
+                    No runners found, see{' '}
+                    <a href={DOCS_RUNNERS} target={'_blank'} rel={'noreferrer noopener'}>
+                      runners docs
+                    </a>{' '}
+                    for details, or follow the{' '}
+                    <a
+                      href={DOCS_GET_STARTED_EMPTY_STATE}
+                      target={'_blank'}
+                      rel={'noreferrer noopener'}>
+                      tutorial
+                    </a>{' '}
+                    to explore the full setup flow.
+                  </>
+                }
+                styles={{ image: { display: 'none' } }}
+              />
+            ),
         }}
       />
     </Flex>

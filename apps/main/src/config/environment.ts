@@ -11,6 +11,7 @@ if (import.meta.env.DEV || !(window as any).env) {
     BASE_URL: import.meta.env.VITE_BASE_URL,
     ENVIRONMENT_NAME: import.meta.env.VITE_ENVIRONMENT_NAME,
     DEPLOYMENT_MODE: import.meta.env.VITE_DEPLOYMENT_MODE,
+    RUNNER_ROLLOUTS: import.meta.env.VITE_RUNNER_ROLLOUTS,
     VERSION: 'development',
 
     GOOGLE_CLIENT_ID: import.meta.env.VITE_GOOGLE_CLIENT_ID,

@@ -62,12 +62,51 @@ verification model only supports `unverified`, so Default verified currently
 matches no modules. This is immutable public source provenance; matching server
 artifacts are qualified separately before release.
 
+Deployment and pipeline browser contracts use these immutable public sources:
 
-Automatic deployment log access imports the log endpoint and `managed_logs`
-creation field from local Data Plane candidate commit `6eea87239038c8f6208c9c9b68dc98797d407a7b`,
-full `openapi/spec.yaml` SHA-256 `9421b3f94b36cab8e66653db258a0172c61bfc0c812a76b63024a462fa2cd24c`.
-This candidate has not been publicly pushed or released. The curated source
-retains other operations; the generated client is produced with the existing
-pinned Orval tooling. Publish the coordinated server source before publishing
-the Console. The log viewer uses a bounded handwritten native-cookie fetch
-with `decrypt=true`; it does not put decrypted contents into the query cache.
+- Control Plane: [`6b133551f03fe48130b8bf9974f77b19c614271c`](https://raw.githubusercontent.com/stellwerk-labs/platform-orchestrator-cp/6b133551f03fe48130b8bf9974f77b19c614271c/openapi/spec.yaml),
+  Git blob `66865d77542d16373e26ac10b2e5c92a7b9323b4`, full `openapi/spec.yaml`
+  SHA-256 `b720ffe7154012200f52c3b509baaa51ff67ac57140a0dabbd5e9b41d9b649b8`.
+  The curated slice covers Runner registration/read/update and their 42-schema
+  closure, plus the retained-outcome acknowledgement operation. The latter's
+  descriptions include ordinary retained ownership as well as plugin work.
+- Data Plane: [`e31b51422403c7b1aee3ee033bb645a304009b94`](https://raw.githubusercontent.com/stellwerk-labs/platform-orchestrator-dp/e31b51422403c7b1aee3ee033bb645a304009b94/openapi/spec.yaml),
+  Git blob `5d3a805e0b742fda21026e5af9cee7aa532696ab`, full `openapi/spec.yaml`
+  SHA-256 `43a4ad79fc8e1ad2f8dcc8410c3eb6e884f829325f9c18abecfcc5e55885dfef`.
+  The refreshed curated slice covers deployment listing (bounded pagination,
+  search and quick filters), optional pipeline summary and creation selection,
+  the existing log endpoint and `managed_logs` creation field. Other operations
+  and schemas remain curated; Runner result callbacks are not refreshed by this
+  browser-source update. The existing browser-specific log-recipient description
+  retains its explicit explanation of `managed_logs`.
+- Pipeline authoring: [`openapi/pipelines.yaml` at the same public Control Plane revision](https://raw.githubusercontent.com/stellwerk-labs/platform-orchestrator-cp/6b133551f03fe48130b8bf9974f77b19c614271c/openapi/pipelines.yaml),
+  Git blob `a1feed1bfd33786b129654954acd3c41a3bd6b9e`,
+  SHA-256 `629867b8e7b1f20080ef6de9ecb003755846b4add3bf4c00d5f98569ea76299f`.
+  `pipelines.yml` is the exact complete file at this revision. Its bytes already
+  matched before this provenance update.
+
+These sources were fetched anonymously from the immutable public URLs and checked
+against the Git blobs and SHA-256 values above. This proves source availability,
+not a released image or matching installed server version. Historical sources for
+unrelated curated entries above remain applicable.
+
+`runner-source.json` records the exact selected Runner schemas and semantic hash.
+All 42 are unchanged by this source refresh, so `changed_schemas` is empty. Its
+`curated_nonselected_unchanged` flag is false because the acknowledgement operation's
+descriptions also change. Native inventory remains optional in disabled READ
+responses, with explicit null permitted in native PATCH. Enabled Create retains
+Core's authoritative inventory and protocol/capability business requirements.
+
+The existing bounded handwritten `deploymentPipelineApi.ts`, phase-log reader
+and `pipelineDocumentApi.ts` remain in use. Their pipeline execution, control,
+saved-plan, central-log and document operations were compared with these public
+contracts. Saved-plan action callers consume only the returned ID; they do not
+require a full Deployment response. The legacy `planLogsApi.ts` Runner-rollout
+`/plan-logs` route is not described by this public OpenAPI and remains unchanged;
+this source comparison does not qualify that route. Decrypted log contents remain
+outside the query cache. Editor completion continues to use the runtime
+`/orgs/{org}/projects/{project}/pipelines/schema` endpoint.
+
+Use the existing pinned Orval 8.43.0 and normal formatter through
+`pnpm run orval --clean`, followed by `pnpm run generate:runner-schema`. Source
+preparation alone does not establish successful generation or client qualification.

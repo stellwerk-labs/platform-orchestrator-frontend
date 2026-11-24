@@ -1240,7 +1240,8 @@ export const useCalculateDeploymentDiff = <
   return useMutation(getCalculateDeploymentDiffMutationOptions(options), queryClient);
 };
 /**
- * Logs are retained for 30 days. Without decrypt=true or DecryptKey, the response remains encrypted and requires deployment_read.
+ * Legacy responses remain encrypted without decrypt=true or DecryptKey and require deployment_read.
+ * Native central logs require managed custody, decrypt=true, deployment_read and deployment_logs_read; availability depends on retained artifacts.
  * Plaintext requests require deployment_logs_read. Use managed_logs:true when creating a Deployment to enable server-managed decryption.
  *
  * @summary Get the logs produced by the runner execution during the deployment.

@@ -10,7 +10,8 @@
     "test": "turbo test",
     "test:ci": "turbo test:ci --cache-dir=.turbo",
     "test:licenses": "node --experimental-strip-types --test apps/main/scripts/dependency-notices.test.mts",
-    "test:orval": "node --test apps/main/src/scripts/format-orval-docs.test.mjs",
+    "test:orval": "node --test apps/main/src/scripts/format-orval-docs.test.mjs apps/main/scripts/runner-contract.test.mjs apps/main/scripts/native-runner-schema.test.mjs",
+    "generate:runner-schema": "node apps/main/scripts/native-runner-schema.mjs",
     "test:report": "turbo test-report",
     "coverage": "turbo coverage",
     "lint": "eslint --max-warnings=0 .",
@@ -65,5 +66,13 @@
     "*.{js,ts,tsx,css,json,md}": [
       "prettier --write"
     ]
+  },
+  "pnpm": {
+    "overrides": {
+      "undici@>=7.0.0 <7.30.1": "7.30.1",
+      "follow-redirects@>=1.16.0 <1.16.2": "1.16.2",
+      "postcss@<8.5.23": "8.5.23",
+      "dompurify@<3.4.18": "3.4.18"
+    }
   }
 }

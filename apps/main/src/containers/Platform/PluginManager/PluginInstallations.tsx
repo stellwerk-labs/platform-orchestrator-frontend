@@ -3,6 +3,7 @@ import type { ColumnsType } from 'antd/es/table';
 import { Link } from 'react-router';
 
 import { PageHeader } from '@src/components/shared/PageHeader/PageHeader';
+import { matchesSearch, TableToolbar, useTableSearch } from '@src/components/shared/TableToolbar';
 import {
   useListPluginInstallations,
   useListPluginPackages,
@@ -71,6 +72,7 @@ const RegistrationProblems = ({ installation }: { installation: PluginInstallati
 };
 
 export const PluginInstallations = () => {
+  const search = useTableSearch();
   const installations = useListPluginInstallations();
   const packages = useListPluginPackages();
 
@@ -141,16 +143,60 @@ export const PluginInstallations = () => {
       {installations.isError ? (
         <PluginManagerError error={installations.error} what={'The plugin installations'} />
       ) : (
-        <Table
-          rowKey={'installation_id'}
-          columns={columns}
-          loading={installations.isLoading && { indicator: <Spin /> }}
-          dataSource={[...(installations.data?.items ?? [])].sort((a, b) =>
-            a.plugin_id.localeCompare(b.plugin_id),
-          )}
-          pagination={false}
-          locale={{ emptyText: <Empty description={'No plugin is installed.'} /> }}
-        />
+        <>
+          <TableToolbar
+            label={'plugins'}
+            {...search}
+            filters={[
+              { value: 'problems', label: 'Registration problems' },
+              { value: 'upgrading', label: 'Upgrade pending' },
+              ...[...new Set(installations.data?.items.map((row) => row.state))].map((state) => ({
+                value: state,
+                label: state,
+              })),
+            ]}
+          />
+          <Table
+            rowKey={'installation_id'}
+            columns={columns}
+            loading={installations.isLoading && { indicator: <Spin /> }}
+            dataSource={[...(installations.data?.items ?? [])]
+              .filter(
+                (row) =>
+                  matchesSearch(
+                    search.query,
+                    row.plugin_id,
+                    row.installation_id,
+                    row.package_sha256,
+                    packageVersion(packages.data?.items, row.package_sha256),
+                    row.organization_mode,
+                  ) &&
+                  (search.view === 'all' ||
+                    (search.view === 'problems'
+                      ? Boolean(
+                          row.diagnostic ||
+                          registrationProblems(row).failed.length ||
+                          registrationProblems(row).pending.length,
+                        )
+                      : search.view === 'upgrading'
+                        ? Boolean(row.target_package_sha256)
+                        : row.state === search.view)),
+              )
+              .sort((a, b) => a.plugin_id.localeCompare(b.plugin_id))}
+            pagination={false}
+            locale={{
+              emptyText: (
+                <Empty
+                  description={
+                    search.query || search.view !== 'all'
+                      ? 'No results match these filters.'
+                      : 'No plugin is installed.'
+                  }
+                />
+              ),
+            }}
+          />
+        </>
       )}
     </>
   );

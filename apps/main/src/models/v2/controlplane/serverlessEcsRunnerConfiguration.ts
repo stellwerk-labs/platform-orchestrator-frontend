@@ -3,6 +3,7 @@
  * Do not edit manually.
  */
 import type { AwsTemporaryAuth } from './awsTemporaryAuth.ts';
+import type { RunnerExecutionCatalogue } from './runnerExecutionCatalogue.ts';
 import type { ServerlessEcsRunnerConfigurationType } from './serverlessEcsRunnerConfigurationType.ts';
 import type { ServerlessEcsRunnerJob } from './serverlessEcsRunnerJob.ts';
 
@@ -10,6 +11,30 @@ import type { ServerlessEcsRunnerJob } from './serverlessEcsRunnerJob.ts';
  * Runner configuration for executing on AWS ECS Fargate.
  */
 export interface ServerlessEcsRunnerConfiguration {
+  /** Approved native execution inventory, limited to 64 KiB. Omission preserves it on update; explicit null clears it on update only. Dependent protocols and capabilities must remain consistent. */
+  native_execution?: RunnerExecutionCatalogue;
+  /**
+   * Maximum concurrent jobs across all Environments using this Runner. Omission preserves unlimited legacy admission. Reducing the limit drains existing jobs before new admission.
+   *
+   * @minimum 1
+   */
+  max_parallel_jobs?: number;
+  /**
+   * Operator-declared execution and connectivity capabilities of the configured Runner image and site. Omission preserves existing capabilities on update; null clears them on update only. Bundled software does not imply network access.
+   *
+   * @maxItems 32
+   * @items.minLength 1
+   * @items.maxLength 128
+   * @items.pattern ^[a-z][a-z0-9_.:/-]*$
+   */
+  capabilities?: string[];
+  /**
+   * Protocols explicitly supported by the configured Runner image. Observation requires environment-observation/v1.
+   *
+   * @maxItems 16
+   * @items.maxLength 128
+   */
+  supported_protocols?: string[];
   type: ServerlessEcsRunnerConfigurationType;
   auth: AwsTemporaryAuth;
   job: ServerlessEcsRunnerJob;

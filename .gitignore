@@ -39,3 +39,5 @@ package-lock.json
 
 # jscpd reports
 reports/jscpd
+
+/apps/main/test-reports/native-browser/

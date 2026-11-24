@@ -1,12 +1,18 @@
-import { Empty, Table, Typography } from 'antd';
+import { Alert, Empty, Flex, Table, Typography } from 'antd';
 import { ColumnsType, TableProps } from 'antd/es/table';
 import { FilterValue, TablePaginationConfig } from 'antd/es/table/interface';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router';
 
+import { TableToolbar, useTableSearch } from '@src/components/shared/TableToolbar';
+import { windowEnv } from '@src/config/environment';
 import { MatchParams } from '@src/config/routing';
+import { CreatePipelineDeployment } from '@src/containers/RunnerRollouts/CreatePipelineDeployment';
+import type { PipelineDeployment } from '@src/containers/RunnerRollouts/deploymentPipelineApi';
+import { PipelineStatus } from '@src/containers/RunnerRollouts/PipelineStatus';
 import { useListDeployments } from '@src/hooks/react-query/v2/dataplane/deployment/deployment';
+import { useDebouncedValue } from '@src/hooks/useDebouncedValue';
 import { useTokenPagination } from '@src/hooks/useTokenPagination';
 import { useUserDetails } from '@src/hooks/useUserDetails';
 import { ByStatusQueryParamParameterItem, DeploymentSummary } from '@src/models/v2/dataplane';
@@ -27,15 +33,71 @@ const modeFilters = USER_VISIBLE_MODES.map((mode) => ({
   value: mode,
 }));
 
+type QuickFilter =
+  'all' | 'plans' | 'unused_plans' | 'deployments' | 'needs_approval' | 'needs_attention';
+const quickFilters = [
+  { value: 'plans', label: 'Plans' },
+  { value: 'unused_plans', label: 'Unused plans' },
+  { value: 'deployments', label: 'Deployments' },
+  { value: 'needs_approval', label: 'Needs approval' },
+  { value: 'needs_attention', label: 'Needs attention' },
+];
+
 export const Deploys = () => {
+  const search = useTableSearch();
+  const [statusFilter, setStatusFilter] = useState<ByStatusQueryParamParameterItem[]>();
+  const [modeFilter, setModeFilter] = useState<UserVisibleMode[]>();
+
+  const query = useDebouncedValue(search.query, 250);
+  const filter = quickFilters.some((option) => option.value === search.view)
+    ? (search.view as QuickFilter)
+    : 'all';
+  return (
+    <Flex vertical gap={'small'}>
+      <TableToolbar
+        label={'deployments'}
+        placeholder={'Search IDs, pipeline name, environment or creator ID'}
+        {...search}
+        filters={quickFilters}>
+        {filter === 'unused_plans' && (
+          <Typography.Text type={'secondary'}>
+            No Apply deployment has been created. An unsuccessful Apply still consumes its source
+            plan.
+          </Typography.Text>
+        )}
+      </TableToolbar>
+      <DeploymentsTable
+        key={`${query}:${filter}`}
+        query={query}
+        quickFilter={filter}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        modeFilter={modeFilter}
+        setModeFilter={setModeFilter}
+      />
+    </Flex>
+  );
+};
+
+const DeploymentsTable = ({
+  query,
+  quickFilter,
+  statusFilter,
+  setStatusFilter,
+  modeFilter,
+  setModeFilter,
+}: {
+  query: string;
+  quickFilter: QuickFilter;
+  statusFilter?: ByStatusQueryParamParameterItem[];
+  setStatusFilter: (value: ByStatusQueryParamParameterItem[] | undefined) => void;
+  modeFilter?: UserVisibleMode[];
+  setModeFilter: (value: UserVisibleMode[] | undefined) => void;
+}) => {
   const { orgId, projectId, envId } = useParams<keyof MatchParams>() as MatchParams;
 
   const { t } = useTranslation('viewEnvironment');
   const deploysTranslations = t('DEPLOYS');
-
-  // Server-side filters
-  const [statusFilter, setStatusFilter] = useState<ByStatusQueryParamParameterItem[]>();
-  const [modeFilter, setModeFilter] = useState<UserVisibleMode[]>();
 
   // Pagination
   const {
@@ -48,14 +110,23 @@ export const Deploys = () => {
   } = useTokenPagination();
 
   // Data fetching
-  const { data: deploymentsPage, isLoading } = useListDeployments(orgId, {
-    project_id: projectId,
-    env_id: envId,
-    by_status: statusFilter,
-    by_mode: mapModeFilterToApiParams(modeFilter),
-    per_page: pageSize,
-    page: pageToken,
-  });
+  const {
+    data: deploymentsPage,
+    isLoading,
+    isError,
+  } = useListDeployments(
+    orgId,
+    {
+      ...{ q: query || undefined, quick_filter: quickFilter },
+      project_id: projectId,
+      env_id: envId,
+      by_status: statusFilter,
+      by_mode: mapModeFilterToApiParams(modeFilter),
+      per_page: pageSize,
+      page: pageToken,
+    },
+    { query: { refetchInterval: windowEnv.RUNNER_ROLLOUTS === 'true' ? 2000 : false } },
+  );
 
   const { getUserDisplayName } = useUserDetails(orgId);
 
@@ -118,9 +189,28 @@ export const Deploys = () => {
       key: 'status',
       width: 140,
       filters: statusFilters,
-      filteredValue: statusFilter,
-      render: (status: string) => (
-        <DeploymentStatus status={status} activeDeployment={false} greyIcon />
+      filteredValue: statusFilter ?? null,
+      render: (status: string, record: PipelineDeployment) => (
+        <Flex vertical gap={'small'}>
+          {record.pipeline ? (
+            <PipelineStatus
+              phase={record.pipeline.phase}
+              applied={record.pipeline.infrastructure_applied}
+            />
+          ) : (
+            <DeploymentStatus status={status} activeDeployment={false} greyIcon />
+          )}
+          {status === 'executing' &&
+            record.status_message &&
+            record.status_message !== 'Deploying...' && (
+              <Typography.Paragraph
+                type={'secondary'}
+                ellipsis={{ rows: 2, tooltip: true }}
+                style={{ marginBottom: 0 }}>
+                {record.status_message}
+              </Typography.Paragraph>
+            )}
+        </Flex>
       ),
     },
     {
@@ -129,13 +219,13 @@ export const Deploys = () => {
       key: 'mode',
       width: 180,
       filters: modeFilters,
-      filteredValue: modeFilter,
+      filteredValue: modeFilter ?? null,
       render: (mode: UserVisibleMode, record: DeploymentSummary) => (
         <DeploymentMode mode={mode} planOnly={record.plan_only} />
       ),
     },
     {
-      title: 'Deployed At',
+      title: 'Created At',
       dataIndex: 'created_at',
       width: 200,
       key: 'created_at',
@@ -160,16 +250,37 @@ export const Deploys = () => {
   const total = nextPageToken ? currentPage * pageSize + 1 : currentPage * pageSize;
 
   return (
-    <Table
-      columns={columns}
-      dataSource={deployments}
-      rowKey={'id'}
-      loading={isLoading}
-      pagination={{ current: currentPage, pageSize, total }}
-      onChange={handleTableChange}
-      locale={{
-        emptyText: <Empty description={deploysTranslations.NO_DEPLOYS_TO_THIS_ENVIRONMENT} />,
-      }}
-    />
+    <Flex vertical gap={'middle'}>
+      {windowEnv.RUNNER_ROLLOUTS === 'true' && (
+        <CreatePipelineDeployment key={`${orgId}/${projectId}/${envId}`} />
+      )}
+      {isError ? (
+        <Alert
+          type={'error'}
+          showIcon
+          message={'Deployments could not be loaded. Check your access or try again.'}
+        />
+      ) : (
+        <Table
+          columns={columns}
+          dataSource={deployments}
+          rowKey={'id'}
+          loading={isLoading}
+          pagination={{ current: currentPage, pageSize, total }}
+          onChange={handleTableChange}
+          locale={{
+            emptyText: (
+              <Empty
+                description={
+                  query || quickFilter !== 'all'
+                    ? 'No deployments match these filters.'
+                    : deploysTranslations.NO_DEPLOYS_TO_THIS_ENVIRONMENT
+                }
+              />
+            ),
+          }}
+        />
+      )}
+    </Flex>
   );
 };

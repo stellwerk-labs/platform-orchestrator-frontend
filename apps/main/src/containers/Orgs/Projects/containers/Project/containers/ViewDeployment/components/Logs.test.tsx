@@ -8,6 +8,11 @@ import { Link, MemoryRouter, Route, Routes } from 'react-router';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { windowEnv } from '@src/config/environment';
+import {
+  type DeploymentPipeline,
+  pipelineQueryKey,
+} from '@src/containers/RunnerRollouts/deploymentPipelineApi';
+import type { NativeLogProgress } from '@src/containers/RunnerRollouts/NativePhaseLogs';
 import { getGetEnvironmentQueryKey } from '@src/hooks/react-query/v2/controlplane/environment/environment';
 import { getCheckPermissionsQueryKey } from '@src/hooks/react-query/v2/iam/user/user';
 import { RBACPermission } from '@src/hooks/useRBAC';
@@ -21,6 +26,7 @@ let respond: (request: IncomingMessage, response: ServerResponse) => void;
 let requests = 0;
 let clients: QueryClient[] = [];
 const originalBaseURL = windowEnv.BASE_URL;
+const originalPipelineFlag = windowEnv.RUNNER_ROLLOUTS;
 const fixture = createServer((request, response) => {
   response.setHeader('Connection', 'close');
   requests += 1;
@@ -38,6 +44,7 @@ beforeEach(() => {
   respond = (_request, response) => response.end(firstLog);
 });
 afterEach(() => {
+  windowEnv.RUNNER_ROLLOUTS = originalPipelineFlag;
   clients.forEach((client) => client.clear());
   clients = [];
 });
@@ -50,11 +57,18 @@ afterAll(async () => {
   );
 });
 
-const renderLogs = (orgAllowed = true, envAllowed = false) => {
+const renderLogs = (
+  orgAllowed = true,
+  envAllowed = false,
+  execution?: DeploymentPipeline & { native_logs?: boolean; progress: NativeLogProgress },
+  readAllowed = true,
+) => {
   const client = new QueryClient({
     defaultOptions: { queries: { staleTime: Infinity, retry: false } },
   });
   clients.push(client);
+  client.setQueryData(pipelineQueryKey('atlas', 'first'), execution ?? null);
+  client.setQueryData(pipelineQueryKey('second-org', 'second'), null);
   for (const orgId of ['atlas', 'second-org']) {
     client.setQueryData(getGetEnvironmentQueryKey(orgId, 'project', 'env'), {
       uuid: 'environment-id',
@@ -62,11 +76,13 @@ const renderLogs = (orgAllowed = true, envAllowed = false) => {
     const checks = [
       { resource: `organization:${orgId}`, permission: RBACPermission.DEPLOYMENT_LOGS_READ },
       { resource: 'env:environment-id', permission: RBACPermission.DEPLOYMENT_LOGS_READ },
+      { resource: `organization:${orgId}`, permission: RBACPermission.DEPLOYMENT_READ },
+      { resource: 'env:environment-id', permission: RBACPermission.DEPLOYMENT_READ },
     ];
     client.setQueryData(getCheckPermissionsQueryKey(checks), {
       items: checks.map((permission_check, index) => ({
         permission_check,
-        allowed: index === 0 ? orgAllowed : envAllowed,
+        allowed: (index < 2 || readAllowed) && (index % 2 === 0 ? orgAllowed : envAllowed),
       })),
     });
   }
@@ -103,6 +119,43 @@ const openPendingStream = () => {
 };
 
 describe('Deployment Logs', () => {
+  it('does not label saved-plan fallback content as Apply logs before Apply starts', () => {
+    windowEnv.RUNNER_ROLLOUTS = 'true';
+    renderLogs(true, false, {
+      definition: { id: 'reviewed', version: 1, name: 'Reviewed', strategy: 'reviewed', steps: [] },
+      progress: {
+        id: 'first',
+        environment_id: 'environment-id',
+        revision: 1,
+        created_at: '',
+        phase: 'awaiting_approval',
+        infrastructure_applied: false,
+      },
+    });
+    expect(screen.getByText('Plan logs')).toBeVisible();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(requests).toBe(0);
+  });
+
+  it('shows distinct Apply logs when a post task failed after infrastructure applied', async () => {
+    windowEnv.RUNNER_ROLLOUTS = 'true';
+    renderLogs(true, false, {
+      definition: { id: 'reviewed', version: 1, name: 'Reviewed', strategy: 'reviewed', steps: [] },
+      progress: {
+        id: 'first',
+        environment_id: 'environment-id',
+        revision: 1,
+        created_at: '',
+        phase: 'post_failed',
+        infrastructure_applied: true,
+      },
+    });
+    expect(screen.getByRole('radio', { name: 'Plan logs' })).toBeVisible();
+    expect(screen.getByRole('radio', { name: 'Apply logs' })).toBeChecked();
+    expect(await screen.findByText(firstLog)).toBeVisible();
+    expect(requests).toBe(1);
+  });
+
   it('loads automatically without a key form, renders inert text, and excludes logs from the query cache', async () => {
     const { client } = renderLogs();
     expect(await screen.findByText(firstLog)).toBeVisible();
@@ -180,4 +233,12 @@ describe('Deployment Logs', () => {
     ).toBeVisible();
     expect(requests).toBe(0);
   });
+});
+
+it('requires deployment read as well as log read before mounting any private viewer', () => {
+  renderLogs(true, false, undefined, false);
+  expect(
+    screen.getByText('You do not have permission to read these deployment logs.'),
+  ).toBeVisible();
+  expect(requests).toBe(0);
 });

@@ -27,6 +27,7 @@ import { Link, useParams } from 'react-router';
 import { CheckRBAC } from '@src/components/shared/CheckRBAC';
 import { PageHeader } from '@src/components/shared/PageHeader/PageHeader';
 import { ProtectedButton } from '@src/components/shared/ProtectedButton';
+import { matchesSearch, TableToolbar, useTableSearch } from '@src/components/shared/TableToolbar';
 import { features } from '@src/config/features';
 import { MatchParams } from '@src/config/routing';
 import {
@@ -62,6 +63,7 @@ import { generateMembershipDetailsUrl } from '@src/utilities/navigation';
 type TableRow = MembershipRow | (InvitationSummary & { type: 'invite' });
 
 export const OrgMembers = () => {
+  const search = useTableSearch();
   // Router hooks
   const { orgId } = useParams<keyof MatchParams>() as MatchParams;
 
@@ -114,7 +116,19 @@ export const OrgMembers = () => {
       return a.type === 'member' ? -1 : 1;
     });
 
-  const sortedRows = sortRows(mergedRows);
+  const sortedRows = sortRows(mergedRows).filter(
+    (row) =>
+      (search.view === 'all' || row.type === search.view) &&
+      (row.type === 'member'
+        ? matchesSearch(
+            search.query,
+            row.id,
+            row.user_id,
+            row.user_display_name,
+            row.user_primary_email_address,
+          )
+        : matchesSearch(search.query, row.id, row.email_address, row.membership_subject)),
+  );
 
   const handleInviteUsers = (userFields: UserField[]) => {
     setLoadingInvite(true);
@@ -402,11 +416,24 @@ export const OrgMembers = () => {
 
         {contextHolder}
 
+        <TableToolbar
+          label={'members and invitations'}
+          {...search}
+          filters={[
+            { value: 'member', label: 'Members' },
+            { value: 'invite', label: 'Invitations' },
+          ]}
+        />
         <Table
           rowKey={(record: TableRow) => record.id}
           columns={columns}
           dataSource={sortedRows}
-          locale={{ emptyText: 'No members or invitations' }}
+          locale={{
+            emptyText:
+              search.query || search.view !== 'all'
+                ? 'No results match these filters.'
+                : 'No members or invitations',
+          }}
           pagination={false}
           size={'small'}
         />

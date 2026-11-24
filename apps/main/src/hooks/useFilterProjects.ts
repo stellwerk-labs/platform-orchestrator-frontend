@@ -1,5 +1,6 @@
 import { useParams } from 'react-router';
 
+import { matchesSearch } from '@src/components/shared/TableToolbar';
 import { MatchParams } from '@src/config/routing';
 import {
   getListProjectsQueryKey,
@@ -25,7 +26,7 @@ export const useFilterProjects = (filterValue: string | undefined) => {
     projectCount: allProjects?.length,
     filteredProjects: filterValue
       ? allProjects?.filter((application) =>
-          application.display_name.toLowerCase()?.includes(filterValue.toLowerCase()),
+          matchesSearch(filterValue, application.id, application.display_name),
         )
       : allProjects,
   };

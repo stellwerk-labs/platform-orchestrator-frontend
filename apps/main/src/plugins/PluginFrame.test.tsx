@@ -503,6 +503,18 @@ describe('plugin frame', () => {
       navigation(session, 'stellwerk.plugin.navigate-core', '/../../modules/redis?tab=versions'),
     );
     await waitFor(() => expect(currentLocation()).toBe('/orgs/org-one/modules/redis?tab=versions'));
+    session.port.postMessage(
+      navigation(
+        session,
+        'stellwerk.plugin.navigate-core',
+        '/projects/project/envs/production/deploys/4a13bf6f-080b-41fe-8744-37bd50243382/pipeline',
+      ),
+    );
+    await waitFor(() =>
+      expect(currentLocation()).toBe(
+        '/orgs/org-one/projects/project/envs/production/deploys/4a13bf6f-080b-41fe-8744-37bd50243382/pipeline',
+      ),
+    );
     expect(coreRequests).toEqual([]);
   });
 
@@ -584,6 +596,64 @@ describe('plugin frame', () => {
     mountFrame({ ...plugin, ui: undefined });
     expect(screen.getByText('The plugin has no registered UI contribution.')).toBeInTheDocument();
     expect(screen.queryByTitle(plugin.display_name)).not.toBeInTheDocument();
+  });
+
+  it('rejects an actor read not advertised by the current plugin', async () => {
+    const session = connect(renderFrame());
+    const answer = await exchange(
+      session,
+      request(session, {
+        operation_id: 'iam.getActor',
+        path_parameters: { userId: '11111111-1111-4111-8111-111111111111' },
+      }),
+    );
+    expect(answer).toMatchObject({ error: 'The requested operation is not registered.' });
+    expect(coreRequests).toEqual([]);
+  });
+
+  it('returns a minimized actor only within the active organization bridge session', async () => {
+    const userId = '11111111-1111-4111-8111-111111111111';
+    server.use(
+      http.post(
+        'http://example.com/auth/check-permissions',
+        () => new HttpResponse(null, { status: 403 }),
+      ),
+      http.get('http://example.com/orgs/:orgId/members', ({ params }) => {
+        expect(params.orgId).toBe(orgId);
+        return HttpResponse.json({
+          items: [
+            {
+              user_id: userId,
+              user_display_name: 'Audit Actor',
+              subject: 'private-subject',
+              identity_providers: ['private-provider'],
+            },
+          ],
+        });
+      }),
+    );
+    const session = connect(
+      renderFrame({
+        ...plugin,
+        ui: {
+          ...plugin.ui!,
+          core_operations: [{ id: 'iam.getActor', method: 'GET', mutating: false }],
+        },
+      }),
+    );
+    const actorRequest = { operation_id: 'iam.getActor', path_parameters: { userId } };
+    await expect(
+      exchange(session, request(session, { ...actorRequest, org_id: 'another-org' })),
+    ).resolves.toMatchObject({ error: 'Malformed or cross-organization operation request.' });
+    expect(coreRequests).toEqual([]);
+    await expect(exchange(session, request(session, actorRequest))).resolves.toMatchObject({
+      response: {
+        status: 200,
+        body: { actor: { user_id: userId, display_name: 'Audit Actor' } },
+      },
+    });
+    expect(JSON.stringify(session.received)).not.toMatch(/private-subject|private-provider/);
+    expect(coreRequests).toEqual([`GET /orgs/${orgId}/members`, 'POST /auth/check-permissions']);
   });
 
   it('shows Deployment logs in a Console dialog and answers the frame with an empty completion', async () => {

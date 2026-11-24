@@ -51,9 +51,11 @@ const RunnerLogRow = ({ record }: { record: RunnerLogRecord }) => {
 export const RunnerLogs = ({
   content,
   renderToolbar,
+  scrollMode = 'panel',
 }: {
   content: string;
   renderToolbar?: (rawToggle: ReactNode) => ReactNode;
+  scrollMode?: 'panel' | 'page';
 }) => {
   const [raw, setRaw] = useState(false);
   const records = useMemo(() => parseRunnerLogs(content), [content]);
@@ -70,7 +72,9 @@ export const RunnerLogs = ({
       {!records && (
         <div role={'note'}>Large log: formatting is disabled. Raw content is shown in full.</div>
       )}
-      <div aria-label={'Runner logs'} style={{ maxHeight: '65vh', overflow: 'auto' }}>
+      <div
+        aria-label={'Runner logs'}
+        style={scrollMode === 'panel' ? { maxHeight: '65vh', overflow: 'auto' } : undefined}>
         {raw || !records ? (
           <pre style={logTextStyle}>{content}</pre>
         ) : (

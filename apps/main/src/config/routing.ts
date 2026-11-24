@@ -2,7 +2,7 @@ export interface MatchParams {
   orgId: string;
   projectId: string;
   envId: string;
-  deploymentId: string;
+  deployId: string;
   moduleId: string;
   runnerId: string;
   resourceTypeId: string;

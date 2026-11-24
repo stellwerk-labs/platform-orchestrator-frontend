@@ -6,6 +6,7 @@ import type { K8sAgentRunnerConfigurationUpdateBody } from './k8sAgentRunnerConf
 import type { K8sEksRunnerConfigurationUpdateBody } from './k8sEksRunnerConfigurationUpdateBody.ts';
 import type { K8sGkeRunnerConfigurationUpdateBody } from './k8sGkeRunnerConfigurationUpdateBody.ts';
 import type { K8sRunnerConfigurationUpdateBody } from './k8sRunnerConfigurationUpdateBody.ts';
+import type { NativeAgentRunnerConfigurationUpdateBody } from './nativeAgentRunnerConfigurationUpdateBody.ts';
 import type { ServerlessEcsRunnerConfigurationUpdateBody } from './serverlessEcsRunnerConfigurationUpdateBody.ts';
 
 /**
@@ -16,4 +17,5 @@ export type RunnerConfigurationUpdate =
   | K8sGkeRunnerConfigurationUpdateBody
   | K8sEksRunnerConfigurationUpdateBody
   | K8sAgentRunnerConfigurationUpdateBody
+  | NativeAgentRunnerConfigurationUpdateBody
   | ServerlessEcsRunnerConfigurationUpdateBody;

@@ -112,126 +112,191 @@ const packageData = (moduleId: string): { directory: string; key: string } => {
   throw new Error('Bundled dependency has no package identity');
 };
 
-/** Validate Vite's actual bundle catalogue and preserve its upstream notices. */
-export const dependencyNotices = (ownLicense: string, supplement?: Supplement): Plugin => ({
-  name: 'console:dependency-notices',
-  apply: 'build',
-  enforce: 'post',
-  generateBundle: {
-    order: 'post',
-    handler(_options, bundle) {
-      const catalogue = bundle[dependencyLicenseFile];
-      if (!catalogue || catalogue.type !== 'asset') {
-        throw new Error('Vite dependency licence catalogue is missing');
-      }
-      const entries: DependencyLicense[] = JSON.parse(
-        typeof catalogue.source === 'string'
-          ? catalogue.source
-          : Buffer.from(catalogue.source).toString('utf8'),
-      );
-      const supplements = supplementalLicenses(supplement);
-      const emitted = new Map<string, Buffer>();
-      const dependencies = new Map<string, DependencyLicense>();
-      for (const entry of entries) {
-        const key = `${entry.name}@${entry.version}`;
-        const original = supplements.get(key);
-        if (original && supplement) {
-          if (
-            entry.text?.trim() ||
-            (entry.identifier && entry.identifier !== original.identifier)
-          ) {
-            throw new Error(`Supplemental licence no longer matches upstream metadata: ${key}`);
-          }
-          for (const notice of original.notices) {
-            const content = readNotice(join(dirname(supplement.manifestFile), notice.source));
-            emitted.set(`licenses/packages/${key}/${notice.fileName}`, content);
-          }
-          entry.identifier = original.identifier;
-          entry.text = emitted
-            .get(`licenses/packages/${key}/${original.notices[0]!.fileName}`)!
-            .toString('utf8')
-            .trim();
-          emitted.set(
-            `licenses/packages/${key}/provenance.json`,
-            Buffer.from(JSON.stringify(original, null, 2) + '\n'),
-          );
-        }
-        if (
-          dependencies.has(key) ||
-          !entry.identifier ||
-          !reviewedLicenses.has(entry.identifier) ||
-          !entry.text?.trim()
-        ) {
-          throw new Error(`Missing or unreviewed bundled dependency licence: ${key}`);
-        }
-        dependencies.set(key, entry);
-      }
+const bundledDependency = (moduleId: string): boolean =>
+  !moduleId.startsWith('\0') && moduleId.includes('/node_modules/');
 
-      const included = new Set<string>();
-      const bundled = new Set<string>();
-      for (const chunk of Object.values(bundle)) {
-        if (chunk.type !== 'chunk') continue;
-        for (const moduleId of chunk.moduleIds) {
-          if (moduleId.startsWith('\0') || !moduleId.includes('/node_modules/')) continue;
-          const { directory, key } = packageData(moduleId);
-          const entry = dependencies.get(key);
-          if (!entry) throw new Error(`Bundled dependency is absent from Vite catalogue: ${key}`);
-          const original = supplements.get(key);
-          if (
-            original &&
-            sha256(readFileSync(join(directory, 'package.json'))) !== original.packageJSONSHA256
-          ) {
-            throw new Error(`Supplemental licence package identity changed: ${key}`);
-          }
-          bundled.add(key);
-          // Inspect only the bundled module's ancestors, up to its named package root.
-          let noticeDirectory = dirname(moduleId.split('?')[0]!);
-          while (true) {
-            if (!included.has(noticeDirectory)) {
-              included.add(noticeDirectory);
-              let matchedLicense = Boolean(original);
-              for (const file of readdirSync(noticeDirectory).sort()) {
-                if (!isNotice(file)) continue;
-                if (original && noticeDirectory === directory && licenseName.test(file)) {
-                  throw new Error(`Supplemental licence upstream material changed: ${key}`);
-                }
-                const content = readNotice(join(noticeDirectory, file));
-                if (
-                  licenseName.test(file) &&
-                  content.toString('utf8').trim() === entry.text?.trim()
-                ) {
-                  matchedLicense = true;
-                }
-                const fileName = `licenses/packages/${key}/${relative(directory, join(noticeDirectory, file))}`;
-                const prior = emitted.get(fileName);
-                if (prior && !prior.equals(content)) {
-                  throw new Error(`Conflicting bundled dependency notices: ${key}`);
-                }
-                emitted.set(fileName, content);
-              }
-              if (noticeDirectory === directory && !matchedLicense)
-                throw new Error(`Bundled dependency licence text is missing: ${key}`);
+const workerLicense = (directory: string): DependencyLicense => {
+  const { name, version, license } = JSON.parse(
+    readFileSync(join(directory, 'package.json'), 'utf8'),
+  );
+  const file = readdirSync(directory)
+    .sort()
+    .find((fileName) => licenseName.test(fileName));
+  return {
+    name,
+    version,
+    identifier: typeof license === 'string' ? license.trim() : undefined,
+    text: file ? readNotice(join(directory, file)).toString('utf8').trim() : undefined,
+  };
+};
+
+/** Validate main and worker dependencies together and preserve their original notices. */
+export const dependencyNotices = (
+  ownLicense: string,
+  supplement?: Supplement,
+): {
+  main: Plugin;
+  worker: () => Plugin[];
+} => {
+  const workerModules = new Set<string>();
+  return {
+    worker: () => [
+      {
+        name: 'console:worker-dependencies',
+        apply: 'build',
+        generateBundle(_options, bundle) {
+          for (const chunk of Object.values(bundle)) {
+            if (chunk.type !== 'chunk') continue;
+            for (const moduleId of chunk.moduleIds) {
+              if (bundledDependency(moduleId)) workerModules.add(moduleId);
             }
-            if (noticeDirectory === directory) break;
-            noticeDirectory = dirname(noticeDirectory);
           }
-        }
-      }
-      if (dependencies.size !== bundled.size) {
-        throw new Error('Vite dependency licence catalogue does not match the bundle');
-      }
-      catalogue.source = JSON.stringify(entries, null, 2);
-      emitted.set('licenses/platform-orchestrator-frontend/LICENSE', readNotice(ownLicense));
-      for (const [fileName, source] of emitted) this.emitFile({ type: 'asset', fileName, source });
-      this.emitFile({
-        type: 'asset',
-        fileName: 'licenses/manifest.sha256',
-        source:
-          [...emitted, [dependencyLicenseFile, Buffer.from(catalogue.source)] as const]
-            .sort(([first], [second]) => first.localeCompare(second, 'en'))
-            .map(([fileName, source]) => `${sha256(source)}  ${fileName.slice('licenses/'.length)}`)
-            .join('\n') + '\n',
-      });
+        },
+      },
+    ],
+    main: {
+      name: 'console:dependency-notices',
+      apply: 'build',
+      enforce: 'post',
+      generateBundle: {
+        order: 'post',
+        handler(_options, bundle) {
+          const catalogue = bundle[dependencyLicenseFile];
+          if (!catalogue || catalogue.type !== 'asset') {
+            throw new Error('Vite dependency licence catalogue is missing');
+          }
+          const entries: DependencyLicense[] = JSON.parse(
+            typeof catalogue.source === 'string'
+              ? catalogue.source
+              : Buffer.from(catalogue.source).toString('utf8'),
+          );
+          const catalogued = new Set(entries.map((entry) => `${entry.name}@${entry.version}`));
+          for (const moduleId of workerModules) {
+            const { directory, key } = packageData(moduleId);
+            if (!catalogued.has(key)) {
+              entries.push(workerLicense(directory));
+              catalogued.add(key);
+            }
+          }
+          entries.sort((first, second) =>
+            `${first.name}@${first.version}`.localeCompare(
+              `${second.name}@${second.version}`,
+              'en',
+            ),
+          );
+          const supplements = supplementalLicenses(supplement);
+          const emitted = new Map<string, Buffer>();
+          const dependencies = new Map<string, DependencyLicense>();
+          for (const entry of entries) {
+            const key = `${entry.name}@${entry.version}`;
+            const original = supplements.get(key);
+            if (original && supplement) {
+              if (
+                entry.text?.trim() ||
+                (entry.identifier && entry.identifier !== original.identifier)
+              ) {
+                throw new Error(`Supplemental licence no longer matches upstream metadata: ${key}`);
+              }
+              for (const notice of original.notices) {
+                const content = readNotice(join(dirname(supplement.manifestFile), notice.source));
+                emitted.set(`licenses/packages/${key}/${notice.fileName}`, content);
+              }
+              entry.identifier = original.identifier;
+              entry.text = emitted
+                .get(`licenses/packages/${key}/${original.notices[0]!.fileName}`)!
+                .toString('utf8')
+                .trim();
+              emitted.set(
+                `licenses/packages/${key}/provenance.json`,
+                Buffer.from(JSON.stringify(original, null, 2) + '\n'),
+              );
+            }
+            if (
+              dependencies.has(key) ||
+              !entry.identifier ||
+              !reviewedLicenses.has(entry.identifier) ||
+              !entry.text?.trim()
+            ) {
+              throw new Error(`Missing or unreviewed bundled dependency licence: ${key}`);
+            }
+            dependencies.set(key, entry);
+          }
+
+          const included = new Set<string>();
+          const bundled = new Set<string>();
+          const moduleIds = new Set(workerModules);
+          for (const chunk of Object.values(bundle)) {
+            if (chunk.type === 'chunk') {
+              for (const moduleId of chunk.moduleIds) {
+                if (bundledDependency(moduleId)) moduleIds.add(moduleId);
+              }
+            }
+          }
+          for (const moduleId of moduleIds) {
+            const { directory, key } = packageData(moduleId);
+            const entry = dependencies.get(key);
+            if (!entry) throw new Error(`Bundled dependency is absent from Vite catalogue: ${key}`);
+            const original = supplements.get(key);
+            if (
+              original &&
+              sha256(readFileSync(join(directory, 'package.json'))) !== original.packageJSONSHA256
+            ) {
+              throw new Error(`Supplemental licence package identity changed: ${key}`);
+            }
+            bundled.add(key);
+            // Inspect only the bundled module's ancestors, up to its named package root.
+            let noticeDirectory = dirname(moduleId.split('?')[0]!);
+            while (true) {
+              if (!included.has(noticeDirectory)) {
+                included.add(noticeDirectory);
+                let matchedLicense = Boolean(original);
+                for (const file of readdirSync(noticeDirectory).sort()) {
+                  if (!isNotice(file)) continue;
+                  if (original && noticeDirectory === directory && licenseName.test(file)) {
+                    throw new Error(`Supplemental licence upstream material changed: ${key}`);
+                  }
+                  const content = readNotice(join(noticeDirectory, file));
+                  if (
+                    licenseName.test(file) &&
+                    content.toString('utf8').trim() === entry.text?.trim()
+                  ) {
+                    matchedLicense = true;
+                  }
+                  const fileName = `licenses/packages/${key}/${relative(directory, join(noticeDirectory, file))}`;
+                  const prior = emitted.get(fileName);
+                  if (prior && !prior.equals(content)) {
+                    throw new Error(`Conflicting bundled dependency notices: ${key}`);
+                  }
+                  emitted.set(fileName, content);
+                }
+                if (noticeDirectory === directory && !matchedLicense)
+                  throw new Error(`Bundled dependency licence text is missing: ${key}`);
+              }
+              if (noticeDirectory === directory) break;
+              noticeDirectory = dirname(noticeDirectory);
+            }
+          }
+          if (dependencies.size !== bundled.size) {
+            throw new Error('Vite dependency licence catalogue does not match the bundle');
+          }
+          catalogue.source = JSON.stringify(entries, null, 2);
+          emitted.set('licenses/platform-orchestrator-frontend/LICENSE', readNotice(ownLicense));
+          for (const [fileName, source] of emitted)
+            this.emitFile({ type: 'asset', fileName, source });
+          this.emitFile({
+            type: 'asset',
+            fileName: 'licenses/manifest.sha256',
+            source:
+              [...emitted, [dependencyLicenseFile, Buffer.from(catalogue.source)] as const]
+                .sort(([first], [second]) => first.localeCompare(second, 'en'))
+                .map(
+                  ([fileName, source]) =>
+                    `${sha256(source)}  ${fileName.slice('licenses/'.length)}`,
+                )
+                .join('\n') + '\n',
+          });
+        },
+      },
     },
-  },
-});
+  };
+};

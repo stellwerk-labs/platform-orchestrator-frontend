@@ -4,6 +4,7 @@
  */
 import type { DeploymentId } from './deploymentId.ts';
 import type { DeploymentMetrics } from './deploymentMetrics.ts';
+import type { DeploymentPipelineSummary } from './deploymentPipelineSummary.ts';
 import type { EnvironmentFence } from './environmentFence.ts';
 import type { OrganizationId } from './organizationId.ts';
 
@@ -35,4 +36,5 @@ export interface DeploymentSummary {
   status_message: string;
   metrics: DeploymentMetrics;
   environment_fence?: EnvironmentFence;
+  pipeline?: DeploymentPipelineSummary;
 }

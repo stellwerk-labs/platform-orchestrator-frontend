@@ -53,6 +53,17 @@ const defaultOutputs: Omit<OutputOptions, 'target' | 'schemas'> = {
   },
 };
 export default defineConfig({
+  pipelines: {
+    output: {
+      mode: 'single',
+      formatter: 'prettier',
+      client: 'axios-functions',
+      target: './src/api/pipelines.ts',
+      schemas: './src/models/pipelines',
+      override: { mutator: { path: './src/custom-instance.ts', name: 'customInstance' } },
+    },
+    input: { target: './schemas/pipelines.yml' },
+  },
   controlplane: {
     output: {
       ...defaultOutputs,

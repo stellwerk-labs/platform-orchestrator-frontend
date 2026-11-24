@@ -109,3 +109,52 @@ jobs:
         run: pnpm run e2e:ci -- --browser=${{ matrix.browser }}
         env:
           CI: true
+
+  native-pipeline-browser:
+    name: Native pipeline browser (${{ matrix.suite }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [controls, phase-logs]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.candidate_sha || github.ref }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
+
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install project Chromium
+        run: pnpm --filter main-app --fail-if-no-match exec playwright install --with-deps chromium
+
+      - name: Build and test Native pipeline fixture
+        timeout-minutes: 3
+        env:
+          CI: true
+          TZ: UTC
+          VITE_BASE_URL: ''
+          NATIVE_BROWSER_SUITE: ${{ matrix.suite }}
+        run: |
+          set -euo pipefail
+          pnpm --filter main-app --fail-if-no-match run "test:native-${NATIVE_BROWSER_SUITE}-browser" 2>&1 | tee "$RUNNER_TEMP/native-pipeline-browser-${NATIVE_BROWSER_SUITE}.log"
+
+      - name: Upload Native browser diagnostics
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: native-pipeline-browser-${{ matrix.suite }}
+          path: |
+            ${{ runner.temp }}/native-pipeline-browser-${{ matrix.suite }}.log
+            apps/main/test-reports/native-browser/${{ matrix.suite }}/bundle/failure.png
+          retention-days: 14

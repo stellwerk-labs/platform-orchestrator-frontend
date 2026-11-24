@@ -17,11 +17,27 @@ paths:
         - $ref: '#/components/parameters/projectIdQueryParam'
         - $ref: '#/components/parameters/envIdQueryParam'
         # pagination
-        - $ref: '#/components/parameters/perPageQueryParam'
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
         - $ref: '#/components/parameters/pageTokenQueryParam'
         # filter params
         - $ref: '#/components/parameters/byModeQueryParam'
         - $ref: '#/components/parameters/byStatusQueryParam'
+        - name: q
+          in: query
+          description: Literal search over deployment ID, creator ID, project/environment slug and pipeline name or ID.
+          schema:
+            type: string
+            maxLength: 200
+        - name: quick_filter
+          in: query
+          schema:
+            type: string
+            enum: [all, plans, unused_plans, deployments, needs_approval, needs_attention]
       responses:
         '200':
           description: Successful list response
@@ -304,29 +320,46 @@ paths:
         - Deployment
       summary: Get the logs produced by the runner execution during the deployment.
       description: |
-        Logs are retained for 30 days. Without decrypt=true or DecryptKey, the response remains encrypted and requires deployment_read.
+        Legacy responses remain encrypted without decrypt=true or DecryptKey and require deployment_read.
+        Native central logs require managed custody, decrypt=true, deployment_read and deployment_logs_read; availability depends on retained artifacts.
         Plaintext requests require deployment_logs_read. Use managed_logs:true when creating a Deployment to enable server-managed decryption.
       security:
         - userIdHeader: []
       parameters:
-        - $ref: "#/components/parameters/orgIdPathParam"
-        - $ref: "#/components/parameters/deploymentIdPathParam"
+        - $ref: '#/components/parameters/orgIdPathParam'
+        - $ref: '#/components/parameters/deploymentIdPathParam'
         - name: decrypt
           in: query
           required: false
           description: Return plaintext using the server-managed log identity. Requires deployment_logs_read on the deployment Environment (or organization). Cannot be combined with DecryptKey; returns 409 when no managed identity is retained.
           schema:
             type: boolean
+        - name: phase
+          in: query
+          description: Native phase; defaults to plan for a plan-only Deployment and apply otherwise.
+          schema: { type: string, enum: [plan, apply] }
+        - name: execution_id
+          in: query
+          description: Exact captured Native execution identity.
+          schema: { type: string, minLength: 1, maxLength: 128, pattern: '^[A-Za-z0-9_.:-]+$' }
+        - name: capture_revision
+          in: query
+          description: Exact positive Native capture revision; omitted selects the greatest accepted revision.
+          schema: { type: integer, format: int64, minimum: 1 }
+        - name: subject
+          in: query
+          description: Exact displayed Plan subject; use an empty value for failed diagnostics without a subject.
+          schema: { type: string, maxLength: 64, pattern: '^([a-f0-9]{64})?$' }
         - name: DecryptKey
           description: The private key needed to decrypt the logs. It should be an 'age' private key (see https://age-encryption.org).
           in: header
           required: false
           schema:
             type: string
-            example: "AGE-SECRET-KEY-1SGKT64UHNGURNZUQSAJ9J0C65R2F2PXDCZQVVGRUPN98L33G2HFSUC24EJ"
+            example: 'AGE-SECRET-KEY-1SGKT64UHNGURNZUQSAJ9J0C65R2F2PXDCZQVVGRUPN98L33G2HFSUC24EJ'
             pattern: ^AGE-SECRET-KEY-[A-Z0-9]+$
       responses:
-        "200":
+        '200':
           description: The logs produced by the runner execution.
           content:
             text/plain:
@@ -344,12 +377,12 @@ paths:
               schema:
                 type: string
                 example: 'attachment; filename="depId.log"'
-        "400":
-          $ref: "#/components/responses/400BadRequest"
-        "404":
-          $ref: "#/components/responses/404NotFound"
-        "409":
-          $ref: "#/components/responses/409Conflict"
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '409':
+          $ref: '#/components/responses/409Conflict'
 
   /orgs/{orgId}/deployments/{deploymentId}/encrypted-outputs:
     get:
@@ -769,7 +802,7 @@ paths:
       security:
         - userIdHeader: []
       parameters:
-        - $ref: "#/components/parameters/orgIdPathParam"
+        - $ref: '#/components/parameters/orgIdPathParam'
         - name: Idempotency-Key
           in: header
           required: false
@@ -784,30 +817,30 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ModuleTestDeploymentCreateBody"
+              $ref: '#/components/schemas/ModuleTestDeploymentCreateBody'
       responses:
-        "200":
+        '200':
           description: Successful dry run create response.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DeploymentDryRun"
-        "201":
+                $ref: '#/components/schemas/DeploymentDryRun'
+        '201':
           description: Successful create response.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Deployment"
-        "202":
+                $ref: '#/components/schemas/Deployment'
+        '202':
           description: The Environment is busy and the request waits in its deployment queue.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DeploymentQueueItem"
-        "400":
-          $ref: "#/components/responses/400BadRequest"
-        "409":
-          $ref: "#/components/responses/409Conflict"
+                $ref: '#/components/schemas/DeploymentQueueItem'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '409':
+          $ref: '#/components/responses/409Conflict'
 components:
   securitySchemes:
     userIdHeader:
@@ -1149,6 +1182,8 @@ components:
           $ref: '#/components/schemas/DeploymentMetrics'
         environment_fence:
           $ref: '#/components/schemas/EnvironmentFence'
+        pipeline:
+          $ref: '#/components/schemas/DeploymentPipelineSummary'
     EnvironmentFence:
       description: |
         Reported on `listLastDeployments` items only, and only while the item's Environment is fenced: its current
@@ -1442,6 +1477,22 @@ components:
           type: integer
           minimum: 0
           example: 2
+    DeploymentPipelineSummary:
+      type: object
+      required: [id, version, name, strategy, phase, infrastructure_applied]
+      properties:
+        id: {type: string}
+        version: {type: integer}
+        name: {type: string}
+        strategy: {type: string}
+        phase: {type: string}
+        infrastructure_applied: {type: boolean}
+    DeploymentPipelineSelection:
+      type: object
+      required: [id, version]
+      properties:
+        id: {type: string, minLength: 1, maxLength: 64, description: Immutable published pipeline Version UUID or an eligible builtin recipe ID.}
+        version: {type: integer, minimum: 1}
     DeploymentCreateBody:
       type: object
       required:
@@ -1571,6 +1622,8 @@ components:
             is promoted. Dry runs do not check it.
           type: string
           format: uuid
+        pipeline:
+          $ref: '#/components/schemas/DeploymentPipelineSelection'
     DeploymentDryRun:
       type: object
       required:
@@ -1943,21 +1996,21 @@ components:
       type: object
       required: [project_id, env_id, environment_uuid, module_version, deployment_id, observed_at]
       properties:
-        project_id: {type: string}
-        env_id: {type: string}
-        environment_uuid: {type: string, format: uuid}
-        module_version: {type: string}
-        deployment_id: {type: string, format: uuid}
-        observed_at: {type: string, format: date-time}
+        project_id: { type: string }
+        env_id: { type: string }
+        environment_uuid: { type: string, format: uuid }
+        module_version: { type: string }
+        deployment_id: { type: string, format: uuid }
+        observed_at: { type: string, format: date-time }
     ModuleTestDeploymentCreateBody:
       type: object
       additionalProperties: false
       required: [deployment, draft_test_snapshots]
       properties:
-        deployment: {$ref: '#/components/schemas/DeploymentCreateBody'}
+        deployment: { $ref: '#/components/schemas/DeploymentCreateBody' }
         draft_test_snapshots:
           type: object
           minProperties: 1
           maxProperties: 1000
           description: Stable Module UUID to immutable captured test snapshot UUID. Draft heads and published Version references are not accepted here.
-          additionalProperties: {type: string, format: uuid}
+          additionalProperties: { type: string, format: uuid }

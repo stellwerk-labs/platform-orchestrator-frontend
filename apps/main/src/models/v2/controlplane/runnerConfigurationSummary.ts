@@ -8,5 +8,22 @@ import type { RunnerType } from './runnerType.ts';
  * A summary of the runner configuration.
  */
 export interface RunnerConfigurationSummary {
+  /**
+   * Configured concurrent job limit. Absent means legacy unlimited admission.
+   *
+   * @minimum 1
+   */
+  max_parallel_jobs?: number;
+  /**
+   * Operator-declared execution and connectivity capabilities of the configured Runner image and site. Omission preserves existing capabilities on update; null clears them on update only. Bundled software does not imply network access.
+   *
+   * @maxItems 32
+   * @items.minLength 1
+   * @items.maxLength 128
+   * @items.pattern ^[a-z][a-z0-9_.:/-]*$
+   */
+  capabilities?: string[];
+  /** Protocols explicitly declared by the configured Runner image. */
+  supported_protocols?: string[];
   type: RunnerType;
 }

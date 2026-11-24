@@ -5,11 +5,39 @@
 import type { K8sRunnerConfigurationUpdateBodyType } from './k8sRunnerConfigurationUpdateBodyType.ts';
 import type { K8sRunnerJobConfig } from './k8sRunnerJobConfig.ts';
 import type { K8sRunnerK8sCluster } from './k8sRunnerK8sCluster.ts';
+import type { RunnerExecutionCatalogue } from './runnerExecutionCatalogue.ts';
 
 /**
  * Object to update an existing runner configuration for a Kubernetes cluster.
  */
 export interface K8sRunnerConfigurationUpdateBody {
+  /** Approved native execution inventory, limited to 64 KiB. Omission preserves it on update; explicit null clears it on update only. Dependent protocols and capabilities must remain consistent. */
+  native_execution?: RunnerExecutionCatalogue | null;
+  /**
+   * Maximum concurrent jobs across all Environments using this Runner. Omission preserves the configured value. Explicit null clears the limit to unlimited. Reducing the limit drains existing jobs before new admission.
+   *
+   * @minimum 1
+   * @nullable
+   */
+  max_parallel_jobs?: number | null;
+  /**
+   * Operator-declared execution and connectivity capabilities of the configured Runner image and site. Omission preserves existing capabilities on update; null clears them on update only. Bundled software does not imply network access.
+   *
+   * @maxItems 32
+   * @nullable
+   * @items.minLength 1
+   * @items.maxLength 128
+   * @items.pattern ^[a-z][a-z0-9_.:/-]*$
+   */
+  capabilities?: string[] | null;
+  /**
+   * Protocols explicitly supported by the configured Runner image. Omission preserves the configured value. Null clears the opt-in; an empty array declares no protocols. Observation requires environment-observation/v1.
+   *
+   * @maxItems 16
+   * @nullable
+   * @items.maxLength 128
+   */
+  supported_protocols?: string[] | null;
   job?: K8sRunnerJobConfig;
   cluster?: K8sRunnerK8sCluster;
   type: K8sRunnerConfigurationUpdateBodyType;

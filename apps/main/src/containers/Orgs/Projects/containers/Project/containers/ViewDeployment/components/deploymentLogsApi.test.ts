@@ -73,6 +73,30 @@ describe('deployment log HTTP transport', () => {
   });
 
   it.each([
+    [404, 'not available yet'],
+    [413, '4 MiB viewer limit'],
+    [409, 'execution changed'],
+    [503, 'Runner may be disconnected'],
+  ])(
+    'describes canonical pipeline log availability without legacy retention/key claims: %i',
+    async (status, message) => {
+      respond = (_request, response) => {
+        response.writeHead(status);
+        response.end('PRIVATE_PIPELINE_ERROR');
+      };
+      await expect(
+        loadDeploymentLogs(
+          `${origin}/api/`,
+          'org',
+          'deployment',
+          new AbortController().signal,
+          true,
+        ),
+      ).rejects.toThrow(String(message));
+    },
+  );
+
+  it.each([
     [
       409,
       'This deployment uses a caller-managed log key. Read it with octl logs --key-file. New deployments can use automatic log access.',
@@ -81,7 +105,7 @@ describe('deployment log HTTP transport', () => {
     [403, 'You do not have permission to read these deployment logs.'],
     [
       404,
-      'Logs are not available. They may still be uploading, may not have been stored, or may have expired after 30 days.',
+      'Logs are not available. They may still be uploading, may not have been stored, or may no longer be retained.',
     ],
     [500, 'The logs could not be loaded. Try again.'],
   ])(
@@ -162,5 +186,35 @@ describe('deployment log HTTP transport', () => {
     controller.abort();
     await failure;
     await expect.poll(() => closed).toBe(true);
+  });
+});
+
+it('binds Native phase/execution/capture/subject to the ordinary authenticated Deployment route', async () => {
+  let address: URL | undefined;
+  respond = (request, response) => {
+    address = new URL(request.url ?? '/', origin);
+    response.end('');
+  };
+  const content = await loadDeploymentLogs(
+    origin,
+    'org',
+    'deployment',
+    new AbortController().signal,
+    true,
+    {
+      phase: 'plan',
+      executionId: 'execution:one',
+      captureRevision: 2,
+      subject: 'displayed-subject',
+    },
+  );
+  expect(content).toBe('');
+  expect(address?.pathname).toBe('/orgs/org/deployments/deployment/actions/get-logs');
+  expect(Object.fromEntries(address?.searchParams ?? [])).toEqual({
+    decrypt: 'true',
+    phase: 'plan',
+    execution_id: 'execution:one',
+    capture_revision: '2',
+    subject: 'displayed-subject',
   });
 });

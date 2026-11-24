@@ -1,4 +1,5 @@
 import {
+  ApartmentOutlined,
   ApiOutlined,
   AppstoreOutlined,
   BookOutlined,
@@ -110,6 +111,18 @@ const NavigationBar = () => {
                 Modules
               </Link>
             </Menu.Item>
+
+            {windowEnv.RUNNER_ROLLOUTS === 'true' && (
+              <Menu.Item
+                key={'pipelines'}
+                icon={<ApartmentOutlined />}
+                tabIndex={0}
+                onKeyDown={handleMenuItemKeyDown}>
+                <Link to={`/orgs/${orgId}/pipelines`} tabIndex={-1}>
+                  Pipelines
+                </Link>
+              </Menu.Item>
+            )}
 
             {orgId && <PluginNavigationItems orgId={orgId} onKeyDown={handleMenuItemKeyDown} />}
 

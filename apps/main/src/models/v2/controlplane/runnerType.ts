@@ -14,4 +14,5 @@ export const RunnerType = {
   'kubernetes-agent': 'kubernetes-agent',
   'kubernetes-eks': 'kubernetes-eks',
   'serverless-ecs': 'serverless-ecs',
+  'native-agent': 'native-agent',
 } as const;

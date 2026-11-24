@@ -32,3 +32,12 @@ it.each([
   expect(viewer.querySelectorAll('pre')).toHaveLength(1);
   expect(viewer.querySelector('code')).toBeNull();
 });
+
+it('lets the deployment page own vertical scrolling while the modal keeps bounded scrolling', () => {
+  const { rerender } = render(<RunnerLogs content={'first\nsecond'} scrollMode={'page'} />);
+  expect(screen.getByLabelText('Runner logs').style.maxHeight).toBe('');
+  expect(screen.getByLabelText('Runner logs').style.overflow).toBe('');
+  rerender(<RunnerLogs content={'first\nsecond'} />);
+  expect(screen.getByLabelText('Runner logs').style.maxHeight).toBe('65vh');
+  expect(screen.getByLabelText('Runner logs').style.overflow).toBe('auto');
+});

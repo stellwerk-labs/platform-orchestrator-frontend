@@ -16,3 +16,7 @@ Mutation errors retain only safe status/message metadata. Clear fields on succes
 Formattedlogsareusefulonlywithcoherentkeycustody. ReuseexistingVaultTransitmodel fornormaldeployments instead of exposing agekeyhandlinginGUI. ScopedpermissionneedsorgORexactenvchecks, backendauthorizestheactualdeploymentenv.
 
 IAM resource identity is `env:<uuid>`, not `environment:<uuid>`. Build permission fixtures from the actual server contract; mirrored invented prefixes can let client tests pass while scoped users are denied.
+
+## Native pipeline source export
+
+Keep the released application source and its public SDK contracts aligned; preserve existing compatibility exports.
