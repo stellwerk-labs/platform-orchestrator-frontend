@@ -27,6 +27,7 @@ port="$(docker port "$container" 9000/tcp)"
 [[ "$port" =~ ^127\.0\.0\.1:[0-9]+$ ]]
 python3 - "$port" <<'PY'
 import json, re, sys, time
+from http.client import RemoteDisconnected
 from urllib.error import URLError
 from urllib.request import urlopen
 base = "http://" + sys.argv[1]
@@ -35,7 +36,7 @@ for attempt in range(30):
         with urlopen(base + "/", timeout=2) as response:
             body, headers = response.read(2 * 1024 * 1024).decode(), response.headers
         break
-    except URLError:
+    except (URLError, RemoteDisconnected):
         time.sleep(1)
 else:
     raise SystemExit("Console did not start within bounded wait")

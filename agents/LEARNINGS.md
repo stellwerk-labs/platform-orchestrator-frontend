@@ -20,3 +20,7 @@ IAM resource identity is `env:<uuid>`, not `environment:<uuid>`. Build permissio
 ## Native pipeline source export
 
 Keep the released application source and its public SDK contracts aligned; preserve existing compatibility exports.
+
+## HTTP startup probes
+
+A published container port may accept and close an HTTP connection before the service is ready. Python can raise RemoteDisconnected directly rather than wrapping it in URLError, so bounded readiness probes must handle that observed transition explicitly.

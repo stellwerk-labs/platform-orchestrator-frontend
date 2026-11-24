@@ -23,3 +23,7 @@ Use an optional shared viewer toolbar render slot to arrange its existing raw to
 ## Native pipeline source export
 
 Prepare Native pipeline application changes as a source export with all product code, tests, documentation and release controls retained.
+
+## Console image startup readiness
+
+Treat an initial remote disconnect as a transient only while waiting for HTTP startup. Keep the existing retry count, request timeout and all semantic image assertions. This test-only correction requires no runtime image rebuild.

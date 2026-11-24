@@ -28,3 +28,7 @@ Prepared the Native pipeline application source export. Public artifact publicat
 
 Added the existing pipeline feature flag to normal runtime environment injection. The existing release contracts now exercise actual startup generation with the flag enabled, disabled and unset; the image smoke checks the served flag.
 All 11 release contracts and shell checks passed, followed by independent source reviews. Actual image smoke qualification and public publication remain separate steps.
+
+## 2026-11-24: Console image readiness
+
+The image smoke now retries an initial HTTP remote disconnect within its existing bounded readiness loop. Real startup observation reproduced the disconnect followed by a successful response; runtime files and all feature/configuration, SPA, asset and notice assertions are unchanged. The whole corrected image smoke, all 11 release contracts, shell checks and diff checks passed.
