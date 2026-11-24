@@ -5,7 +5,9 @@ import copy
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
+import subprocess
 import tarfile
 import tempfile
 import unittest
@@ -58,6 +60,22 @@ class ReleaseTests(unittest.TestCase):
         self.assertIn("RUN --network=none --mount=type=bind,from=apk-inputs,source=/apks,target=/apks,ro", final)
         for forbidden in ("rm /var/log/apk.log", "rm -f /var/log/apk.log", "--allow-untrusted", "--no-scripts", ">/dev/null"):
             self.assertNotIn(forbidden, final)
+
+    def test_runtime_pipeline_flag_preserves_explicit_opt_in(self):
+        docker = ROOT / "apps/main/docker"
+        target = self.root / "docker"
+        target.mkdir()
+        (target / "init-env-vars").write_bytes((docker / "init-env-vars").read_bytes())
+        for value in ("true", "false", None):
+            with self.subTest(value=value):
+                env = {"PATH": os.environ["PATH"]}
+                if value is not None:
+                    env["RUNNER_ROLLOUTS"] = value
+                subprocess.run(["bash", str(docker / "init-env.sh")], cwd=self.root,
+                               env=env, check=True, timeout=10)
+                config = (self.root / "env-config.js").read_text()
+                actual = json.loads(config.removeprefix("window.env = "))
+                self.assertEqual(actual["RUNNER_ROLLOUTS"], value)
 
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()

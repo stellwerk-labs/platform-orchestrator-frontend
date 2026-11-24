@@ -23,3 +23,8 @@ Layout-only: removed duplicate Runner logs card title; composed Reload/Clear/raw
 ## Native pipeline source export
 
 Prepared the Native pipeline application source export. Public artifact publication and hosted qualification are separate release steps.
+
+## 2026-11-24: Pipeline runtime flag
+
+Added the existing pipeline feature flag to normal runtime environment injection. The existing release contracts now exercise actual startup generation with the flag enabled, disabled and unset; the image smoke checks the served flag.
+All 11 release contracts and shell checks passed, followed by independent source reviews. Actual image smoke qualification and public publication remain separate steps.

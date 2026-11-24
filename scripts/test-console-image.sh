@@ -19,7 +19,8 @@ timeout -k 5s 30s docker run --rm --pull=never --network none --cpus 1 --memory 
 container="$(timeout -k 5s 30s docker run -d --pull=never --cpus 1 --memory 256m \
   --pids-limit 128 --publish 127.0.0.1::9000 \
   --env BASE_URL=https://api.example.org --env ENVIRONMENT_NAME=qualification-regression \
-  --env DEPLOYMENT_MODE=enterprise --env PRODUCT_NAME=Console "$image")"
+  --env DEPLOYMENT_MODE=enterprise --env PRODUCT_NAME=Console \
+  --env RUNNER_ROLLOUTS=true "$image")"
 [[ "$container" =~ ^[0-9a-f]{64}$ ]] || { echo "invalid disposable container identity" >&2; exit 1; }
 trap 'docker rm -f "$container" >/dev/null' EXIT
 port="$(docker port "$container" 9000/tcp)"
@@ -43,6 +44,7 @@ config = json.JSONDecoder().raw_decode(body.split("window.env = ", 1)[1])[0]
 assert config["BASE_URL"] == "https://api.example.org"
 assert config["ENVIRONMENT_NAME"] == "qualification-regression"
 assert config["DEPLOYMENT_MODE"] == "enterprise" and config["PRODUCT_NAME"] == "Console"
+assert config["RUNNER_ROLLOUTS"] == "true"
 assert "no-store" in ",".join(headers.get_all("Cache-Control", []))
 with urlopen(base + "/projects/deep/route", timeout=5) as response:
     assert response.read().decode() == body
