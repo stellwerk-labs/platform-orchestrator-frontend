@@ -49,3 +49,7 @@ Preserve the earlier public candidate tag and note. Use the forward rc2 identity
 ### CSS image URL validation
 
 Recognize the closing parenthesis of an unquoted CSS image URL as a delimiter, while preserving strict Base64 validation and all raw and decoded content checks.
+
+### Preserve immutable candidate versions
+
+A release-control correction after a reserved candidate gets a forward candidate version. Previously reserved source, tags and release notes remain unchanged.

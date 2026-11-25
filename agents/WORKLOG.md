@@ -55,3 +55,7 @@ Prepared the rc2 README entry and new release note after the reviewed, signed Pr
 ### CSS image URL validation
 
 Corrected the CSS image URL delimiter and extended the existing image-scanning regression to both forms. Application code, dependencies, image construction and release identities are unchanged. The same regression fails with the old parser and passes with the correction. All 29 release-content tests and the complete retained two-platform payload check passed with the pinned secret scanner.
+
+### Prepare Console RC3 metadata
+
+Prepared the forward candidate header and README link for the reviewed embedded-image parser correction. Existing RC2 notes and product runtime, build inputs and dependencies are unchanged.

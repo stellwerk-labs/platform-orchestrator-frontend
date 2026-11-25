@@ -46,3 +46,7 @@ When an ordinary source gate finds a stale browser expectation after tag creatio
 ### CSS image URL validation
 
 Embedded images occur in both quoted markup and unquoted CSS URLs. Regression coverage must preserve surrounding-text and decoded-content refusal behavior for both forms.
+
+### Scope candidate metadata to the corrected source
+
+Keep the candidate header and documentation entry aligned with the corrected release controls. A documentation edit alone does not invalidate product qualification.
