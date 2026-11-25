@@ -36,3 +36,8 @@ dynamic schemas, examples and imports.
 ## 2026-11-25: Providers search browser contract
 
 A shared toolbar can change a field placeholder and broaden search to descriptions and types. Use its explicit accessible role/name and include a query that genuinely narrows the existing fixtures to the correct result.
+
+
+## 2026-11-25: Forward Console pipeline candidate
+
+When an ordinary source gate finds a stale browser expectation after tag creation, retain that public identity and qualify a forward candidate. Keep the correction scoped to the actual supported UI contract and its existing regression case.

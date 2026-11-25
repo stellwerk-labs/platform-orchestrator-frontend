@@ -45,3 +45,8 @@ See DECISIONS.md and LEARNINGS.md for scope and documentation maintenance guidan
 ## 2026-11-25: Providers search browser contract
 
 Aligned the existing Providers browser case with the accessible search control and broad search semantics. Retained its inputs, added a narrowing check with the expected provider source, and kept the clear-search check. No application, dependency or configuration change; focused browser verification and normal full hosted qualification are separate.
+
+
+## 2026-11-25: Forward Console pipeline candidate
+
+Prepared the rc2 README entry and new release note after the reviewed, signed Providers search regression update. The old rc1 note and application runtime remain unchanged. Normal hosted tests, reproducibility and original-public artifact verification remain required before distribution completion.

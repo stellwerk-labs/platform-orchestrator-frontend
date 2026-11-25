@@ -39,3 +39,8 @@ and does not invalidate the existing functional qualification.
 ## 2026-11-25: Providers search browser contract
 
 Use the existing accessible name for the Providers search field in its browser regression. Preserve provider fixtures and verify description-aware matches, narrowing to a provider type and clearing search; application behavior is unchanged.
+
+
+## 2026-11-25: Forward Console pipeline candidate
+
+Preserve the earlier public candidate tag and note. Use the forward rc2 identity after the reviewed browser-test correction while retaining application, dependency and configuration bytes. Documentation availability maintenance retains product qualification.
