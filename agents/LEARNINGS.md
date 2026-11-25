@@ -16,3 +16,8 @@ Mutation errors retain only safe status/message metadata. Clear fields on succes
 Formattedlogsareusefulonlywithcoherentkeycustody. ReuseexistingVaultTransitmodel fornormaldeployments instead of exposing agekeyhandlinginGUI. ScopedpermissionneedsorgORexactenvchecks, backendauthorizestheactualdeploymentenv.
 
 IAM resource identity is `env:<uuid>`, not `environment:<uuid>`. Build permission fixtures from the actual server contract; mirrored invented prefixes can let client tests pass while scoped users are denied.
+
+
+## Candidate workflow execution
+
+A local reusable workflow runs from the dispatcher's revision. Checking out candidate application files does not replace that workflow's job graph. Keep candidate browser suites in the dispatcher graph as well as the candidate source.

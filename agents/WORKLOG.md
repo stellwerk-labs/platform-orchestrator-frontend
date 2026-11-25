@@ -19,3 +19,8 @@ ReplacedmanualkeyUIwithautomaticmanagedreads;18actualHTTP/DOMtestspass, fullType
 ## Logs toolbar layout, 2026-11-13
 
 Layout-only: removed duplicate Runner logs card title; composed Reload/Clear/raw toggle and right-aligned nowrap hint in one toolbar. Scoped Prettier, ESLint and TypeScript passed. User explicitly requested no full test-suite rerun; no API/auth/key/log state behavior changed.
+
+
+## Candidate browser workflow bootstrap
+
+Prepared the existing controls and phase-logs browser matrix for the main dispatcher with a candidate-only event condition. Existing candidate, workflow and Console release contracts pass all29 tests. actionlint was unavailable and was not executed. Application files, dependencies and candidate workflow bytes are unchanged. Hosted matrix results, public dormancy/readback and protected publication approval remain separate requirements. See DECISIONS.md and LEARNINGS.md.
