@@ -44,3 +44,8 @@ Use the existing accessible name for the Providers search field in its browser r
 ## 2026-11-25: Forward Console pipeline candidate
 
 Preserve the earlier public candidate tag and note. Use the forward rc2 identity after the reviewed browser-test correction while retaining application, dependency and configuration bytes. Documentation availability maintenance retains product qualification.
+
+
+### CSS image URL validation
+
+Recognize the closing parenthesis of an unquoted CSS image URL as a delimiter, while preserving strict Base64 validation and all raw and decoded content checks.

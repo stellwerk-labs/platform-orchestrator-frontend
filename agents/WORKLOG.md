@@ -50,3 +50,8 @@ Aligned the existing Providers browser case with the accessible search control a
 ## 2026-11-25: Forward Console pipeline candidate
 
 Prepared the rc2 README entry and new release note after the reviewed, signed Providers search regression update. The old rc1 note and application runtime remain unchanged. Normal hosted tests, reproducibility and original-public artifact verification remain required before distribution completion.
+
+
+### CSS image URL validation
+
+Corrected the CSS image URL delimiter and extended the existing image-scanning regression to both forms. Application code, dependencies, image construction and release identities are unchanged. The same regression fails with the old parser and passes with the correction. All 29 release-content tests and the complete retained two-platform payload check passed with the pinned secret scanner.

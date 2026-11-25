@@ -457,7 +457,7 @@ def text_views(data):
                 raise ValueError("invalid embedded image type or size")
             images.append(decoded)
             return b""
-        cleaned = re.sub(rb"""data:image/(png|jpeg|gif|webp);base64,([^"'`\\\s<>]*)""", image, value)
+        cleaned = re.sub(rb"""data:image/(png|jpeg|gif|webp);base64,([^"'`\\\s<>)]*)""", image, value)
         cleaned = re.sub(rb"""(["'`])([Mm][MmZzLlHhVvCcSsQqTtAa0-9eE.,+\- \t\r\n]+)\1""",
                          lambda match: b"" if svg_path(match[2]) else match[0], cleaned)
         def apk_checksum(match):

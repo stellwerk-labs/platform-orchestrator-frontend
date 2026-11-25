@@ -41,3 +41,8 @@ A shared toolbar can change a field placeholder and broaden search to descriptio
 ## 2026-11-25: Forward Console pipeline candidate
 
 When an ordinary source gate finds a stale browser expectation after tag creation, retain that public identity and qualify a forward candidate. Keep the correction scoped to the actual supported UI contract and its existing regression case.
+
+
+### CSS image URL validation
+
+Embedded images occur in both quoted markup and unquoted CSS URLs. Regression coverage must preserve surrounding-text and decoded-content refusal behavior for both forms.

@@ -441,20 +441,26 @@ class ContentTests(unittest.TestCase):
         directory.mkdir()
         file = directory / "asset.svg"
         png = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jF3sAAAAASUVORK5CYII=")
-        def write(data):
-            file.write_bytes(b'<image href="data:image/png;base64,' + base64.b64encode(data) + b'"/>')
-        write(png)
-        self.assertEqual(self.scanner(directory).returncode, 0)
-        token = "ghp_" + "".join(random.Random(53).sample(string.ascii_letters + string.digits, 36))
-        for seed in (token.encode(), b"/" + b"Users/private-user/work"):
-            write(png[:-12] + seed + png[-12:])
-            result = self.scanner(directory)
-            self.assertNotEqual(result.returncode, 0)
-            self.assertNotIn(token, result.stdout + result.stderr)
-        write(b"not an image " + b"C" + b"01")
-        self.assertNotEqual(self.scanner(directory).returncode, 0)
-        file.write_bytes(b'<image href="data:image/png;base64,NOT!BASE64"/>')
-        self.assertNotEqual(self.scanner(directory).returncode, 0)
+        for prefix, suffix in ((b'<image href="data:image/png;base64,', b'"/>'),
+                               (b'body{background:url(data:image/png;base64,', b')}')):
+            with self.subTest(prefix=prefix):
+                def write(data):
+                    file.write_bytes(prefix + base64.b64encode(data) + suffix)
+                write(png)
+                self.assertEqual(self.scanner(directory).returncode, 0)
+                token = "ghp_" + "".join(random.Random(53).sample(string.ascii_letters + string.digits, 36))
+                for seed in (token.encode(), b"/" + b"Users/private-user/work"):
+                    write(png[:-12] + seed + png[-12:])
+                    result = self.scanner(directory)
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertNotIn(token, result.stdout + result.stderr)
+                write(b"not an image " + b"C" + b"01")
+                self.assertNotEqual(self.scanner(directory).returncode, 0)
+                file.write_bytes(prefix + b"NOT!BASE64" + suffix)
+                self.assertNotEqual(self.scanner(directory).returncode, 0)
+                write(png)
+                file.write_bytes(file.read_bytes() + b" " + b"C" + b"01")
+                self.assertNotEqual(self.scanner(directory).returncode, 0)
 
     def test_only_exact_apk_sha1_records_ignore_short_ids(self):
         directory = self.root / "apk-records"
