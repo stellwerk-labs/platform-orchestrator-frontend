@@ -24,3 +24,10 @@ Keep the released application source and its public SDK contracts aligned; prese
 ## HTTP startup probes
 
 A published container port may accept and close an HTTP connection before the service is ready. Python can raise RemoteDisconnected directly rather than wrapping it in URLError, so bounded readiness probes must handle that observed transition explicitly.
+
+## 2026-11-25: Pipeline RC documentation
+
+Put availability guidance at feature entry points and keep operational limits explicit.
+Customer guidance must avoid internal experiment history and private environment details.
+For generated documentation, preserve notices in the source templates while retaining
+dynamic schemas, examples and imports.

@@ -32,3 +32,11 @@ All 11 release contracts and shell checks passed, followed by independent source
 ## 2026-11-24: Console image readiness
 
 The image smoke now retries an initial HTTP remote disconnect within its existing bounded readiness loop. Real startup observation reproduced the disconnect followed by a successful response; runtime files and all feature/configuration, SPA, asset and notice assertions are unchanged. The whole corrected image smoke, all 11 release contracts, shell checks and diff checks passed.
+
+## 2026-11-25: Pipeline RC documentation
+
+Prepared customer-facing RC availability and deployment-default guidance without
+runtime, schema, dependency or version changes. Focused documentation checks cover
+text, links, file hashes and applicable generator templates; the full functional
+suite was not rerun because the qualified application code is unchanged.
+See DECISIONS.md and LEARNINGS.md for scope and documentation maintenance guidance.

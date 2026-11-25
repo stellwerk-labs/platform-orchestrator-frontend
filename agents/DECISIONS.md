@@ -27,3 +27,10 @@ Prepare Native pipeline application changes as a source export with all product 
 ## Console image startup readiness
 
 Treat an initial remote disconnect as a transient only while waiting for HTTP startup. Keep the existing retry count, request timeout and all semantic image assertions. This test-only correction requires no runtime image rebuild.
+
+## 2026-11-25: Pipeline RC documentation
+
+Mark Deployment Pipelines as an RC feature, separate from the current stable release.
+Preserve direct Apply as the built-in default; publishing a recipe alone changes no default.
+This documentation correction changes no runtime, schema, dependency or RC version
+and does not invalidate the existing functional qualification.
