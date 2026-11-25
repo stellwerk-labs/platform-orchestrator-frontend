@@ -40,3 +40,8 @@ runtime, schema, dependency or version changes. Focused documentation checks cov
 text, links, file hashes and applicable generator templates; the full functional
 suite was not rerun because the qualified application code is unchanged.
 See DECISIONS.md and LEARNINGS.md for scope and documentation maintenance guidance.
+
+
+## 2026-11-25: Providers search browser contract
+
+Aligned the existing Providers browser case with the accessible search control and broad search semantics. Retained its inputs, added a narrowing check with the expected provider source, and kept the clear-search check. No application, dependency or configuration change; focused browser verification and normal full hosted qualification are separate.

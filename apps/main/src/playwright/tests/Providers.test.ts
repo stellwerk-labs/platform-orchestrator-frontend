@@ -87,11 +87,16 @@ test.describe('Service providers', () => {
 
     await test.expect(page.getByRole('row')).toHaveCount(4);
 
-    await page.getByPlaceholder('Filter providers').fill('default');
+    await page.getByRole('textbox', { name: 'Search providers' }).fill('default');
 
-    await test.expect(page.getByRole('row')).toHaveCount(3);
+    await test.expect(page.getByRole('row')).toHaveCount(4);
 
-    await page.getByPlaceholder('Filter providers').fill('');
+    await page.getByRole('textbox', { name: 'Search providers' }).fill('kubernetes');
+
+    await test.expect(page.getByRole('row')).toHaveCount(2);
+    await test.expect(page.getByText('hashicorp/kubernetes', { exact: true })).toBeVisible();
+
+    await page.getByRole('textbox', { name: 'Search providers' }).fill('');
 
     await test.expect(page.getByRole('row')).toHaveCount(4);
   });

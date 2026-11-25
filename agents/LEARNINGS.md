@@ -31,3 +31,8 @@ Put availability guidance at feature entry points and keep operational limits ex
 Customer guidance must avoid internal experiment history and private environment details.
 For generated documentation, preserve notices in the source templates while retaining
 dynamic schemas, examples and imports.
+
+
+## 2026-11-25: Providers search browser contract
+
+A shared toolbar can change a field placeholder and broaden search to descriptions and types. Use its explicit accessible role/name and include a query that genuinely narrows the existing fixtures to the correct result.

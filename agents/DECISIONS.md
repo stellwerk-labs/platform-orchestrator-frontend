@@ -34,3 +34,8 @@ Mark Deployment Pipelines as an RC feature, separate from the current stable rel
 Preserve direct Apply as the built-in default; publishing a recipe alone changes no default.
 This documentation correction changes no runtime, schema, dependency or RC version
 and does not invalidate the existing functional qualification.
+
+
+## 2026-11-25: Providers search browser contract
+
+Use the existing accessible name for the Providers search field in its browser regression. Preserve provider fixtures and verify description-aware matches, narrowing to a provider type and clearing search; application behavior is unchanged.
