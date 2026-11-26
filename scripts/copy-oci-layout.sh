@@ -21,9 +21,10 @@ trap 'rm -f -- "$errors"' EXIT
 
 for attempt in $(seq "$attempts"); do
   status=0
+  # 6 attempts of 120 s plus pauses must fit the 30 min publisher jobs.
   timeout -k 5s 120s oras cp --no-tty --from-oci-layout "$layout_ref" "$destination" 2>"$errors" || status=$?
   cat "$errors" >&2
-  if ((status == 0)); then exit 0; fi
+  if ((status == 0)); then break; fi
   if ((status != 1 || attempt == attempts)) || ! tail -n 1 "$errors" | grep -Eq "$lag"; then
     exit "$status"
   fi

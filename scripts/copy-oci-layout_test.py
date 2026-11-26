@@ -112,7 +112,7 @@ class RegistryHandler(BaseHTTPRequestHandler):
 
 
 class CopyTests(unittest.TestCase):
-    def copy(self, mode):
+    def copy(self, mode, source_tag="v1"):
         server = ThreadingHTTPServer(("127.0.0.1", 0), RegistryHandler)
         server.state = {"mode": mode, "blobs": {}, "manifests": {}, "tags": {}, "lagging": set()}
         thread = threading.Thread(target=server.serve_forever, daemon=True)
@@ -123,7 +123,7 @@ class CopyTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = fixture(Path(directory))
             destination = f"localhost:{server.server_port}/local/console:v1"
-            result = subprocess.run(["bash", str(SCRIPT), f"{directory}:v1", destination],
+            result = subprocess.run(["bash", str(SCRIPT), f"{directory}:{source_tag}", destination],
                                     env=dict(os.environ, PUBLISH_RETRY_PAUSE_SECONDS="0"),
                                     capture_output=True, text=True, timeout=120)
         return server.state, root, result
@@ -138,6 +138,13 @@ class CopyTests(unittest.TestCase):
         state, _, result = self.copy("deny")
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn("denied", result.stderr)
+        self.assertNotIn("retrying", result.stderr)
+        self.assertEqual(state["tags"], {})
+
+    def test_missing_layout_tag_is_not_mistaken_for_registry_lag(self):
+        # ORAS also ends this deterministic source error with "not found"; only the registry form retries.
+        state, _, result = self.copy("normal", source_tag="v2")
+        self.assertEqual(result.returncode, 1, result.stderr)
         self.assertNotIn("retrying", result.stderr)
         self.assertEqual(state["tags"], {})
 
