@@ -49,14 +49,16 @@ cosign_release() {
 }
 
 # Only the existing candidate/stable workflow jobs call this after their human
-# artifact gate. Partial publication reserves immutable names and is not retried.
+# artifact gate. Partial publication reserves immutable names, so nothing here is
+# retried except the content-addressed OCI copy, which only points the tag at the
+# reviewed root and repeats while GHCR lags behind its own push.
 release_args=(--verify-tag --draft --latest=false --title "$RELEASE_VERSION" --notes-file "$output/release-notes.md")
 if [[ "$GITHUB_EVENT_NAME" == workflow_dispatch ]]; then release_args+=(--prerelease); fi
 gh release create "$RELEASE_VERSION" "${release_args[@]}" --repo "$GITHUB_REPOSITORY" >/dev/null
 # A verified local tag descriptor preserves OCI media types; digest-only copy
 # can change the descriptor and therefore cannot be used for this boundary.
 printf 'Copying verified OCI graph to reserved Console tag.\n'
-timeout -k 5s 120s oras cp --no-tty --from-oci-layout "$layout:$reference" "$image:$RELEASE_VERSION" >/dev/null
+bash "$root/scripts/copy-oci-layout.sh" "$layout:$reference" "$image:$RELEASE_VERSION" >/dev/null
 printf 'OCI copy accepted; checking read-only registry visibility of the exact graph.\n'
 timeout -k 5s 120s python3 "$root/scripts/registry_visibility.py" "$layout" "$image:$RELEASE_VERSION" "$digest"
 while IFS= read -r subject; do

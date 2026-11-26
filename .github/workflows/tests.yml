@@ -153,10 +153,12 @@ jobs:
           pnpm run test:licenses
           node --test scripts/verify-runtime-notices.test.mjs
 
-      - name: Test original-layer, final-tree and binary scanner contracts
+      - name: Test original-layer, final-tree, binary scanner and registry copy contracts
         run: |
           bash scripts/install-release-tools.sh "$RUNNER_TEMP/release-tools"
+          bash scripts/install-oras.sh "$RUNNER_TEMP/release-tools"
           PATH="$RUNNER_TEMP/release-tools:$PATH" python3 scripts/release_content_test.py
+          PATH="$RUNNER_TEMP/release-tools:$PATH" python3 scripts/copy-oci-layout_test.py
 
       - name: Run eslint
         run: pnpm run lint
